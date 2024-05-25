@@ -3,25 +3,16 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-// import firebase from 'firebase';
-// // Your web app's Firebase configuration
-// // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// const firebaseConfig = {
-//     apiKey: "AIzaSyDwplCXmmoBcfvUhKX1a50Zzn1mQ4F45xw",
-//     authDomain: "appchat-frontend.firebaseapp.com",
-//     projectId: "appchat-frontend",
-//     storageBucket: "appchat-frontend.appspot.com",
-//     messagingSenderId: "494767959162",
-//     appId: "1:494767959162:web:ce7639451c7afcfc64dfc3",
-//     measurementId: "G-9TKZ7BPTB6"
-// };
+import {Provider} from "react-redux";
+import store from "./redux/store/store";
 
-// firebase.initializeApp(firebaseConfig);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+      <Provider store={store}>
+          <App />
+      </Provider>
   </React.StrictMode>
 );
 
