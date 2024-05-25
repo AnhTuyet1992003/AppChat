@@ -47,7 +47,7 @@ const Register = () => {
                         <div className="signup-image">
                             <figure><img width={400} height={500} src="/image/signup-image.jpg" alt="sing up image"/>
                             </figure>
-                            <Link to="/" className="signup-image-link">Đã có tài khoản? Đăng nhập!</Link>
+                            <Link to="/Login" className="signup-image-link">Đã có tài khoản? Đăng nhập!</Link>
                         </div>
                     </div>
                 </div>
