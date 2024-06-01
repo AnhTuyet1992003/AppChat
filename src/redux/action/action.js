@@ -1,10 +1,23 @@
+//action.js
 
+// login
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const loginSuccess = (data) => ({type: LOGIN_SUCCESS, data});
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const loginError = (error) => ({type: LOGIN_ERROR, error});
+// get list user
+export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';
+export const getUserListSuccess = (data) => ({ type: GET_USER_LIST_SUCCESS, data });
 
+export const GET_USER_LIST_FAILURE = 'GET_USER_LIST_FAILURE';
+export const getUserListFailure = (error) => ({ type: GET_USER_LIST_FAILURE, error });
 
+//send chat to people
+export const SEND_CHAT_TO_PEOPLE_SUCCESS = 'SEND_CHAT_TO_PEOPLE_SUCCESS';
+export const sendChatToPeopleSuccess = (data) => ({type: SEND_CHAT_TO_PEOPLE_SUCCESS, data});
+
+export const SEND_CHAT_TO_PEOPLE_FAILURE = 'SEND_CHAT_TO_PEOPLE_FAILURE';
+export const sendChatToPeopleFailure = (error) => ({type: SEND_CHAT_TO_PEOPLE_FAILURE, error});
 export const sendMessage = (socket, message) => {
     if (socket) {
         socket.send(JSON.stringify(message));

@@ -14,7 +14,12 @@ import {
     getUserList,
     reLogin,
     loginSuccess,
-    loginError
+    loginError,
+    getUserListSucces,
+    getUserListSuccess,
+    getUserListFailure,
+    sendChatToPeopleSuccess,
+    sendChatToPeopleFailure
 } from "../redux/action/action";
 
 let socket = null;
@@ -37,6 +42,24 @@ export const initializeSocket = (url) => {
                 } else {
                     store.dispatch(loginError(response.error));
                 }
+                break;
+            case "GET_USER_LIST":
+                if (response.status === "success") {
+                    store.dispatch(getUserListSuccess(response.data));
+                } else {
+                    store.dispatch(getUserListFailure(response.error));
+                }
+                break;
+            case "SEND_CHAT":
+                if (response.data.type === "people") {
+                    if (response.status === "success") {
+                        store.dispatch(sendChatToPeopleSuccess(response.data));
+                    } else {
+                        store.dispatch(sendChatToPeopleFailure(response.error));
+                    }
+                }
+                break;
+            default:
                 break;
         }
     }
