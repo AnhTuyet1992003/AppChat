@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import { faFacebookF, faTwitter, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../../App.css';
+import './Authentication.css';
 import {initializeSocket, loginUser, socketActions} from "../../socket/socket";
 
 
@@ -31,7 +31,7 @@ const Login = () => {
 
     useEffect(() => {
         if (loginStatus === "success") {
-            navigate('/Register');
+            navigate('/Home');
         } else if (loginStatus === "error") {
             setError("Tên đăng nhập hoặc mật khẩu không chính xác");
         }
