@@ -38,6 +38,10 @@ export const initializeSocket = (url) => {
                     store.dispatch(loginError(response.error));
                 }
                 break;
+            case "LOGOUT":
+                if(response.stat == "success"){
+                    store.dispatch(logout(response.data))
+                }
         }
     }
 };

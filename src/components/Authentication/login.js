@@ -92,7 +92,7 @@ const Login = () => {
 
                                 <div className="form-group form-button">
                                     <input type="submit" name="signin" id="signin" className="form-submit"
-                                           value="Log in"/>
+                                           value="Login"/>
                                 </div>
                             </form>
                             <div className="social-login">
