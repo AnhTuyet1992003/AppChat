@@ -28,7 +28,6 @@ const Login = () => {
         };
     }, []);
 
-
     useEffect(() => {
         if (loginStatus === "success") {
             navigate('/Home');

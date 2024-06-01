@@ -14,7 +14,8 @@ import {
     getUserList,
     reLogin,
     loginSuccess,
-    loginError
+    loginError,
+    logoutSuccess,
 } from "../redux/action/action";
 
 let socket = null;
@@ -39,8 +40,8 @@ export const initializeSocket = (url) => {
                 }
                 break;
             case "LOGOUT":
-                if(response.stat == "success"){
-                    store.dispatch(logout(response.data))
+                if(response.status === "success"){
+                    store.dispatch(logoutSuccess(response.data))
                 }
         }
     }

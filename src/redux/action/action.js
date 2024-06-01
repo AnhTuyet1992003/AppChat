@@ -3,7 +3,8 @@ export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const loginSuccess = (data) => ({type: LOGIN_SUCCESS, data});
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const loginError = (error) => ({type: LOGIN_ERROR, error});
-
+export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
+export const logoutSuccess = (data) => ({type: LOGOUT_SUCCESS, data});
 
 export const sendMessage = (socket, message) => {
     if (socket) {
