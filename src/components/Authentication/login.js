@@ -22,9 +22,9 @@ const Login = () => {
         setSocket(ws);
 
         return () => {
-          if (ws) {
-              ws.close();
-          }
+            if (ws) {
+                ws.close();
+            }
         };
     }, []);
 
