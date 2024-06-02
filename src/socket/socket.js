@@ -15,7 +15,6 @@ import {
     reLogin,
     loginSuccess,
     loginError,
-    getUserListSucces,
     getUserListSuccess,
     getUserListFailure,
     sendChatToPeopleSuccess,
@@ -28,16 +27,27 @@ export const initializeSocket = (url) => {
     socket = new WebSocket(url);
     socket.onmessage = async (message) => {
         const response = JSON.parse(message.data);
-        switch (response.event){
+        switch (response.event) {
             case "REGISTER":
-                if (response.status === "success"){
+                if (response.status === "success") {
                     // store.dispatch()
                 } else {
                     // Handle failure
                 }
                 break;
             case "LOGIN":
-                if (response.status === "success"){
+                if (response.status === "success") {
+                    const { RE_LOGIN_CODE } = response.data;
+                    localStorage.setItem('RE_LOGIN_CODE', RE_LOGIN_CODE);
+                    store.dispatch(loginSuccess(response.data));
+                } else {
+                    store.dispatch(loginError(response.error));
+                }
+                break;
+            case "RE_LOGIN":
+                if (response.status === "success") {
+                    const { RE_LOGIN_CODE } = response.data;
+                    localStorage.setItem('RE_LOGIN_CODE', RE_LOGIN_CODE);
                     store.dispatch(loginSuccess(response.data));
                 } else {
                     store.dispatch(loginError(response.error));
@@ -62,7 +72,7 @@ export const initializeSocket = (url) => {
             default:
                 break;
         }
-    }
+    };
 };
 
 export const socketActions = {

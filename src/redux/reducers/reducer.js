@@ -2,7 +2,12 @@
 import {
     GET_USER_LIST_FAILURE,
     GET_USER_LIST_SUCCESS,
-    LOGIN_ERROR, LOGIN_SUCCESS, SEND_CHAT_TO_PEOPLE_FAILURE, SEND_CHAT_TO_PEOPLE_SUCCESS,
+    LOGIN_ERROR,
+    LOGIN_SUCCESS,
+    RE_LOGIN_ERROR,
+    RE_LOGIN_SUCCESS,
+    SEND_CHAT_TO_PEOPLE_FAILURE,
+    SEND_CHAT_TO_PEOPLE_SUCCESS,
 
 } from "../action/action";
 import data from "bootstrap/js/src/dom/data";
@@ -12,7 +17,6 @@ const initialState = {
     login: {},
     userList: { data: null, error: null },
     logout: {},
-    isConnected: false,
     messages: { data: null, error: null },
     active: { name: '', type: null }
 };
@@ -30,6 +34,17 @@ const socketReducer = (state = initialState, action) => {
                 ...state,
                 login: { status: 'error', data: action.error },
             };
+        case RE_LOGIN_SUCCESS:
+            return {
+                ...state,
+                login: { status: 'success', data: action.data },
+            };
+        case RE_LOGIN_ERROR:
+            return {
+                ...state,
+                login: { status: 'error', data: action.error },
+            };
+
         case GET_USER_LIST_SUCCESS:
             return {
                 ...state,

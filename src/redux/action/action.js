@@ -1,4 +1,21 @@
-//action.js
+let messageQueue = [];
+let isSocketOpen = false;
+
+export const sendMessage = (socket, message) => {
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(message));
+        return {
+            type: 'SEND_MESSAGE',
+            payload: message
+        };
+    } else if (socket.readyState === WebSocket.CONNECTING) {
+        messageQueue.push(message);
+        return {
+            type: 'QUEUE_MESSAGE',
+            payload: message
+        };
+    }
+};
 
 // login
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
@@ -12,21 +29,18 @@ export const getUserListSuccess = (data) => ({ type: GET_USER_LIST_SUCCESS, data
 export const GET_USER_LIST_FAILURE = 'GET_USER_LIST_FAILURE';
 export const getUserListFailure = (error) => ({ type: GET_USER_LIST_FAILURE, error });
 
+export const RE_LOGIN_SUCCESS = 'RE_LOGIN_SUCCESS';
+export const reLoginSuccess = (data) => ({ type: RE_LOGIN_SUCCESS, data });
+
+export const RE_LOGIN_ERROR = 'RE_LOGIN_ERROR';
+export const reLoginError = (error) => ({ type: RE_LOGIN_ERROR, error });
+
 //send chat to people
 export const SEND_CHAT_TO_PEOPLE_SUCCESS = 'SEND_CHAT_TO_PEOPLE_SUCCESS';
 export const sendChatToPeopleSuccess = (data) => ({type: SEND_CHAT_TO_PEOPLE_SUCCESS, data});
 
 export const SEND_CHAT_TO_PEOPLE_FAILURE = 'SEND_CHAT_TO_PEOPLE_FAILURE';
 export const sendChatToPeopleFailure = (error) => ({type: SEND_CHAT_TO_PEOPLE_FAILURE, error});
-export const sendMessage = (socket, message) => {
-    if (socket) {
-        socket.send(JSON.stringify(message));
-        return {
-            type: 'SEND_MESSAGE',
-            payload: message
-        };
-    }
-};
 
 //websocket action
 export const register = (socket, user, pass) => sendMessage(socket, {

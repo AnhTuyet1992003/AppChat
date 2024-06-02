@@ -1,5 +1,4 @@
-import { useEffect, useRef } from 'react';
-
+import { useEffect, useRef, useState } from 'react';
 import '../scss/styles-light.min.css';
 import $ from 'jquery';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -7,30 +6,56 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 import 'magnific-popup/dist/magnific-popup.css';
 import 'magnific-popup';
 import ChatBox from "./Chat/chat";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { initializeSocket, socketActions } from "../socket/socket";
 
 function Home() {
     const chatContainerRef = useRef(null);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const [socket, setSocket] = useState(null);
 
     useEffect(() => {
+        const reLoginCode = localStorage.getItem('RE_LOGIN_CODE');
+        const reLoginUser = localStorage.getItem('RE_LOGIN_USER');
+        console.log("get: " + reLoginCode);
+
+        if (!reLoginCode || !reLoginUser) {
+            navigate('/login');
+            return;
+        }
+
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = '%PUBLIC_URL%/src/scss/styles-dark.min.css';
+        link.href = '/src/scss/styles-dark.min.css';
         link.media = '(prefers-color-scheme: dark)';
         document.head.appendChild(link);
+
+        const socketInstance = initializeSocket();
+        setSocket(socketInstance);
 
         return () => {
             document.head.removeChild(link);
         };
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
-        // Toggle active state on contact item
+        if (socket) {
+            const reLoginCode = localStorage.getItem('RE_LOGIN_CODE');
+            const reLoginUser = localStorage.getItem('RE_LOGIN_USER');
+            if (reLoginCode && reLoginUser) {
+                dispatch(socketActions.reLoginUser(reLoginUser, reLoginCode));
+            }
+        }
+    }, [socket, dispatch]);
+
+    useEffect(() => {
         $(document).on('click', '.js-contact-list .contact-item', function () {
             $(".contact-item").removeClass("active");
             $(this).addClass("active");
         });
 
-        // Open and close navigation
         $('.navigation-toggle').on("click", function (e) {
             e.stopPropagation();
             $('.navigation').toggleClass("navigation-visible");
@@ -44,48 +69,40 @@ function Home() {
             $('.navigation').removeClass('navigation-visible');
         });
 
-        // Hide navigation while resize window on desktop view
         $(window).on("resize", function () {
             if ($(this).width() > 1200) {
                 $('.navigation').removeClass('navigation-visible');
             }
         }).trigger('resize');
 
-        // Hide chat
         $(".chat-hide").on("click", function () {
             $(".main").removeClass("main-visible");
         });
 
-        // Show info panel
         $(".chat-info-toggle").on("click", function () {
             $(".chat-info").toggleClass('chat-info-visible');
         });
 
-        // Hide info panel
         $(".chat-info-close").on("click", function () {
             $(".chat-info").removeClass("chat-info-visible");
         });
 
-        // Magnific popup
         $('.shared-image-list').magnificPopup({
             delegate: 'a.shared-image',
             type: 'image',
             mainClass: 'mfp-fade',
             closeOnContentClick: true,
             showCloseBtn: false,
-
             zoom: {
                 enabled: true,
                 duration: 300,
                 easing: 'ease',
             },
-
             image: {
                 cursor: 'pointer',
             }
         });
 
-        // Cleanup function to remove event listeners on component unmount
         return () => {
             $(document).off('click', '.js-contact-list .contact-item');
             $('.navigation-toggle').off("click");
@@ -98,7 +115,6 @@ function Home() {
         };
     }, []);
 
-    // Scroll chat to bottom whenever new messages are added
     useEffect(() => {
         const chatContainer = chatContainerRef.current;
         if (chatContainer) {
@@ -108,7 +124,7 @@ function Home() {
 
     return (
         <>
-          <ChatBox />
+            <ChatBox />
         </>
     )
 }

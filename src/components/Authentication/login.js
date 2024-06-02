@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from 'react-redux';
-import {Link, useNavigate} from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import { faFacebookF, faTwitter, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Authentication.css';
-import {initializeSocket, loginUser, socketActions} from "../../socket/socket";
+import {initializeSocket, socketActions} from "../../socket/socket";
 
 
 const Login = () => {
@@ -17,17 +17,45 @@ const Login = () => {
     const dispatch = useDispatch();
     const loginStatus = useSelector((state) => state.login.status);
     const navigate = useNavigate();
+    const location = useLocation();
+    const handleSubmit1 = (event) => {
+        event.preventDefault();
+        // Prevent showing the logout message again
+        location.state = null;
+        const reLoginCode = localStorage.getItem('RE_LOGIN_CODE');
+
+        if (reLoginCode) {
+            // Perform re-login
+            dispatch(socketActions.reLoginUser(username, reLoginCode));
+        } else {
+            // Perform regular login
+            dispatch(socketActions.loginUser(username, password));
+        }
+    };
     useEffect(() => {
-        const ws = initializeSocket('ws://140.238.54.136:8080/chat/chat');
-        setSocket(ws);
+        const initSocket = async () => {
+            try {
+                if (localStorage.getItem("RE_LOGIN_CODE") !== null && loginStatus !== 'success') {
+                    // Initialize WebSocket connection
+                    const ws = initializeSocket('ws://140.238.54.136:8080/chat/chat');
+                    setSocket(ws); // Set the socket state
 
-        return () => {
-          if (ws) {
-              ws.close();
-          }
+                    // Dispatch re-login action
+                    await dispatch(socketActions.reLoginUser(localStorage.getItem("user"), localStorage.getItem("RE_LOGIN_CODE")));
+                }
+            } catch (error) {
+                console.error('WebSocket connection error:', error);
+                setError('WebSocket connection error: ' + error.message);
+            }
         };
-    }, []);
 
+        initSocket();
+        return () => {
+            if (socket) {
+                socket.close();
+            }
+        };
+    }, [dispatch, loginStatus]);
 
     useEffect(() => {
         if (loginStatus === "success") {
@@ -35,7 +63,8 @@ const Login = () => {
         } else if (loginStatus === "error") {
             setError("Tên đăng nhập hoặc mật khẩu không chính xác");
         }
-    }, [loginStatus]);
+    }, [loginStatus, navigate]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!username || !password) {
@@ -43,7 +72,7 @@ const Login = () => {
             return;
         }
         setError("");
-        socketActions.loginUser(username, password);
+            socketActions.loginUser(username, password);
     };
 
     return (
