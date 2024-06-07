@@ -1,22 +1,19 @@
 // redux/actions/action.js
 let messageQueue = [];
 
+
+export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
+export const logoutSuccess = (data) => ({type: LOGOUT_SUCCESS, data});
+
 export const sendMessage = (socket, message) => {
-    if (socket.readyState === WebSocket.OPEN) {
+    if (socket) {
         socket.send(JSON.stringify(message));
         return {
             type: 'SEND_MESSAGE',
             payload: message
         };
-    } else if (socket.readyState === WebSocket.CONNECTING) {
-        messageQueue.push(message);
-        return {
-            type: 'QUEUE_MESSAGE',
-            payload: message
-        };
     }
 };
-
 // login
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const loginSuccess = (data) => ({ type: LOGIN_SUCCESS, data });

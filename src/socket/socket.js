@@ -1,5 +1,6 @@
 // src/socket/socket.js
 import store from "../redux/store/store";
+// src/socket/socket.js
 import {
     login,
     register,
@@ -19,7 +20,8 @@ import {
     getUserListFailure,
     sendChatToPeopleSuccess,
     sendChatToPeopleFailure,
-    sendMessage, reLoginSuccess // import hàm sendMessage từ actions
+    sendMessage, reLoginSuccess,
+    logoutSuccess,
 } from "../redux/action/action";
 
 let socket = null;
@@ -89,6 +91,10 @@ export const initializeSocket = (url) => {
                 break;
             default:
                 break;
+            case "LOGOUT":
+                if(response.status === "success"){
+                    store.dispatch(logoutSuccess(response.data))
+                }
         }
     };
     socket.onclose = () => {

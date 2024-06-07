@@ -16,6 +16,7 @@ const Login = () => {
     const loginStatus = useSelector((state) => state.login.status);
     const navigate = useNavigate();
     useEffect(() => {
+
         initializeSocket('ws://140.238.54.136:8080/chat/chat');
     }, []);
     // đăng nhập
@@ -97,7 +98,7 @@ const Login = () => {
 
                                 <div className="form-group form-button">
                                     <input type="submit" name="signin" id="signin" className="form-submit"
-                                           value="Log in"/>
+                                           value="Login"/>
                                 </div>
                             </form>
                             <div className="social-login">

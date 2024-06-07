@@ -1,8 +1,16 @@
 
 import React from 'react';
-
+import { useDispatch } from 'react-redux';
+import { socketActions } from '../../../../socket/socket';
+import { useNavigate } from 'react-router-dom';
 
 function SettingTab() {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const handleLogout = () => {
+        socketActions.logoutUser();
+        navigate('/Login');
+    };
 
     return (
         <div className="d-flex flex-column h-100">
@@ -65,7 +73,7 @@ function SettingTab() {
                                         john@gmail.com
                                     </p>
                                 </div>
-                                <button className="btn btn-sm btn-icon btn-base">
+                                <button className="btn btn-sm btn-icon btn-base" onClick={handleLogout}>
                                     <i className="ri-logout-box-line"/>
                                 </button>
                             </div>

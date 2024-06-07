@@ -8,7 +8,7 @@ import {
     RE_LOGIN_SUCCESS,
     SEND_CHAT_TO_PEOPLE_FAILURE,
     SEND_CHAT_TO_PEOPLE_SUCCESS,
-
+    LOGOUT_SUCCESS
 } from "../action/action";
 import data from "bootstrap/js/src/dom/data";
 
@@ -64,6 +64,11 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 messages: { data: null, error: action.error },
+            };
+        case LOGOUT_SUCCESS:
+            return {
+                ...state,
+                logout: {status:'success',data: action.data},
             };
         default:
             return state;
