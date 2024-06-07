@@ -7,49 +7,29 @@ import 'magnific-popup/dist/magnific-popup.css';
 import 'magnific-popup';
 import ChatBox from "./Chat/chat";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { initializeSocket, socketActions } from "../socket/socket";
+import {useDispatch, useSelector} from "react-redux";
+import {initializeSocket, reLoginUser, socketActions} from "../socket/socket";
+import {reLogin} from "../redux/action/action";
 
 function Home() {
+    const login = useSelector((state) => state.login);
     const chatContainerRef = useRef(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [socket, setSocket] = useState(null);
-
+    // Duy trì đăng nhập
     useEffect(() => {
-        const reLoginCode = localStorage.getItem('RE_LOGIN_CODE');
-        const reLoginUser = localStorage.getItem('RE_LOGIN_USER');
-        console.log("get: " + reLoginCode);
-
-        if (!reLoginCode || !reLoginUser) {
-            navigate('/login');
-            return;
-        }
-
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = '/src/scss/styles-dark.min.css';
-        link.media = '(prefers-color-scheme: dark)';
-        document.head.appendChild(link);
-
-        const socketInstance = initializeSocket();
-        setSocket(socketInstance);
-
-        return () => {
-            document.head.removeChild(link);
-        };
-    }, [navigate]);
-
-    useEffect(() => {
-        if (socket) {
-            const reLoginCode = localStorage.getItem('RE_LOGIN_CODE');
-            const reLoginUser = localStorage.getItem('RE_LOGIN_USER');
-            if (reLoginCode && reLoginUser) {
-                dispatch(socketActions.reLoginUser(reLoginUser, reLoginCode));
+        if (!login.status) {
+            if (localStorage.getItem("reLogin") !== null) {
+                // kêt nối lại socket
+                initializeSocket('ws://140.238.54.136:8080/chat/chat');
+                reLoginUser(localStorage.getItem("user"), localStorage.getItem("reLogin"));
+            } else {
+                //chuyển hướng về trang login
+                navigate("/login");
             }
-        }
-    }, [socket, dispatch]);
 
+        }
+    }, [dispatch, navigate, login]);
     useEffect(() => {
         $(document).on('click', '.js-contact-list .contact-item', function () {
             $(".contact-item").removeClass("active");

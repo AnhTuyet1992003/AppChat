@@ -1,5 +1,5 @@
+// redux/actions/action.js
 let messageQueue = [];
-let isSocketOpen = false;
 
 export const sendMessage = (socket, message) => {
     if (socket.readyState === WebSocket.OPEN) {
@@ -19,9 +19,10 @@ export const sendMessage = (socket, message) => {
 
 // login
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
-export const loginSuccess = (data) => ({type: LOGIN_SUCCESS, data});
+export const loginSuccess = (data) => ({ type: LOGIN_SUCCESS, data });
 export const LOGIN_ERROR = 'LOGIN_ERROR';
-export const loginError = (error) => ({type: LOGIN_ERROR, error});
+export const loginError = (error) => ({ type: LOGIN_ERROR, error });
+
 // get list user
 export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';
 export const getUserListSuccess = (data) => ({ type: GET_USER_LIST_SUCCESS, data });
@@ -35,37 +36,22 @@ export const reLoginSuccess = (data) => ({ type: RE_LOGIN_SUCCESS, data });
 export const RE_LOGIN_ERROR = 'RE_LOGIN_ERROR';
 export const reLoginError = (error) => ({ type: RE_LOGIN_ERROR, error });
 
-//send chat to people
+// send chat to people
 export const SEND_CHAT_TO_PEOPLE_SUCCESS = 'SEND_CHAT_TO_PEOPLE_SUCCESS';
-export const sendChatToPeopleSuccess = (data) => ({type: SEND_CHAT_TO_PEOPLE_SUCCESS, data});
+export const sendChatToPeopleSuccess = (data) => ({ type: SEND_CHAT_TO_PEOPLE_SUCCESS, data });
 
 export const SEND_CHAT_TO_PEOPLE_FAILURE = 'SEND_CHAT_TO_PEOPLE_FAILURE';
-export const sendChatToPeopleFailure = (error) => ({type: SEND_CHAT_TO_PEOPLE_FAILURE, error});
+export const sendChatToPeopleFailure = (error) => ({ type: SEND_CHAT_TO_PEOPLE_FAILURE, error });
 
-//websocket action
+// websocket actions
 export const register = (socket, user, pass) => sendMessage(socket, {
     action: "onchat",
     data: {
         event: 'REGISTER',
-        data: { user, pass}
+        data: { user, pass }
     }
 });
 
-export const login = (socket, user, pass) => sendMessage(socket, {
-    action: "onchat",
-    data: {
-        event: 'LOGIN',
-        data: { user, pass}
-    }
-});
-
-export const reLogin = (socket, user, code) => sendMessage(socket, {
-    action: "onchat",
-    data: {
-        event: 'RE_LOGIN',
-        data: { user, code}
-    }
-});
 
 export const logout = (socket) => sendMessage(socket, {
     action: "onchat",
@@ -74,11 +60,11 @@ export const logout = (socket) => sendMessage(socket, {
     }
 });
 
-export const creatRoom = (socket, nameRoom) => sendMessage(socket, {
+export const createRoom = (socket, nameRoom) => sendMessage(socket, {
     action: "onchat",
     data: {
         event: 'CREATE_ROOM',
-        data: { name: nameRoom}
+        data: { name: nameRoom }
     }
 });
 
@@ -86,7 +72,7 @@ export const joinRoom = (socket, nameRoom) => sendMessage(socket, {
     action: "onchat",
     data: {
         event: 'JOIN_ROOM',
-        data: { name: nameRoom}
+        data: { name: nameRoom }
     }
 });
 
@@ -94,7 +80,7 @@ export const getRoomChatMessages = (socket, roomName, page) => sendMessage(socke
     action: "onchat",
     data: {
         event: 'GET_ROOM_CHAT_MES',
-        data: { name: roomName, page}
+        data: { name: roomName, page }
     }
 });
 
@@ -102,7 +88,7 @@ export const getPeopleChatMessages = (socket, userName, page) => sendMessage(soc
     action: "onchat",
     data: {
         event: 'GET_PEOPLE_CHAT_MES',
-        data: { name: userName, page}
+        data: { name: userName, page }
     }
 });
 
@@ -110,7 +96,7 @@ export const sendChatToRoom = (socket, roomName, message) => sendMessage(socket,
     action: "onchat",
     data: {
         event: 'SEND_CHAT',
-        data: { type: "room", to: roomName, mes: message}
+        data: { type: "room", to: roomName, mes: message }
     }
 });
 
@@ -118,7 +104,7 @@ export const sendChatToPeople = (socket, userName, message) => sendMessage(socke
     action: "onchat",
     data: {
         event: 'SEND_CHAT',
-        data: { type: "people", to: userName, mes: message}
+        data: { type: "people", to: userName, mes: message }
     }
 });
 
@@ -126,7 +112,7 @@ export const checkUser = (socket, userName) => sendMessage(socket, {
     action: "onchat",
     data: {
         event: 'CHECK_USER',
-        data: { user: userName}
+        data: { user: userName }
     }
 });
 

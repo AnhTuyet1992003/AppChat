@@ -6,64 +6,40 @@ import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import { faFacebookF, faTwitter, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Authentication.css';
-import {initializeSocket, socketActions} from "../../socket/socket";
+import {initializeSocket, loginUser, reLoginUser, socketActions} from "../../socket/socket";
 
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [socket, setSocket] = useState(null);
-    const dispatch = useDispatch();
     const loginStatus = useSelector((state) => state.login.status);
     const navigate = useNavigate();
-    const location = useLocation();
-    const handleSubmit1 = (event) => {
-        event.preventDefault();
-        // Prevent showing the logout message again
-        location.state = null;
-        const reLoginCode = localStorage.getItem('RE_LOGIN_CODE');
-
-        if (reLoginCode) {
-            // Perform re-login
-            dispatch(socketActions.reLoginUser(username, reLoginCode));
-        } else {
-            // Perform regular login
-            dispatch(socketActions.loginUser(username, password));
-        }
-    };
     useEffect(() => {
-        const initSocket = async () => {
-            try {
-                if (localStorage.getItem("RE_LOGIN_CODE") !== null && loginStatus !== 'success') {
-                    // Initialize WebSocket connection
-                    const ws = initializeSocket('ws://140.238.54.136:8080/chat/chat');
-                    setSocket(ws); // Set the socket state
-
-                    // Dispatch re-login action
-                    await dispatch(socketActions.reLoginUser(localStorage.getItem("user"), localStorage.getItem("RE_LOGIN_CODE")));
-                }
-            } catch (error) {
-                console.error('WebSocket connection error:', error);
-                setError('WebSocket connection error: ' + error.message);
-            }
-        };
-
-        initSocket();
-        return () => {
-            if (socket) {
-                socket.close();
-            }
-        };
-    }, [dispatch, loginStatus]);
-
+        initializeSocket('ws://140.238.54.136:8080/chat/chat');
+    }, []);
+    // đăng nhập
     useEffect(() => {
         if (loginStatus === "success") {
+            if (localStorage.getItem("user") === null) {
+                //lưu vào user vào localStorage
+                localStorage.setItem("user", username);
+            }
+            //đăng nhập thành công chuyển hướng đến trang home
             navigate('/Home');
         } else if (loginStatus === "error") {
             setError("Tên đăng nhập hoặc mật khẩu không chính xác");
         }
     }, [loginStatus, navigate]);
+
+    //duy trì đăng nhập
+    useEffect(() => {
+        if (localStorage.getItem("reLogin") !== null && loginStatus !== 'success') {
+            // kêt nối lại socket
+            initializeSocket('ws://140.238.54.136:8080/chat/chat');
+            reLoginUser(localStorage.getItem("user"), localStorage.getItem("reLogin"));
+        }
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -72,7 +48,7 @@ const Login = () => {
             return;
         }
         setError("");
-            socketActions.loginUser(username, password);
+        loginUser(username, password);
     };
 
     return (

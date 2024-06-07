@@ -4,7 +4,7 @@ import {
     login,
     register,
     logout,
-    creatRoom,
+    createRoom,
     joinRoom,
     getRoomChatMessages,
     getPeopleChatMessages,
@@ -18,16 +18,35 @@ import {
     getUserListSuccess,
     getUserListFailure,
     sendChatToPeopleSuccess,
-    sendChatToPeopleFailure
+    sendChatToPeopleFailure,
+    sendMessage, reLoginSuccess // import hàm sendMessage từ actions
 } from "../redux/action/action";
 
 let socket = null;
+let messageQueue = [];
+let isSocketOpen = false;
+
+const sendMessageInternal = (socket, message) => {
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(message));
+    } else {
+        messageQueue.push(message);
+    }
+};
 
 export const initializeSocket = (url) => {
     socket = new WebSocket(url);
+    socket.onopen = () => {
+        isSocketOpen = true;
+        while (messageQueue.length > 0) {
+            const message = messageQueue.shift();
+            sendMessageInternal(socket, message);
+        }
+    };
     socket.onmessage = async (message) => {
         const response = JSON.parse(message.data);
         switch (response.event) {
+            // xử lý các sự kiện khác
             case "REGISTER":
                 if (response.status === "success") {
                     // store.dispatch()
@@ -37,8 +56,8 @@ export const initializeSocket = (url) => {
                 break;
             case "LOGIN":
                 if (response.status === "success") {
-                    const { RE_LOGIN_CODE } = response.data;
-                    localStorage.setItem('RE_LOGIN_CODE', RE_LOGIN_CODE);
+                    localStorage.setItem("reLogin", response.data.RE_LOGIN_CODE);
+
                     store.dispatch(loginSuccess(response.data));
                 } else {
                     store.dispatch(loginError(response.error));
@@ -46,9 +65,8 @@ export const initializeSocket = (url) => {
                 break;
             case "RE_LOGIN":
                 if (response.status === "success") {
-                    const { RE_LOGIN_CODE } = response.data;
-                    localStorage.setItem('RE_LOGIN_CODE', RE_LOGIN_CODE);
-                    store.dispatch(loginSuccess(response.data));
+                    localStorage.setItem("reLogin", response.data.RE_LOGIN_CODE);
+                        store.dispatch(reLoginSuccess(response.data));
                 } else {
                     store.dispatch(loginError(response.error));
                 }
@@ -73,14 +91,69 @@ export const initializeSocket = (url) => {
                 break;
         }
     };
+    socket.onclose = () => {
+        //tái thiết lập lại socket
+        initializeSocket(url);
+    };
+
+    socket.onerror = (error) => {
+        console.log("Socket error: ", error);
+    };
+};
+// hàm đăng nhập
+export const loginUser = (user, pass) => {
+    if (!socket) return;
+    // socket được mở
+    if (socket.readyState === WebSocket.OPEN){
+    socket.send(JSON.stringify({
+        action: "onchat",
+        data: {
+          event: "LOGIN",
+            data:{
+              user: user,
+              pass: pass,
+            },
+        },
+    }));
+    // đang trong quá trình kết nối
+    } else if (socket.readyState === WebSocket.CONNECTING){
+        setTimeout(() => {
+            loginUser(user, pass);
+        }, 1000);
+    } else {
+        console.log("Socket is close")
+    }
+};
+export const reLoginUser = (user, code) => {
+    if (!socket) {
+        return;
+    }
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            action: "onchat",
+            data: {
+                event: "RE_LOGIN",
+                data: {
+                    user: user,
+                    code: code,
+
+                },
+            }
+        }));
+
+    } else if (socket.readyState === WebSocket.CONNECTING) {
+        setTimeout(() => {
+            reLoginUser(user, code);
+        }, 100) //0.1s
+    } else {
+        console.log("Socket is close")
+    }
 };
 
 export const socketActions = {
     registerUser: (user, pass) => store.dispatch(register(socket, user, pass)),
-    loginUser: (user, pass) => store.dispatch(login(socket, user, pass)),
-    reLoginUser: (user, code) => store.dispatch(reLogin(socket, user, code)),
     logoutUser: () => store.dispatch(logout(socket)),
-    createChatRoom: (nameRoom) => store.dispatch(creatRoom(socket, nameRoom)),
+    createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
     joinChatRoom: (nameRoom) => store.dispatch(joinRoom(socket, nameRoom)),
     fetchRoomChatMessages: (roomName, page) => store.dispatch(getRoomChatMessages(socket, roomName, page)),
     fetchPeopleChatMessages: (userName, page) => store.dispatch(getPeopleChatMessages(socket, userName, page)),
