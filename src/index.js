@@ -5,8 +5,9 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {Provider} from "react-redux";
 import store from "./redux/store/store";
+import {initializeSocket} from "./socket/socket";
 
-
+initializeSocket('ws://140.238.54.136:8080/chat/chat');
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
