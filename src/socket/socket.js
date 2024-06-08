@@ -16,6 +16,7 @@ import {
     loginSuccess,
     loginError,
     logoutSuccess,
+    logoutError
 } from "../redux/action/action";
 
 let socket = null;
@@ -40,9 +41,13 @@ export const initializeSocket = (url) => {
                 }
                 break;
             case "LOGOUT":
-                if(response.status === "success"){
-                    store.dispatch(logoutSuccess(response.data))
+                if (response.status === "success") {
+                    localStorage.clear();
+                    store.dispatch(logoutSuccess());
+                } else {
+                    store.dispatch(logoutError(response.mes));
                 }
+                break;
         }
     }
 };

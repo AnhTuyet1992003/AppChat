@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { socketActions } from '../../../../socket/socket';
+import { socketActions,logoutUser } from '../../../../socket/socket';
+// import { logoutUser } from '../../../../redux/action/action';
 import { useNavigate } from 'react-router-dom';
 
 function SettingTab() {

@@ -1,5 +1,5 @@
 import {
-    LOGIN_ERROR, LOGIN_SUCCESS, LOGOUT_SUCCESS,
+    LOGIN_ERROR, LOGIN_SUCCESS, LOGOUT_SUCCESS, LOGOUT_ERROR,
 
 } from "../action/action";
 import data from "bootstrap/js/src/dom/data";
@@ -28,10 +28,9 @@ const socketReducer = (state = initialState, action) => {
                 login: {status: 'error', data: action.error},
             };
         case LOGOUT_SUCCESS:
-            return {
-                ...state,
-                logout: {status:'success',data: action.data},
-            };
+            return {...state, logout: {status: 'success'}, login: {}};
+        case LOGOUT_ERROR:
+            return {...state, logout: {status: 'error', error: action.error}};
         default:
             return state;
     }
