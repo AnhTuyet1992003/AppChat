@@ -20,17 +20,14 @@ export const loginSuccess = (data) => ({ type: LOGIN_SUCCESS, data });
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const loginError = (error) => ({ type: LOGIN_ERROR, error });
 
-// Action types
+
 export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';
 export const GET_USER_LIST_FAILURE = 'GET_USER_LIST_FAILURE';
-
-// Action creators
-export const getUserListSuccess = (data) => ({ type: GET_USER_LIST_SUCCESS, data });
-export const getUserListFailure = (error) => ({ type: GET_USER_LIST_FAILURE, error });
+export const getUserListSuccess = (data) => ({type: GET_USER_LIST_SUCCESS, data});
+export const getUserListFailure = (error) => ({type: GET_USER_LIST_FAILURE, error});
 
 export const RE_LOGIN_SUCCESS = 'RE_LOGIN_SUCCESS';
 export const reLoginSuccess = (data) => ({ type: RE_LOGIN_SUCCESS, data });
-
 export const RE_LOGIN_ERROR = 'RE_LOGIN_ERROR';
 export const reLoginError = (error) => ({ type: RE_LOGIN_ERROR, error });
 

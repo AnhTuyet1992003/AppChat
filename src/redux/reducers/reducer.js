@@ -19,9 +19,31 @@ const initialState = {
     messages: { data: null, error: null },
     active: { name: '', type: null },
     userList: { data: null, error: null },
+    userData: {},
+    active2: {},
+    data2: {},
+    data3: {},
 };
 
 const socketReducer = (state = initialState, action) => {
+
+    const mergeArraysById = (arr1, arr2, arr3) => {
+        const mergedArray = arr1.reduce((result, item) => {
+            const matchedItem = arr2.find((el) => item.name === el.username && item.type === 0);
+            const matchedItem2 = arr3.find((el) => item.name === el.name && item.type === 1);
+
+            if (matchedItem) {
+                result.push({...item, ...matchedItem});
+            }
+            if (matchedItem2) {
+                result.push({...item, ...matchedItem2});
+            }
+
+            return result;
+        }, []);
+
+        return mergedArray;
+    };
     console.log('Action received:', action);
     switch (action.type) {
         case LOGIN_SUCCESS:
@@ -46,9 +68,13 @@ const socketReducer = (state = initialState, action) => {
             };
 
         case GET_USER_LIST_SUCCESS:
+            const userList = action.data;
+            let userListRemoveMySelf = userList.filter(user =>
+                !(user.name === localStorage.getItem("user") && user.type === 0)
+            );
             return {
                 ...state,
-                userList: { data: action.data, error: null },
+                userList: { data: userListRemoveMySelf, error: null }
             };
         case GET_USER_LIST_FAILURE:
             return {

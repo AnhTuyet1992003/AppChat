@@ -19,6 +19,7 @@ import {
     logoutSuccess, getUserListFailure, getUserListSuccess,
 } from "../redux/action/action";
 
+
 let socket = null;
 let messageQueue = [];
 let isSocketOpen = false;
@@ -72,7 +73,7 @@ export const initializeSocket = (url) => {
                 if (response.status === "success") {
                     store.dispatch(getUserListSuccess(response.data));
                 } else {
-                    store.dispatch(getUserListFailure(response.error));
+                    store.dispatch(getUserListFailure(response.mes));
                 }
                 break;
             case "SEND_CHAT":
@@ -152,21 +153,17 @@ export const reLoginUser = (user, code) => {
 };
 export const getUsersList = () => {
     if (!socket) return;
+    const request = () => socket.send(JSON.stringify({
+        action: "onchat",
+        data: { event: "GET_USER_LIST" },
+    }));
+
     if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-            action: "onchat",
-            data: {
-                event: "GET_USER_LIST",
-            },
-        }));
+        request();
     } else if (socket.readyState === WebSocket.CONNECTING) {
-        console.log("WebSocket connection is still in CONNECTING state. Retry in a moment.");
-        setTimeout(() => {
-            getUsersList();
-        }, 1000); // Retry after 1 second
+        setTimeout(request, 1000);
     } else {
-        console.log("WebSocket connection is in CLOSING or CLOSED state.");
-        // Re-establish the WebSocket connection or handle the error as needed
+        console.log("Socket is closed");
     }
 };
 export const socketActions = {
