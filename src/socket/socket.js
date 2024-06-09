@@ -14,6 +14,8 @@ import {
     checkUser,
     getUserList,
     reLogin,
+    registerSuccess,
+    registerError,
     loginSuccess,
     loginError,
     logoutSuccess,
@@ -27,10 +29,10 @@ export const initializeSocket = (url) => {
         const response = JSON.parse(message.data);
         switch (response.event){
             case "REGISTER":
-                if (response.status === "success"){
-                    // store.dispatch()
+                if (response.status === "success") {
+                    store.dispatch(registerSuccess(response.data));
                 } else {
-                    // Handle failure
+                    store.dispatch(registerError(response.mes));
                 }
                 break;
             case "LOGIN":
