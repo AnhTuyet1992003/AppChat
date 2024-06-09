@@ -8,14 +8,14 @@ import 'magnific-popup';
 import ChatBox from "./Chat/chat";
 import { useNavigate } from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
-import {initializeSocket, reLoginUser, socketActions} from "../socket/socket";
-import {reLogin} from "../redux/action/action";
+import {initializeSocket, reLoginUser} from "../socket/socket";
 
 function Home() {
     const login = useSelector((state) => state.login);
     const chatContainerRef = useRef(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
     // Duy trì đăng nhập
     useEffect(() => {
         if (!login.status) {

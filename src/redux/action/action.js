@@ -25,16 +25,14 @@ export const REGISTER_SUCCESS = "REGISTER_SUCCESS";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const registerError = (error) => ({type: REGISTER_ERROR, error});
 
-// get list user
-export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';
-export const getUserListSuccess = (data) => ({ type: GET_USER_LIST_SUCCESS, data });
 
+export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';
 export const GET_USER_LIST_FAILURE = 'GET_USER_LIST_FAILURE';
-export const getUserListFailure = (error) => ({ type: GET_USER_LIST_FAILURE, error });
+export const getUserListSuccess = (data) => ({type: GET_USER_LIST_SUCCESS, data});
+export const getUserListFailure = (error) => ({type: GET_USER_LIST_FAILURE, error});
 
 export const RE_LOGIN_SUCCESS = 'RE_LOGIN_SUCCESS';
 export const reLoginSuccess = (data) => ({ type: RE_LOGIN_SUCCESS, data });
-
 export const RE_LOGIN_ERROR = 'RE_LOGIN_ERROR';
 export const reLoginError = (error) => ({ type: RE_LOGIN_ERROR, error });
 
@@ -118,9 +116,3 @@ export const checkUser = (socket, userName) => sendMessage(socket, {
     }
 });
 
-export const getUserList = (socket) => sendMessage(socket, {
-    action: "onchat",
-    data: {
-        event: 'GET_USER_LIST',
-    }
-});

@@ -2,7 +2,6 @@
 import store from "../redux/store/store";
 // src/socket/socket.js
 import {
-    login,
     register,
     logout,
     createRoom,
@@ -12,19 +11,16 @@ import {
     sendChatToRoom,
     sendChatToPeople,
     checkUser,
-    getUserList,
-    reLogin,
     registerSuccess,
     registerError,
     loginSuccess,
     loginError,
-    getUserListSuccess,
-    getUserListFailure,
     sendChatToPeopleSuccess,
     sendChatToPeopleFailure,
-    sendMessage, reLoginSuccess,
-    logoutSuccess,
+    reLoginSuccess,
+    logoutSuccess, getUserListFailure, getUserListSuccess,
 } from "../redux/action/action";
+
 
 let socket = null;
 let messageQueue = [];
@@ -79,7 +75,7 @@ export const initializeSocket = (url) => {
                 if (response.status === "success") {
                     store.dispatch(getUserListSuccess(response.data));
                 } else {
-                    store.dispatch(getUserListFailure(response.error));
+                    store.dispatch(getUserListFailure(response.mes));
                 }
                 break;
             case "SEND_CHAT":
@@ -157,7 +153,21 @@ export const reLoginUser = (user, code) => {
         console.log("Socket is close")
     }
 };
+export const getUsersList = () => {
+    if (!socket) return;
+    const request = () => socket.send(JSON.stringify({
+        action: "onchat",
+        data: { event: "GET_USER_LIST" },
+    }));
 
+    if (socket.readyState === WebSocket.OPEN) {
+        request();
+    } else if (socket.readyState === WebSocket.CONNECTING) {
+        setTimeout(request, 1000);
+    } else {
+        console.log("Socket is closed");
+    }
+};
 export const socketActions = {
     registerUser: (user, pass) => store.dispatch(register(socket, user, pass)),
     logoutUser: () => store.dispatch(logout(socket)),
@@ -168,5 +178,5 @@ export const socketActions = {
     sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
     sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
     checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
-    fetchUserList: () => store.dispatch(getUserList(socket))
+    // fetchUserList: () => store.dispatch(getUserList(socket))
 };
