@@ -19,6 +19,11 @@ export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const loginSuccess = (data) => ({ type: LOGIN_SUCCESS, data });
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const loginError = (error) => ({ type: LOGIN_ERROR, error });
+export const registerSuccess = (data) => ({type: REGISTER_SUCCESS, data: data});
+
+export const REGISTER_SUCCESS = "REGISTER_SUCCESS";
+export const REGISTER_ERROR = "REGISTER_ERROR";
+export const registerError = (error) => ({type: REGISTER_ERROR, error});
 
 // get list user
 export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';

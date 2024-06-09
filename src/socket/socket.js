@@ -14,6 +14,8 @@ import {
     checkUser,
     getUserList,
     reLogin,
+    registerSuccess,
+    registerError,
     loginSuccess,
     loginError,
     getUserListSuccess,
@@ -51,9 +53,9 @@ export const initializeSocket = (url) => {
             // xử lý các sự kiện khác
             case "REGISTER":
                 if (response.status === "success") {
-                    // store.dispatch()
+                    store.dispatch(registerSuccess(response.data));
                 } else {
-                    // Handle failure
+                    store.dispatch(registerError(response.mes));
                 }
                 break;
             case "LOGIN":
