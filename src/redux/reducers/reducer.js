@@ -15,10 +15,10 @@ import data from "bootstrap/js/src/dom/data";
 const initialState = {
     register: {},
     login: {},
-    userList: { data: null, error: null },
     logout: {},
     messages: { data: null, error: null },
-    active: { name: '', type: null }
+    active: { name: '', type: null },
+    userList: { data: null, error: null },
 };
 
 const socketReducer = (state = initialState, action) => {

@@ -20,11 +20,12 @@ export const loginSuccess = (data) => ({ type: LOGIN_SUCCESS, data });
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const loginError = (error) => ({ type: LOGIN_ERROR, error });
 
-// get list user
+// Action types
 export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';
-export const getUserListSuccess = (data) => ({ type: GET_USER_LIST_SUCCESS, data });
-
 export const GET_USER_LIST_FAILURE = 'GET_USER_LIST_FAILURE';
+
+// Action creators
+export const getUserListSuccess = (data) => ({ type: GET_USER_LIST_SUCCESS, data });
 export const getUserListFailure = (error) => ({ type: GET_USER_LIST_FAILURE, error });
 
 export const RE_LOGIN_SUCCESS = 'RE_LOGIN_SUCCESS';
@@ -113,9 +114,3 @@ export const checkUser = (socket, userName) => sendMessage(socket, {
     }
 });
 
-export const getUserList = (socket) => sendMessage(socket, {
-    action: "onchat",
-    data: {
-        event: 'GET_USER_LIST',
-    }
-});

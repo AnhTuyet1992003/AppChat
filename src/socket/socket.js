@@ -2,7 +2,6 @@
 import store from "../redux/store/store";
 // src/socket/socket.js
 import {
-    login,
     register,
     logout,
     createRoom,
@@ -12,16 +11,12 @@ import {
     sendChatToRoom,
     sendChatToPeople,
     checkUser,
-    getUserList,
-    reLogin,
     loginSuccess,
     loginError,
-    getUserListSuccess,
-    getUserListFailure,
     sendChatToPeopleSuccess,
     sendChatToPeopleFailure,
-    sendMessage, reLoginSuccess,
-    logoutSuccess,
+    reLoginSuccess,
+    logoutSuccess, getUserListFailure, getUserListSuccess,
 } from "../redux/action/action";
 
 let socket = null;
@@ -155,7 +150,25 @@ export const reLoginUser = (user, code) => {
         console.log("Socket is close")
     }
 };
-
+export const getUsersList = () => {
+    if (!socket) return;
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            action: "onchat",
+            data: {
+                event: "GET_USER_LIST",
+            },
+        }));
+    } else if (socket.readyState === WebSocket.CONNECTING) {
+        console.log("WebSocket connection is still in CONNECTING state. Retry in a moment.");
+        setTimeout(() => {
+            getUsersList();
+        }, 1000); // Retry after 1 second
+    } else {
+        console.log("WebSocket connection is in CLOSING or CLOSED state.");
+        // Re-establish the WebSocket connection or handle the error as needed
+    }
+};
 export const socketActions = {
     registerUser: (user, pass) => store.dispatch(register(socket, user, pass)),
     logoutUser: () => store.dispatch(logout(socket)),
@@ -166,5 +179,5 @@ export const socketActions = {
     sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
     sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
     checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
-    fetchUserList: () => store.dispatch(getUserList(socket))
+    // fetchUserList: () => store.dispatch(getUserList(socket))
 };

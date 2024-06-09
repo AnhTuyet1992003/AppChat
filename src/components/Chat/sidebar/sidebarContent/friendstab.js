@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { socketActions } from "../../../../socket/socket";
+import {getUsersList} from "../../../../socket/socket";
 
 function FriendsTab() {
     const dispatch = useDispatch();
@@ -9,7 +9,7 @@ function FriendsTab() {
 
     useEffect(() => {
         if (socket) {
-            dispatch(socketActions.fetchUserList());
+            getUsersList();
         }
     }, [dispatch, socket]);
 
