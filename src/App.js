@@ -9,8 +9,10 @@ import Register from "./components/Authentication/Register";
 import Sidebar from "./components/Chat/sidebar/sidebar";
 import { database } from "./firebase";
 import { get, child, ref } from "firebase/database";
-import React, { Fragment } from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
+import {initializeSocket} from "./socket/socket";
 function App() {
+    initializeSocket('ws://140.238.54.136:8080/chat/chat');
     return (
         <Fragment>
                 <BrowserRouter>

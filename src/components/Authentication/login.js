@@ -1,40 +1,47 @@
 import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from 'react-redux';
-import {Link, useNavigate} from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import { faFacebookF, faTwitter, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Authentication.css';
-import {initializeSocket, loginUser, socketActions} from "../../socket/socket";
+import {initializeSocket, loginUser, reLoginUser, socketActions} from "../../socket/socket";
 
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [socket, setSocket] = useState(null);
-    const dispatch = useDispatch();
     const loginStatus = useSelector((state) => state.login.status);
     const navigate = useNavigate();
     useEffect(() => {
-        const ws = initializeSocket('ws://140.238.54.136:8080/chat/chat');
-        setSocket(ws);
 
-        return () => {
-            if (ws) {
-                ws.close();
-            }
-        };
+        initializeSocket('ws://140.238.54.136:8080/chat/chat');
     }, []);
-
+    // đăng nhập
     useEffect(() => {
         if (loginStatus === "success") {
+            if (localStorage.getItem("user") === null) {
+                //lưu vào user vào localStorage
+                localStorage.setItem("user", username);
+            }
+            //đăng nhập thành công chuyển hướng đến trang home
             navigate('/Home');
         } else if (loginStatus === "error") {
             setError("Tên đăng nhập hoặc mật khẩu không chính xác");
         }
-    }, [loginStatus]);
+    }, [loginStatus, navigate]);
+
+    //duy trì đăng nhập
+    useEffect(() => {
+        if (localStorage.getItem("reLogin") !== null && loginStatus !== 'success') {
+            // kêt nối lại socket
+            initializeSocket('ws://140.238.54.136:8080/chat/chat');
+            reLoginUser(localStorage.getItem("user"), localStorage.getItem("reLogin"));
+        }
+    }, []);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!username || !password) {
@@ -42,7 +49,7 @@ const Login = () => {
             return;
         }
         setError("");
-        socketActions.loginUser(username, password);
+        loginUser(username, password);
     };
 
     return (
