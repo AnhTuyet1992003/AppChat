@@ -11,6 +11,8 @@ import {
     sendChatToRoom,
     sendChatToPeople,
     checkUser,
+    registerSuccess,
+    registerError,
     loginSuccess,
     loginError,
     sendChatToPeopleSuccess,
@@ -47,9 +49,9 @@ export const initializeSocket = (url) => {
             // xử lý các sự kiện khác
             case "REGISTER":
                 if (response.status === "success") {
-                    // store.dispatch()
+                    store.dispatch(registerSuccess(response.data));
                 } else {
-                    // Handle failure
+                    store.dispatch(registerError(response.mes));
                 }
                 break;
             case "LOGIN":
