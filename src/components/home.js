@@ -15,14 +15,14 @@ function Home() {
     const chatContainerRef = useRef(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
+console.log("user:"+localStorage.getItem("username"))
     // Duy trì đăng nhập
     useEffect(() => {
         if (!login.status) {
             if (localStorage.getItem("reLogin") !== null) {
                 // kêt nối lại socket
                 initializeSocket('ws://140.238.54.136:8080/chat/chat');
-                reLoginUser(localStorage.getItem("user"), localStorage.getItem("reLogin"));
+                reLoginUser(localStorage.getItem("username"), localStorage.getItem("reLogin"));
             } else {
                 //chuyển hướng về trang login
                 navigate("/login");

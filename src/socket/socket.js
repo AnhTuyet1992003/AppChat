@@ -11,16 +11,13 @@ import {
     sendChatToRoom,
     sendChatToPeople,
     checkUser,
-    registerSuccess,
-    registerError,
     loginSuccess,
     loginError,
     sendChatToPeopleSuccess,
     sendChatToPeopleFailure,
     reLoginSuccess,
-    logoutSuccess, getUserListFailure, getUserListSuccess,
+    logoutSuccess, getUserListSuccess, getUserListFailure, registerSuccess, registerError,
 } from "../redux/action/action";
-
 
 let socket = null;
 let messageQueue = [];
@@ -66,7 +63,7 @@ export const initializeSocket = (url) => {
             case "RE_LOGIN":
                 if (response.status === "success") {
                     localStorage.setItem("reLogin", response.data.RE_LOGIN_CODE);
-                        store.dispatch(reLoginSuccess(response.data));
+                    store.dispatch(reLoginSuccess(response.data));
                 } else {
                     store.dispatch(loginError(response.error));
                 }
@@ -109,17 +106,17 @@ export const loginUser = (user, pass) => {
     if (!socket) return;
     // socket được mở
     if (socket.readyState === WebSocket.OPEN){
-    socket.send(JSON.stringify({
-        action: "onchat",
-        data: {
-          event: "LOGIN",
-            data:{
-              user: user,
-              pass: pass,
+        socket.send(JSON.stringify({
+            action: "onchat",
+            data: {
+                event: "LOGIN",
+                data:{
+                    user: user,
+                    pass: pass,
+                },
             },
-        },
-    }));
-    // đang trong quá trình kết nối
+        }));
+        // đang trong quá trình kết nối
     } else if (socket.readyState === WebSocket.CONNECTING){
         setTimeout(() => {
             loginUser(user, pass);
@@ -163,7 +160,7 @@ export const getUsersList = () => {
     if (socket.readyState === WebSocket.OPEN) {
         request();
     } else if (socket.readyState === WebSocket.CONNECTING) {
-        setTimeout(request, 1000);
+        setTimeout(request, 2000);
     } else {
         console.log("Socket is closed");
     }
