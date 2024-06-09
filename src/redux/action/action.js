@@ -115,4 +115,3 @@ export const checkUser = (socket, userName) => sendMessage(socket, {
         data: { user: userName }
     }
 });
-

@@ -15,16 +15,18 @@ const Login = () => {
     const [error, setError] = useState('');
     const loginStatus = useSelector((state) => state.login.status);
     const navigate = useNavigate();
-    useEffect(() => {
 
+    useEffect(() => {
+        setError("");
         initializeSocket('ws://140.238.54.136:8080/chat/chat');
     }, []);
     // đăng nhập
     useEffect(() => {
         if (loginStatus === "success") {
-            if (localStorage.getItem("user") === null) {
+            setError("");
+            if (localStorage.getItem("username") === null) {
                 //lưu vào user vào localStorage
-                localStorage.setItem("user", username);
+                localStorage.setItem("username", username);
             }
             //đăng nhập thành công chuyển hướng đến trang home
             navigate('/Home');

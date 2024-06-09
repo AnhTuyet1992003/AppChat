@@ -1,3 +1,4 @@
+
 // reducer.js
 import {
     GET_USER_LIST_FAILURE,
@@ -70,7 +71,7 @@ const socketReducer = (state = initialState, action) => {
         case GET_USER_LIST_SUCCESS:
             const userList = action.data;
             let userListRemoveMySelf = userList.filter(user =>
-                !(user.name === localStorage.getItem("user") && user.type === 0)
+                !(user.name === localStorage.getItem("username") && user.type === 0)
             );
             return {
                 ...state,
