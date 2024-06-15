@@ -9,7 +9,7 @@ import {
     RE_LOGIN_SUCCESS,
     SEND_CHAT_TO_PEOPLE_FAILURE,
     SEND_CHAT_TO_PEOPLE_SUCCESS,
-    LOGOUT_SUCCESS
+    LOGOUT_SUCCESS, LOGOUT_ERROR, RESET_LOGOUT_STATUS
 } from "../action/action";
 import data from "bootstrap/js/src/dom/data";
 
@@ -24,33 +24,23 @@ const initialState = {
     active2: {},
     data2: {},
     data3: {},
+
 };
 
 const socketReducer = (state = initialState, action) => {
 
-    const mergeArraysById = (arr1, arr2, arr3) => {
-        const mergedArray = arr1.reduce((result, item) => {
-            const matchedItem = arr2.find((el) => item.name === el.username && item.type === 0);
-            const matchedItem2 = arr3.find((el) => item.name === el.name && item.type === 1);
-
-            if (matchedItem) {
-                result.push({...item, ...matchedItem});
-            }
-            if (matchedItem2) {
-                result.push({...item, ...matchedItem2});
-            }
-
-            return result;
-        }, []);
-
-        return mergedArray;
-    };
     console.log('Action received:', action);
+
+    if (!action || !action.type) {
+        console.error('Received action without type:', action);
+        return state;
+    }
     switch (action.type) {
         case LOGIN_SUCCESS:
             return {
                 ...state,
                 login: { status: 'success', data: action.data },
+
             };
         case LOGIN_ERROR:
             return {
@@ -93,9 +83,22 @@ const socketReducer = (state = initialState, action) => {
                 messages: { data: null, error: action.error },
             };
         case LOGOUT_SUCCESS:
+            console.log('Processing LOGOUT_SUCCESS action');
             return {
                 ...state,
-                logout: {status:'success',data: action.data},
+                logout: { status: 'success', data: action.data },
+                login: {},
+                userList: { data: null, error: null },
+            };
+        case LOGOUT_ERROR:
+            return {
+                ...state,
+                logout: { status: 'error', error: action.error }
+            };
+        case RESET_LOGOUT_STATUS:
+            return {
+                ...state,
+                logout: {},
             };
         default:
             return state;

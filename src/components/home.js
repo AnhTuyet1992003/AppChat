@@ -23,9 +23,6 @@ console.log("user:"+localStorage.getItem("username"))
                 // kêt nối lại socket
                 initializeSocket('ws://140.238.54.136:8080/chat/chat');
                 reLoginUser(localStorage.getItem("username"), localStorage.getItem("reLogin"));
-            } else {
-                //chuyển hướng về trang login
-                navigate("/login");
             }
 
         }
