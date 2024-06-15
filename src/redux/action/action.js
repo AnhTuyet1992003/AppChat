@@ -3,8 +3,23 @@ let messageQueue = [];
 
 
 export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
-export const logoutSuccess = (data) => ({type: LOGOUT_SUCCESS, data});
+export const LOGOUT_ERROR = 'LOGOUT_ERROR';
 
+export const logoutSuccess = (data) => ({
+    type: LOGOUT_SUCCESS,
+    data: data || {}
+});
+
+export const logoutError = (error) => ({
+    type: LOGOUT_ERROR,
+    error
+});
+// action/action.js
+export const RESET_LOGOUT_STATUS = 'RESET_LOGOUT_STATUS';
+
+export const resetLogoutStatus = () => ({
+    type: RESET_LOGOUT_STATUS,
+});
 export const sendMessage = (socket, message) => {
     if (socket) {
         socket.send(JSON.stringify(message));
@@ -52,13 +67,6 @@ export const register = (socket, user, pass) => sendMessage(socket, {
     }
 });
 
-
-export const logout = (socket) => sendMessage(socket, {
-    action: "onchat",
-    data: {
-        event: 'LOGOUT',
-    }
-});
 
 export const createRoom = (socket, nameRoom) => sendMessage(socket, {
     action: "onchat",

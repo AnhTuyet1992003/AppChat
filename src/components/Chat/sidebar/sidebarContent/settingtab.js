@@ -1,16 +1,38 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { socketActions } from '../../../../socket/socket';
+import $ from 'jquery';
 import { useNavigate } from 'react-router-dom';
+import {socketActions} from "../../../../socket/socket";
+import Login from "../../../Authentication/login";
 
 function SettingTab() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    // Hàm đăng xuất
     const handleLogout = () => {
-        socketActions.logoutUser();
-        navigate('/Login');
+        // Đóng tất cả các modal đang mở
+        $('.modal').modal('hide');
+
+        // Thêm thời gian trễ nhỏ để đảm bảo tất cả các modals được ẩn hoàn toàn
+        setTimeout(() => {
+            // Xóa backdrop thủ công nếu còn sót
+            $('.modal-backdrop').remove();
+
+            // Đảm bảo không còn backdrop nào
+            $('body').removeClass('modal-open');
+            $('body').css('padding-right', '');
+
+            // Gọi hàm logout của socket
+            socketActions.logoutUser();
+
+            // Điều hướng tới trang login
+            navigate("/login");
+        }, 500); // Thời gian trễ 500ms để đảm bảo mọi thứ đã được xử lý
     };
+
+
 
     return (
         <div className="d-flex flex-column h-100">
