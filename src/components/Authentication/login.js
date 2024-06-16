@@ -8,7 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './Authentication.css';
 import {initializeSocket, loginUser, reLoginUser, socketActions} from "../../socket/socket";
 import $ from 'jquery';
-import {resetLogoutStatus} from "../../redux/action/action";
+import { resetLogoutStatus} from "../../redux/action/action";
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -20,6 +20,7 @@ const Login = () => {
     useEffect(() => {
         setError("");
         initializeSocket('ws://140.238.54.136:8080/chat/chat');
+        // dispatch(notLogin());
         // Xóa bất kỳ backdrop nào còn sót lại
         $('.modal-backdrop').remove();
         $('body').removeClass('modal-open');
@@ -37,6 +38,8 @@ const Login = () => {
             //đăng nhập thành công chuyển hướng đến trang home
             navigate('/Home');
         } else if (loginStatus === "error") {
+            localStorage.removeItem("reLogin");
+            localStorage.removeItem("username");
             setError("Tên đăng nhập hoặc mật khẩu không chính xác");
         }
     }, [loginStatus, navigate]);
@@ -46,7 +49,7 @@ const Login = () => {
         if (localStorage.getItem("reLogin") !== null && loginStatus !== 'success') {
             // kêt nối lại socket
             initializeSocket('ws://140.238.54.136:8080/chat/chat');
-            reLoginUser(localStorage.getItem("user"), localStorage.getItem("reLogin"));
+            reLoginUser(localStorage.getItem("username"), localStorage.getItem("reLogin"));
         }
     }, []);
 
