@@ -9,7 +9,7 @@ import {
     RE_LOGIN_SUCCESS,
     SEND_CHAT_TO_PEOPLE_FAILURE,
     SEND_CHAT_TO_PEOPLE_SUCCESS,
-    LOGOUT_SUCCESS, LOGOUT_ERROR, RESET_LOGOUT_STATUS
+    LOGOUT_SUCCESS, LOGOUT_ERROR, RESET_LOGOUT_STATUS, NOT_LOGIN
 } from "../action/action";
 import data from "bootstrap/js/src/dom/data";
 
@@ -36,6 +36,11 @@ const socketReducer = (state = initialState, action) => {
         return state;
     }
     switch (action.type) {
+        case NOT_LOGIN:
+            return {
+                ...state,
+                login: {},
+            };
         case LOGIN_SUCCESS:
             return {
                 ...state,
