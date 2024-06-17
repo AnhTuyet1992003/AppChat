@@ -4,7 +4,6 @@ import store from "../redux/store/store";
 import {
     login,
     register,
-    logout,
     createRoom,
     joinRoom,
     getRoomChatMessages,
@@ -66,6 +65,14 @@ export const initializeSocket = (url) => {
                     store.dispatch(loginError(response.error));
                 }
                 break;
+            case "LOGOUT":
+                if (response.status === "success") {
+                    localStorage.clear();
+                    store.dispatch(logoutSuccess());
+                } else {
+                    store.dispatch(logoutError(response.mes));
+                }
+                break;
             case "RE_LOGIN":
                 if (response.status === "success") {
                     localStorage.setItem("reLogin", response.data.RE_LOGIN_CODE);
@@ -92,14 +99,7 @@ export const initializeSocket = (url) => {
                 break;
             default:
                 break;
-            case "LOGOUT":
-                if (response.status === "success") {
-                    localStorage.clear();
-                    store.dispatch(logoutSuccess());
-                } else {
-                    store.dispatch(logoutError(response.mes));
-                }
-                break;
+
         }
     };
     socket.onclose = () => {
@@ -135,6 +135,17 @@ export const loginUser = (user, pass) => {
         console.log("Socket is close")
     }
 };
+
+export const logout = () => {
+    if (!socket) return;
+    socket.send(JSON.stringify({
+        action: "onchat",
+        data: {
+            event: "LOGOUT",
+        },
+    }));
+};
+
 export const reLoginUser = (user, code) => {
     if (!socket) {
         return;
@@ -163,7 +174,7 @@ export const reLoginUser = (user, code) => {
 
 export const socketActions = {
     registerUser: (user, pass) => store.dispatch(register(socket, user, pass)),
-    logoutUser: () => store.dispatch(logout(socket)),
+    // logoutUser: () => store.dispatch(logout(socket)),
     createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
     joinChatRoom: (nameRoom) => store.dispatch(joinRoom(socket, nameRoom)),
     fetchRoomChatMessages: (roomName, page) => store.dispatch(getRoomChatMessages(socket, roomName, page)),

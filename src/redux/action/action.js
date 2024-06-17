@@ -50,12 +50,12 @@ export const register = (socket, user, pass) => sendMessage(socket, {
 });
 
 
-export const logout = (socket) => sendMessage(socket, {
-    action: "onchat",
-    data: {
-        event: 'LOGOUT',
-    }
-});
+// export const logout = (socket) => sendMessage(socket, {
+//     action: "onchat",
+//     data: {
+//         event: 'LOGOUT',
+//     }
+// });
 
 export const createRoom = (socket, nameRoom) => sendMessage(socket, {
     action: "onchat",

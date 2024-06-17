@@ -1,17 +1,22 @@
-
-import React from 'react';
-import { useDispatch } from 'react-redux';
-import { socketActions,logoutUser } from '../../../../socket/socket';
-// import { logoutUser } from '../../../../redux/action/action';
-import { useNavigate } from 'react-router-dom';
+import React, {useCallback} from 'react';
+import {useDispatch} from 'react-redux';
+import {logout} from '../../../../socket/socket'; // Hoặc thay thế bằng action từ Redux nếu bạn sử dụng Redux action thay vì socket action
+import {useNavigate} from 'react-router-dom';
 
 function SettingTab() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const handleLogout = () => {
-        socketActions.logoutUser();
-        navigate('/Login');
-    };
+
+    // Sử dụng useCallback để đảm bảo rằng hàm handleLogout sẽ không thay đổi sau mỗi lần render
+    const handleLogout = useCallback(async () => {
+        try {
+            dispatch(logout); // Đợi cho việc logout hoàn thành trước khi điều hướng
+            navigate('/Login');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    }, [dispatch, navigate]);
+
 
     return (
         <div className="d-flex flex-column h-100">
