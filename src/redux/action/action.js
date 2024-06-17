@@ -1,15 +1,25 @@
 // redux/actions/action.js
 let messageQueue = [];
 
-export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
-export const loginSuccess = (data) => ({type: LOGIN_SUCCESS, data});
-export const LOGIN_ERROR = 'LOGIN_ERROR';
-export const loginError = (error) => ({type: LOGIN_ERROR, error});
-export const LOGOUT_SUCCESS = "LOGOUT_SUCCESS";
-export const LOGOUT_ERROR = "LOGOUT_ERROR";
-export const logoutSuccess = () => ({type: LOGOUT_SUCCESS});
-export const logoutError = (error) => ({type: LOGOUT_ERROR, error});
 
+export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
+export const LOGOUT_ERROR = 'LOGOUT_ERROR';
+
+export const logoutSuccess = (data) => ({
+    type: LOGOUT_SUCCESS,
+    data: data || {}
+});
+
+export const logoutError = (error) => ({
+    type: LOGOUT_ERROR,
+    error
+});
+// action/action.js
+export const RESET_LOGOUT_STATUS = 'RESET_LOGOUT_STATUS';
+
+export const resetLogoutStatus = () => ({
+    type: RESET_LOGOUT_STATUS,
+});
 export const sendMessage = (socket, message) => {
     if (socket) {
         socket.send(JSON.stringify(message));
@@ -19,17 +29,31 @@ export const sendMessage = (socket, message) => {
         };
     }
 };
+// login
+export const NOT_LOGIN = 'NOT_LOGIN';
 
-// get list user
+export const notLogin = () => ({
+    type: NOT_LOGIN,
+});
+export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
+export const loginSuccess = (data) => ({ type: LOGIN_SUCCESS, data });
+export const LOGIN_ERROR = 'LOGIN_ERROR';
+export const loginError = (error) => ({ type: LOGIN_ERROR, error });
+export const registerSuccess = (data) => ({type: REGISTER_SUCCESS, data: data});
+
+
+export const REGISTER_SUCCESS = "REGISTER_SUCCESS";
+export const REGISTER_ERROR = "REGISTER_ERROR";
+export const registerError = (error) => ({type: REGISTER_ERROR, error});
+
+
 export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';
-export const getUserListSuccess = (data) => ({ type: GET_USER_LIST_SUCCESS, data });
-
 export const GET_USER_LIST_FAILURE = 'GET_USER_LIST_FAILURE';
-export const getUserListFailure = (error) => ({ type: GET_USER_LIST_FAILURE, error });
+export const getUserListSuccess = (data) => ({type: GET_USER_LIST_SUCCESS, data});
+export const getUserListFailure = (error) => ({type: GET_USER_LIST_FAILURE, error});
 
 export const RE_LOGIN_SUCCESS = 'RE_LOGIN_SUCCESS';
 export const reLoginSuccess = (data) => ({ type: RE_LOGIN_SUCCESS, data });
-
 export const RE_LOGIN_ERROR = 'RE_LOGIN_ERROR';
 export const reLoginError = (error) => ({ type: RE_LOGIN_ERROR, error });
 
@@ -49,13 +73,6 @@ export const register = (socket, user, pass) => sendMessage(socket, {
     }
 });
 
-
-// export const logout = (socket) => sendMessage(socket, {
-//     action: "onchat",
-//     data: {
-//         event: 'LOGOUT',
-//     }
-// });
 
 export const createRoom = (socket, nameRoom) => sendMessage(socket, {
     action: "onchat",
@@ -110,12 +127,5 @@ export const checkUser = (socket, userName) => sendMessage(socket, {
     data: {
         event: 'CHECK_USER',
         data: { user: userName }
-    }
-});
-
-export const getUserList = (socket) => sendMessage(socket, {
-    action: "onchat",
-    data: {
-        event: 'GET_USER_LIST',
     }
 });

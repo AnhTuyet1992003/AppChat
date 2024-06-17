@@ -7,7 +7,8 @@ import { faFacebookF, faTwitter, faGoogle } from '@fortawesome/free-brands-svg-i
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Authentication.css';
 import {initializeSocket, loginUser, reLoginUser, socketActions} from "../../socket/socket";
-
+import $ from 'jquery';
+import { resetLogoutStatus} from "../../redux/action/action";
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -15,20 +16,30 @@ const Login = () => {
     const [error, setError] = useState('');
     const loginStatus = useSelector((state) => state.login.status);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     useEffect(() => {
-
+        setError("");
         initializeSocket('ws://140.238.54.136:8080/chat/chat');
+        // dispatch(notLogin());
+        // Xóa bất kỳ backdrop nào còn sót lại
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+        $('body').css('padding-right', '');
+
     }, []);
     // đăng nhập
     useEffect(() => {
         if (loginStatus === "success") {
-            if (localStorage.getItem("user") === null) {
+            setError("");
+            if (localStorage.getItem("username") === null) {
                 //lưu vào user vào localStorage
-                localStorage.setItem("user", username);
+                localStorage.setItem("username", username);
             }
             //đăng nhập thành công chuyển hướng đến trang home
             navigate('/Home');
         } else if (loginStatus === "error") {
+            localStorage.removeItem("reLogin");
+            localStorage.removeItem("username");
             setError("Tên đăng nhập hoặc mật khẩu không chính xác");
         }
     }, [loginStatus, navigate]);
@@ -38,7 +49,7 @@ const Login = () => {
         if (localStorage.getItem("reLogin") !== null && loginStatus !== 'success') {
             // kêt nối lại socket
             initializeSocket('ws://140.238.54.136:8080/chat/chat');
-            reLoginUser(localStorage.getItem("user"), localStorage.getItem("reLogin"));
+            reLoginUser(localStorage.getItem("username"), localStorage.getItem("reLogin"));
         }
     }, []);
 
@@ -49,6 +60,7 @@ const Login = () => {
             return;
         }
         setError("");
+        dispatch(resetLogoutStatus());
         loginUser(username, password);
     };
 

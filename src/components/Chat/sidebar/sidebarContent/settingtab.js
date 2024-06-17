@@ -1,21 +1,37 @@
-import React, {useCallback} from 'react';
-import {useDispatch} from 'react-redux';
-import {logout} from '../../../../socket/socket'; // Hoặc thay thế bằng action từ Redux nếu bạn sử dụng Redux action thay vì socket action
-import {useNavigate} from 'react-router-dom';
+
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import $ from 'jquery';
+import { useNavigate } from 'react-router-dom';
+import {socketActions} from "../../../../socket/socket";
+import Login from "../../../Authentication/login";
 
 function SettingTab() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // Sử dụng useCallback để đảm bảo rằng hàm handleLogout sẽ không thay đổi sau mỗi lần render
-    const handleLogout = useCallback(async () => {
-        try {
-            dispatch(logout); // Đợi cho việc logout hoàn thành trước khi điều hướng
-            navigate('/Login');
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
-    }, [dispatch, navigate]);
+    // Hàm đăng xuất
+    const handleLogout = () => {
+        // Đóng tất cả các modal đang mở
+        $('.modal').modal('hide');
+
+        // Thêm thời gian trễ nhỏ để đảm bảo tất cả các modals được ẩn hoàn toàn
+        setTimeout(() => {
+            // Xóa backdrop thủ công nếu còn sót
+            $('.modal-backdrop').remove();
+
+            // Đảm bảo không còn backdrop nào
+            $('body').removeClass('modal-open');
+            $('body').css('padding-right', '');
+
+            // Gọi hàm logout của socket
+            socketActions.logoutUser();
+
+            // Điều hướng tới trang login
+            navigate("/login");
+        }, 500); // Thời gian trễ 500ms để đảm bảo mọi thứ đã được xử lý
+    };
+
 
 
     return (

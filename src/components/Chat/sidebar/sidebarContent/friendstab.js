@@ -1,17 +1,15 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { socketActions } from "../../../../socket/socket";
+import {getUsersList} from "../../../../socket/socket";
 
-function FriendsTab() {
+function FriendsTab(props) {
     const dispatch = useDispatch();
     const userList = useSelector(state => state.userList.data);
-    const socket = useSelector(state => state.socket);
 
     useEffect(() => {
-        if (socket) {
-            dispatch(socketActions.fetchUserList());
-        }
-    }, [dispatch, socket]);
+        getUsersList();
+    }, [dispatch]);
+
 
 
 
@@ -68,7 +66,7 @@ function FriendsTab() {
                                 <li className="card contact-item">
                                     <div className="card-body">
                                         <div className="d-flex align-items-center">
-                                            <div className="avatar avatar-online me-4">
+                                            <div className="avatar avatar-busy me-4">
                                                 <span className="avatar-label bg-soft-primary text-primary">
                                                 </span>
                                             </div>
