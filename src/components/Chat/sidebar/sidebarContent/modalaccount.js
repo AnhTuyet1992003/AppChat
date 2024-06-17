@@ -149,7 +149,7 @@ const Logout = () => {
                         <button className="btn btn-secondary" data-bs-dismiss="modal" type="button">
                             Close
                         </button>
-                        <button className="btn btn-primary" type="button" onClick={handleLogout}>
+                        <button className="btn btn-primary" type="submit" onClick={handleLogout}>
                             Logout
                         </button>
                     </div>

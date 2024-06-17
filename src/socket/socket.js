@@ -1,6 +1,5 @@
 // src/socket/socket.js
 import store from "../redux/store/store";
-// src/socket/socket.js
 import {
     register,
     logout,
@@ -16,7 +15,7 @@ import {
     sendChatToPeopleSuccess,
     sendChatToPeopleFailure,
     reLoginSuccess,
-    logoutSuccess, getUserListSuccess, getUserListFailure, registerSuccess, registerError, logoutError,
+    logoutSuccess,logoutError, getUserListSuccess, getUserListFailure, registerSuccess, registerError,
 } from "../redux/action/action";
 
 let socket = null;

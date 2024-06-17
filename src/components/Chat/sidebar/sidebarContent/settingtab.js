@@ -1,38 +1,54 @@
-
-import React from 'react';
-import { useDispatch } from 'react-redux';
-import $ from 'jquery';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import {socketActions} from "../../../../socket/socket";
-import Login from "../../../Authentication/login";
+import {initializeSocket, socketActions} from '../../../../socket/socket';
 
 function SettingTab() {
+    const [socket, setSocket] = useState(null);
+    const logoutStatus = useSelector((state) => state.logout.status);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const ws = initializeSocket('ws://140.238.54.136:8080/chat/chat');
+        setSocket(ws);
+
+        return () => {
+            if (ws) {
+                ws.close();
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (logoutStatus === 'success') {
+            navigate('/Login');
+        }
+    }, [logoutStatus]);
+
     // Hàm đăng xuất
     const handleLogout = () => {
-        // Đóng tất cả các modal đang mở
-        $('.modal').modal('hide');
-
-        // Thêm thời gian trễ nhỏ để đảm bảo tất cả các modals được ẩn hoàn toàn
-        setTimeout(() => {
-            // Xóa backdrop thủ công nếu còn sót
-            $('.modal-backdrop').remove();
-
-            // Đảm bảo không còn backdrop nào
-            $('body').removeClass('modal-open');
-            $('body').css('padding-right', '');
-
-            // Gọi hàm logout của socket
-            socketActions.logoutUser();
-
-            // Điều hướng tới trang login
-            navigate("/login");
-        }, 500); // Thời gian trễ 500ms để đảm bảo mọi thứ đã được xử lý
+        // console.log($.fn.modal); // Kiểm tra xem modal() có được định nghĩa không
+        // // Đóng tất cả các modal đang mở
+        // $('.modal').modal('hide');
+        //
+        // // Thêm thời gian trễ nhỏ để đảm bảo tất cả các modals được ẩn hoàn toàn
+        // setTimeout(() => {
+        //     // Xóa backdrop thủ công nếu còn sót
+        //     $('.modal-backdrop').remove();
+        //
+        //     // Đảm bảo không còn backdrop nào
+        //     $('body').removeClass('modal-open');
+        //     $('body').css('padding-right', '');
+        //
+        //     // Gọi hàm logout của socket
+        //     socketActions.logoutUser();
+        //
+        //     // Điều hướng tới trang login
+        //     navigate("/login");
+        // }, 500); // Thời gian trễ 500ms để đảm bảo mọi thứ đã được xử lý
+        socketActions.logoutUser();
     };
-
-
 
     return (
         <div className="d-flex flex-column h-100">
