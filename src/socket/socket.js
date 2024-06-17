@@ -1,6 +1,5 @@
 // src/socket/socket.js
 import store from "../redux/store/store";
-// src/socket/socket.js
 import {
     register,
     logout,
