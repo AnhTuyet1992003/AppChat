@@ -1,8 +1,14 @@
 
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
+import {getPeopleChatMes, initializeSocket, reLoginUser} from "../../../../socket/socket";
+import {useDispatch, useSelector} from "react-redux";
+import {useNavigate} from "react-router-dom";
 
 
 function ChatTab() {
+
+
+
 
     return (
         <div className="d-flex flex-column h-100">

@@ -9,7 +9,12 @@ import {
     RE_LOGIN_SUCCESS,
     SEND_CHAT_TO_PEOPLE_FAILURE,
     SEND_CHAT_TO_PEOPLE_SUCCESS,
-    LOGOUT_SUCCESS, LOGOUT_ERROR, RESET_LOGOUT_STATUS, NOT_LOGIN
+    LOGOUT_SUCCESS,
+    LOGOUT_ERROR,
+    RESET_LOGOUT_STATUS,
+    NOT_LOGIN,
+    GET_PEOPLE_CHAT_MES_SUCCESS,
+    GET_PEOPLE_CHAT_MES_FAILURE
 } from "../action/action";
 import data from "bootstrap/js/src/dom/data";
 
@@ -104,6 +109,16 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 logout: {},
+            };
+        case GET_PEOPLE_CHAT_MES_SUCCESS:
+            return {
+              ...state,
+                messages: {data: action.data, error: null}
+            };
+        case GET_PEOPLE_CHAT_MES_FAILURE:
+            return {
+                ...state,
+                messages: {data: action.data, error: action.error}
             };
         default:
             return state;

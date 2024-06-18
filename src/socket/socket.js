@@ -16,7 +16,13 @@ import {
     sendChatToPeopleSuccess,
     sendChatToPeopleFailure,
     reLoginSuccess,
-    logoutSuccess, getUserListSuccess, getUserListFailure, registerSuccess, registerError, logoutError,
+    logoutSuccess,
+    getUserListSuccess,
+    getUserListFailure,
+    registerSuccess,
+    registerError,
+    logoutError,
+    getPeopleChatMesSuccess, getPeopleChatMesFailure,
 } from "../redux/action/action";
 
 let socket = null;
@@ -85,7 +91,7 @@ export const initializeSocket = (url) => {
                 if (response.status === "success") {
                     store.dispatch(getUserListSuccess(response.data));
                 } else {
-                    store.dispatch(getUserListFailure(response.mes));
+                    store.dispatch(getUserListFailure(response.error));
                 }
                 break;
             case "SEND_CHAT":
@@ -102,7 +108,14 @@ export const initializeSocket = (url) => {
                     localStorage.clear();
                     store.dispatch(logoutSuccess(response.data || {}));
                 } else {
-                    store.dispatch(logoutError(response.mes));
+                    store.dispatch(logoutError(response.error));
+                }
+                break;
+            case "GET_PEOPLE_CHAT_MES":
+                if (response.status === "success"){
+                    store.dispatch(getPeopleChatMesSuccess(response.data));
+                }else{
+                    store.dispatch(getPeopleChatMesFailure(response.error));
                 }
                 break;
             default:
@@ -194,7 +207,19 @@ export const logoutUsers = () => {
         },
     }));
 };
-
+export const getPeopleChatMes = async (name) =>{
+  if (!socket)return;
+  socket.send(JSON.stringify({
+      action: "onchat",
+      data: {
+          event: "GET_PEOPLE_CHAT_MES",
+          data: {
+              name: name,
+              page: 1
+          }
+      }
+  }));
+};
 export const socketActions = {
     registerUser: (user, pass) => store.dispatch(register(socket, user, pass)),
     createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
