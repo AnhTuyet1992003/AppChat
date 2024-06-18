@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import {getUsersList} from "../../../../socket/socket";
+import { getUsersList } from "../../../../socket/socket";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 function FriendsTab(props) {
     const dispatch = useDispatch();
@@ -9,9 +11,6 @@ function FriendsTab(props) {
     useEffect(() => {
         getUsersList();
     }, [dispatch]);
-
-
-
 
     return (
         <div className="d-flex flex-column h-100">
@@ -55,80 +54,83 @@ function FriendsTab(props) {
             <div className="hide-scrollbar h-100">
                 <div className="m-4">
                     <div>
-                        {/*<h5 className="p-2 text-primary">A</h5>*/}
                         {!userList || userList.length === 0 ? (
                             <ul className="list-unstyled">
                                 <li>Loading...</li>
                             </ul>
                         ) : (
                             userList.map((user, index) => (
-                            <ul className="list-unstyled" key={index}>
-                                <li className="card contact-item">
-                                    <div className="card-body">
-                                        <div className="d-flex align-items-center">
-                                            <div className="avatar avatar-busy me-4">
-                                                <span className="avatar-label bg-soft-primary text-primary">
-                                                </span>
-                                            </div>
-                                            <div className="flex-grow-1 overflow-hidden">
-                                                <div className="d-flex align-items-center mb-1">
-                                                    <h5 className="text-truncate mb-0 me-auto">
-                                                        {user.name}
-                                                    </h5>
+                                <ul className="list-unstyled" key={index}>
+                                    <li className="card contact-item">
+                                        <div className="card-body">
+                                            <div className="d-flex align-items-center">
+                                                <div className="avatar avatar-busy me-4">
+                                                    <span className="avatar-label bg-soft-primary text-primary">
+                                                    </span>
                                                 </div>
-                                                <div className="d-flex align-items-center">
-                                                    <div className="text-truncate me-auto">
-                                                        Online
+                                                <div className="flex-grow-1 overflow-hidden">
+                                                    <div className="d-flex align-items-center mb-1">
+                                                        <h5 className="text-truncate mb-0 me-auto">
+                                                            {user.name}
+                                                        </h5>
+                                                    </div>
+                                                    <div className="d-flex align-items-center">
+                                                        <div className="text-truncate me-auto">
+                                                            Online
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className="dropdown">
-                                                <button
-                                                    aria-expanded="false"
-                                                    className="btn btn-icon btn-base btn-sm"
-                                                    data-bs-toggle="dropdown"
-                                                    type="button"
-                                                >
-                                                    <i className="ri-more-fill" />
-                                                </button>
-                                                <ul className="dropdown-menu dropdown-menu-right">
-                                                    <li>
-                                                        <a
-                                                            className="dropdown-item d-flex align-items-center justify-content-between"
-                                                            href="#"
-                                                        >
-                                                            Start chat
-                                                            <i className="ri-message-2-line" />
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a
-                                                            className="dropdown-item d-flex align-items-center justify-content-between"
-                                                            href="#"
-                                                        >
-                                                            Edit contact
-                                                            <i className="ri-edit-line" />
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <div className="dropdown-divider" />
-                                                    </li>
-                                                    <li>
-                                                        <a
-                                                            className="dropdown-item d-flex align-items-center justify-content-between"
-                                                            href="#"
-                                                        >
-                                                            Block user
-                                                            <i className="ri-forbid-line" />
-                                                        </a>
-                                                    </li>
-                                                </ul>
+                                                <div className="dropdown">
+                                                    <button
+                                                        aria-expanded="false"
+                                                        className="btn btn-icon btn-base btn-sm"
+                                                        id={`dropdownMenuButton-${index}`}
+                                                        data-bs-toggle="dropdown"
+                                                        aria-haspopup="true"
+                                                        aria-expanded="false"
+                                                        type="button"
+                                                    >
+                                                        <i className="ri-more-fill" />
+                                                    </button>
+                                                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby={`dropdownMenuButton-${index}`}>
+                                                        <li>
+                                                            <a
+                                                                className="dropdown-item d-flex align-items-center justify-content-between"
+                                                                href="#"
+                                                            >
+                                                                Start chat
+                                                                <i className="ri-message-2-line" />
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a
+                                                                className="dropdown-item d-flex align-items-center justify-content-between"
+                                                                href="#"
+                                                            >
+                                                                Edit contact
+                                                                <i className="ri-edit-line" />
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <div className="dropdown-divider" />
+                                                        </li>
+                                                        <li>
+                                                            <a
+                                                                className="dropdown-item d-flex align-items-center justify-content-between"
+                                                                href="#"
+                                                            >
+                                                                Block user
+                                                                <i className="ri-forbid-line" />
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        )))}
+                                    </li>
+                                </ul>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
