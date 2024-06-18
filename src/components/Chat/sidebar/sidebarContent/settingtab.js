@@ -3,23 +3,23 @@ import {useDispatch, useSelector} from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {initializeSocket, socketActions} from '../../../../socket/socket';
 
-function SettingTab() {
-    const [socket, setSocket] = useState(null);
-    const logoutStatus = useSelector((state) => state.logout.status);
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
 
-    useEffect(() => {
-        const ws = initializeSocket('ws://140.238.54.136:8080/chat/chat');
-        setSocket(ws);
+    function SettingTab() {
+        const [socket, setSocket] = useState(null);
+        const logoutStatus = useSelector((state) => state.logout.status);
+        const dispatch = useDispatch();
+        const navigate = useNavigate();
 
-        return () => {
-            if (ws) {
-                ws.close();
-            }
-        };
-    }, []);
+        useEffect(() => {
+            const ws = initializeSocket('ws://140.238.54.136:8080/chat/chat');
+            setSocket(ws);
 
+            return () => {
+                if (ws) {
+                    ws.close();
+                }
+            };
+        }, []);
     useEffect(() => {
         if (logoutStatus === 'success') {
             navigate('/Login');
@@ -27,7 +27,7 @@ function SettingTab() {
     }, [logoutStatus]);
 
     // Hàm đăng xuất
-    const handleLogout = () => {
+    const handleLogout = (e) => {
         // console.log($.fn.modal); // Kiểm tra xem modal() có được định nghĩa không
         // // Đóng tất cả các modal đang mở
         // $('.modal').modal('hide');
@@ -47,6 +47,7 @@ function SettingTab() {
         //     // Điều hướng tới trang login
         //     navigate("/login");
         // }, 500); // Thời gian trễ 500ms để đảm bảo mọi thứ đã được xử lý
+        e.preventDefault();
         socketActions.logoutUser();
     };
 
