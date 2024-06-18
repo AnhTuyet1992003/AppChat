@@ -203,6 +203,6 @@ export const socketActions = {
     sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
     sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
     checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
-    // fetchUserList: () => store.dispatch(getUserList(socket))
-    logoutUser: () => logoutUsers()
+    fetchUserList: () => store.dispatch(getUsersList(socket)),
+    logoutUser: () => logoutUsers(),
 };
