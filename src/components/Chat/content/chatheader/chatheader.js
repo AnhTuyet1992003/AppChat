@@ -1,9 +1,18 @@
 
-import React from 'react';
+import React, {useEffect} from 'react';
+import {getPeopleChatMes} from "../../../../socket/socket";
+import {useParams} from "react-router-dom";
+import {useSelector} from "react-redux";
 
 
 function ChatHeader() {
-
+    const messages = useSelector((state) => state.messages?.data);
+    const { name } = useParams();
+    useEffect(() => {
+        if (name) {
+            getPeopleChatMes(name);
+        }
+    }, [name]);
     return (
         <div className="chat-header d-flex align-items-center border-bottom px-2">
             <div className="container-fluid">
@@ -20,12 +29,12 @@ function ChatHeader() {
                             </div>
                             <div className="avatar avatar-online avatar-sm me-3">
                       <span className="avatar-label bg-soft-primary text-primary fs-6">
-                        AM
+                         {name ? name.charAt(0) : ""}
                       </span>
                             </div>
                             <div className="flex-grow-1 overflow-hidden">
                                 <h6 className="d-block text-truncate mb-1">
-                                    Ariel Martinez
+                                    {name || ""}
                                 </h6>
                                 <p className="d-block text-truncate text-success fs-6 mb-0">
                                     Available

@@ -37,6 +37,7 @@
     "postcss": "^8.3.6",
     "postcss-loader": "^8.1.1",
     "react": "^18.3.1",
+    "react-bootstrap": "^2.10.2",
     "react-datepicker": "^6.9.0",
     "react-dom": "^18.3.1",
     "react-redux": "^9.1.2",
@@ -59,12 +60,6 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -77,4 +72,5 @@
       "last 1 safari version"
     ]
   }
+
 }

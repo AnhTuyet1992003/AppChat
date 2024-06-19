@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { getUsersList } from "../../../../socket/socket";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min';
+
 
 function FriendsTab(props) {
     const dispatch = useDispatch();
@@ -11,6 +14,7 @@ function FriendsTab(props) {
     useEffect(() => {
         getUsersList();
     }, [dispatch]);
+
 
     useEffect(() => {
         if (userList) {
@@ -70,19 +74,23 @@ function FriendsTab(props) {
             <div className="hide-scrollbar h-100">
                 <div className="m-4">
                     <div>
-                        {/*<h5 className="p-2 text-primary">A</h5>*/}
+
                         {!filteredUsers || filteredUsers.length === 0 ? (
+
                             <ul className="list-unstyled">
                                 <li>Loading...</li>
                             </ul>
                         ) : (
+
                             filteredUsers.map((user, index) => (
                                 <ul className="list-unstyled" key={index}>
                                     <li className="card contact-item">
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
                                                 <div className="avatar avatar-busy me-4">
+
                                                 <span className="avatar-label bg-soft-primary text-primary">
+                                                     {user.name.charAt(0)}
                                                 </span>
                                                 </div>
                                                 <div className="flex-grow-1 overflow-hidden">
@@ -106,6 +114,7 @@ function FriendsTab(props) {
                                                     >
                                                         <i className="ri-more-fill" />
                                                     </button>
+
                                                     <ul className="dropdown-menu dropdown-menu-right">
                                                         <li>
                                                             <a
@@ -143,7 +152,9 @@ function FriendsTab(props) {
                                         </div>
                                     </li>
                                 </ul>
+
                             )))}
+
                     </div>
                 </div>
             </div>

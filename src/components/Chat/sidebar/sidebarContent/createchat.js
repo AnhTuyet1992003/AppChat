@@ -25,7 +25,7 @@ const CreateChat = () => {
             const groupData = await create_room(groupName, groupInfo); // Tạo nhóm và nhận lại thông tin của nhóm
             setCreatedGroup(groupData); // Lưu thông tin của nhóm vào state
             localStorage.setItem('createdGroup', JSON.stringify(groupData)); // Lưu thông tin nhóm vào localStorage
-            navigate('/Home');
+            navigate(`/Home/${groupName}`);
         } catch (error) {
             console.error('Error creating room:', error);
         }
