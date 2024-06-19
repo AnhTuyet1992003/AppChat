@@ -1,9 +1,7 @@
 // src/socket/socket.js
 import store from "../redux/store/store";
-// src/socket/socket.js
 import {
-    registerSuccess,
-    registerError,
+
     logout,
     createRoom,
     joinRoom,
@@ -19,7 +17,8 @@ import {
     sendChatToPeopleSuccess,
     sendChatToPeopleFailure,
     reLoginSuccess,
-    logoutSuccess, getUserListSuccess, getUserListFailure, logoutError,
+
+    logoutSuccess,logoutError, getUserListSuccess, getUserListFailure, registerSuccess, registerError,
 } from "../redux/action/action";
 export let socket;
 export let isSocketOpen = false;
@@ -239,6 +238,6 @@ export const socketActions = {
     sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
     sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
     checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
-    // fetchUserList: () => store.dispatch(getUserList(socket))
-    logoutUser: () => logoutUsers()
+    fetchUserList: () => store.dispatch(getUsersList(socket)),
+    logoutUser: () => logoutUsers(),
 };
