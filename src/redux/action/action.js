@@ -57,6 +57,10 @@ export const RE_LOGIN_SUCCESS = 'RE_LOGIN_SUCCESS';
 export const reLoginSuccess = (data) => ({ type: RE_LOGIN_SUCCESS, data });
 export const RE_LOGIN_ERROR = 'RE_LOGIN_ERROR';
 export const reLoginError = (error) => ({ type: RE_LOGIN_ERROR, error });
+export const CREATE_ROOM_SUCCESS = "CREATE_ROOM_SUCCESS";
+export const CREATE_ROOM_ERROR = "CREATE_ROOM_ERROR";
+export const createRoomSuccess = (data) => ({type: CREATE_ROOM_SUCCESS, data});
+export const createRoomError = (error) => ({type: CREATE_ROOM_ERROR, error});
 
 // send chat to people
 export const SEND_CHAT_TO_PEOPLE_SUCCESS = 'SEND_CHAT_TO_PEOPLE_SUCCESS';

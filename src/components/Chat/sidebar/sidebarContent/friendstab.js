@@ -1,16 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { getUsersList } from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 
+
 function FriendsTab(props) {
     const dispatch = useDispatch();
     const userList = useSelector(state => state.userList.data);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState([]);
 
     useEffect(() => {
         getUsersList();
     }, [dispatch]);
+
+
+    useEffect(() => {
+        if (userList) {
+            setFilteredUsers(
+                userList.filter(user =>
+                    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+            );
+        }
+    }, [searchQuery, userList]);
+
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value);
+    };
 
     return (
         <div className="d-flex flex-column h-100">
@@ -41,6 +59,8 @@ function FriendsTab(props) {
                         className="form-control form-control-lg form-control-solid"
                         placeholder="Search friends"
                         type="text"
+                        value={searchQuery}
+                        onChange={handleSearchChange}
                     />
                     <button
                         className="btn btn-secondary btn-lg"
@@ -54,19 +74,24 @@ function FriendsTab(props) {
             <div className="hide-scrollbar h-100">
                 <div className="m-4">
                     <div>
-                        {!userList || userList.length === 0 ? (
+
+                        {/*<h5 className="p-2 text-primary">A</h5>*/}
+                        {!filteredUsers || filteredUsers.length === 0 ? (
+
                             <ul className="list-unstyled">
                                 <li>Loading...</li>
                             </ul>
                         ) : (
-                            userList.map((user, index) => (
+
+                            filteredUsers.map((user, index) => (
                                 <ul className="list-unstyled" key={index}>
                                     <li className="card contact-item">
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
                                                 <div className="avatar avatar-busy me-4">
-                                                    <span className="avatar-label bg-soft-primary text-primary">
-                                                    </span>
+
+                                                <span className="avatar-label bg-soft-primary text-primary">
+                                                </span>
                                                 </div>
                                                 <div className="flex-grow-1 overflow-hidden">
                                                     <div className="d-flex align-items-center mb-1">
@@ -84,15 +109,13 @@ function FriendsTab(props) {
                                                     <button
                                                         aria-expanded="false"
                                                         className="btn btn-icon btn-base btn-sm"
-                                                        id={`dropdownMenuButton-${index}`}
                                                         data-bs-toggle="dropdown"
-                                                        aria-haspopup="true"
-                                                        aria-expanded="false"
                                                         type="button"
                                                     >
                                                         <i className="ri-more-fill" />
                                                     </button>
-                                                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby={`dropdownMenuButton-${index}`}>
+
+                                                    <ul className="dropdown-menu dropdown-menu-right">
                                                         <li>
                                                             <a
                                                                 className="dropdown-item d-flex align-items-center justify-content-between"
@@ -129,8 +152,8 @@ function FriendsTab(props) {
                                         </div>
                                     </li>
                                 </ul>
-                            ))
-                        )}
+
+                            )))}
                     </div>
                 </div>
             </div>
