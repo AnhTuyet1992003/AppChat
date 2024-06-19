@@ -1,8 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { initializeSocket, create_room } from '../../../../socket/socket';
 
+const CreateChat = () => {
+    const [groupName, setGroupName] = useState('');
+    const [groupInfo, setGroupInfo] = useState('');
+    const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState('');
+    const [createdGroup, setCreatedGroup] = useState(null); // State để lưu thông tin nhóm đã tạo
+    const socketUrl = 'ws://140.238.54.136:8080/chat/chat'; // Replace with your WebSocket URL
+    initializeSocket(socketUrl);
 
-function CreateChat() {
+    const handleCreateChat = async () => {
+        // Reset error message
+        setErrorMessage('');
 
+        // Check if groupName is empty
+        if (groupName.trim() === '') {
+            setErrorMessage('Vui lòng nhập tên nhóm');
+            return;
+        }
+
+        try {
+            const groupData = await create_room(groupName, groupInfo); // Tạo nhóm và nhận lại thông tin của nhóm
+            setCreatedGroup(groupData); // Lưu thông tin của nhóm vào state
+            localStorage.setItem('createdGroup', JSON.stringify(groupData)); // Lưu thông tin nhóm vào localStorage
+            navigate('/Home');
+        } catch (error) {
+            console.error('Error creating room:', error);
+        }
+    };
     return (
         <div className="d-flex flex-column h-100">
             <div className="tab-header d-flex align-items-center border-bottom">
@@ -142,18 +169,14 @@ function CreateChat() {
                                             className="form-control form-control-lg form-control-solid"
                                             placeholder="Group name"
                                             type="text"
+                                            value={groupName}
+                                            onChange={(e) => setGroupName(e.target.value)}
                                         />
+
+
                                     </div>
                                 </div>
-                                <div className="mb-4">
-                                    <div className="input-group">
-                          <textarea
-                              className="form-control form-control-lg form-control-solid"
-                              placeholder="About text"
-                              rows="3"
-                          />
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                         <div className="d-flex align-items-center mx-4 mb-3">
@@ -523,13 +546,20 @@ function CreateChat() {
                     </div>
                 </div>
             </div>
+            {errorMessage && (
+                <div className="alert alert-danger mt-2" role="alert">
+                    {errorMessage}
+                </div>
+            )}
             <div className="create-chat-footer border-top p-4">
-                <button className="btn btn-lg btn-primary w-100">
+                <button
+                    className="btn btn-lg btn-primary w-100"
+                    onClick={handleCreateChat}
+                >
                     Create Chat
                 </button>
             </div>
         </div>
     )
 }
-
 export default CreateChat;

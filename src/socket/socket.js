@@ -2,12 +2,15 @@
 import store from "../redux/store/store";
 // src/socket/socket.js
 import {
-    register,
+    registerSuccess,
+    registerError,
     logout,
     createRoom,
     joinRoom,
     getRoomChatMessages,
     getPeopleChatMessages,
+    createRoomSuccess,
+    createRoomError,
     sendChatToRoom,
     sendChatToPeople,
     checkUser,
@@ -16,13 +19,11 @@ import {
     sendChatToPeopleSuccess,
     sendChatToPeopleFailure,
     reLoginSuccess,
-    logoutSuccess, getUserListSuccess, getUserListFailure, registerSuccess, registerError, logoutError,
+    logoutSuccess, getUserListSuccess, getUserListFailure, logoutError,
 } from "../redux/action/action";
-
-let socket = null;
-let messageQueue = [];
-let isSocketOpen = false;
-
+export let socket;
+export let isSocketOpen = false;
+export const messageQueue = [];
 const sendMessageInternal = (message) => {
     if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(message));
@@ -105,6 +106,16 @@ export const initializeSocket = (url) => {
                     store.dispatch(logoutError(response.mes));
                 }
                 break;
+            case "CREATE_ROOM":
+                if (response.status === "success") {
+                    store.dispatch(createRoomSuccess(response.data));
+                    getUsersList();  // Gọi lại getUsersList để cập nhật danh sách người dùng
+                } else {
+                    console.log(response.mes)
+                    store.dispatch(createRoomError(response.mes));
+                }
+                break;
+
             default:
                 console.warn("Unhandled socket event:", response.event);
                 break;
@@ -194,9 +205,33 @@ export const logoutUsers = () => {
         },
     }));
 };
-
+export const register = (user, pass) => {
+    if (!socket) return;
+    socket.send(JSON.stringify({
+        action: "onchat",
+        data: {
+            event: "REGISTER",
+            data: {
+                user,
+                pass,
+            },
+        },
+    }));
+};
+export const create_room = async (name) => {
+    if (!socket) return;
+    await socket.send(JSON.stringify({
+        action: "onchat",
+        data: {
+            event: "CREATE_ROOM",
+            data: {
+                name: name
+            }
+        }
+    }));
+};
 export const socketActions = {
-    registerUser: (user, pass) => store.dispatch(register(socket, user, pass)),
+    registerUser: (user, pass) => store.dispatch(register(user, pass)),
     createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
     joinChatRoom: (nameRoom) => store.dispatch(joinRoom(socket, nameRoom)),
     fetchRoomChatMessages: (roomName, page) => store.dispatch(getRoomChatMessages(socket, roomName, page)),
