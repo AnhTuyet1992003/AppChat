@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faEnvelope, faLock,faPhone,faImage} from '@fortawesome/free-solid-svg-icons';
+import { faUser, faEnvelope, faLock, faPhone, faImage, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { register } from '../../redux/action/action';
-import '@fortawesome/fontawesome-free/css/all.min.css'; // Ensure this line is added
+import { initializeSocket } from '../../socket/socket';
+import $ from "jquery"; // Đảm bảo đường dẫn chính xác đến initializeSocket
 
 const Register = () => {
     const [username, setUsername] = useState('');
@@ -14,12 +15,15 @@ const Register = () => {
     const [gender, setGender] = useState('');
     const [error, setError] = useState('');
     const [accountExists, setAccountExists] = useState(false);
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [profileImage, setProfileImage] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showRePassword, setShowRePassword] = useState(false);
     const navigate = useNavigate();
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [profileImage, setProfileImage] = useState(null);
-
+    useEffect(() => {
+        setError("");
+        initializeSocket('ws://140.238.54.136:8080/chat/chat');
+    }, []);
     const validatePassword = (password) => {
         const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
         return regex.test(password);
@@ -53,13 +57,10 @@ const Register = () => {
             setError('Vui lòng tải lên ảnh đại diện.');
             return;
         }
-
-
         const socket = new WebSocket('ws://140.238.54.136:8080/chat/chat');
         socket.onopen = () => {
-            register(socket, username, password);
+            register(username, password);
         };
-
         socket.onmessage = (event) => {
             const response = JSON.parse(event.data);
             if (response.event === 'REGISTER' && response.status === 'success') {
@@ -82,19 +83,21 @@ const Register = () => {
         const file = e.target.files[0];
         setProfileImage(file);
     };
+
+
     return (
         <div>
             <section className="signup">
                 <div className="container">
                     <div className="signup-content">
                         <div className="signup-form">
-                            <h2 className="form-title" style={{fontSize: '40px', marginTop: '-5px'}}>Đăng ký</h2>
-                            {accountExists && <p style={{ color: 'red',marginTop:'-20px'}}>Tài khoản đã tồn tại.</p>}
-                            {error && <p style={{ color: 'red',marginTop:'-20px'}}>{error}</p>}
+                            <h2 className="form-title">Đăng ký</h2>
+                            {accountExists && <p style={{ color: 'red' }}>Tài khoản đã tồn tại.</p>}
+                            {error && <p style={{ color: 'red' }}>{error}</p>}
                             <form method="POST" className="register-form" id="register-form" onSubmit={handleSubmit}>
-                                <div className="form-group" style={{marginTop: '-10px'}}>
+                                <div className="form-group">
                                     <label htmlFor="name">
-                                        <FontAwesomeIcon style={{fontSize: '22px'}} icon={faUser}/>
+                                        <FontAwesomeIcon icon={faUser} />
                                     </label>
                                     <input
                                         type="text"
@@ -106,9 +109,9 @@ const Register = () => {
                                         required
                                     />
                                 </div>
-                                <div className="form-group" style={{marginTop: '-10px'}}>
+                                <div className="form-group">
                                     <label htmlFor="email">
-                                        <FontAwesomeIcon style={{fontSize: '22px'}} icon={faEnvelope}/>
+                                        <FontAwesomeIcon icon={faEnvelope} />
                                     </label>
                                     <input
                                         type="email"
@@ -120,9 +123,9 @@ const Register = () => {
                                         required
                                     />
                                 </div>
-                                <div className="form-group" style={{marginTop: '-10px'}}>
+                                <div className="form-group">
                                     <label htmlFor="phone">
-                                        <FontAwesomeIcon style={{fontSize: '22px'}} icon={faPhone}/>
+                                        <FontAwesomeIcon icon={faPhone} />
                                     </label>
                                     <input
                                         type="text"
@@ -134,9 +137,9 @@ const Register = () => {
                                         required
                                     />
                                 </div>
-                                <div className="form-group" style={{marginTop: '-10px'}}>
+                                <div className="form-group">
                                     <label htmlFor="pass">
-                                        <FontAwesomeIcon style={{fontSize: '22px'}} icon={faLock}/>
+                                        <FontAwesomeIcon icon={faLock} />
                                     </label>
                                     <input
                                         type={showPassword ? "text" : "password"}
@@ -147,22 +150,22 @@ const Register = () => {
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
                                     />
-                                    <i
-                                        className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'} password-icon`}
+                                    <FontAwesomeIcon
+                                        icon={showPassword ? faEyeSlash : faEye}
+                                        className="password-icon"
                                         onClick={() => setShowPassword(!showPassword)}
                                         style={{
-                                            fontSize: "18px",
-                                            cursor: "pointer",
-                                            position: "absolute",
-                                            top: "50%",
-                                            right: "10px",
-                                            transform: "translateY(-50%)"
+                                            cursor: 'pointer',
+                                            position: 'absolute',
+                                            top: '50%',
+                                            right: '10px',
+                                            transform: 'translateY(-50%)'
                                         }}
-                                    ></i>
+                                    />
                                 </div>
-                                <div className="form-group" style={{marginTop: '-10px'}}>
-                                    <label htmlFor="re-pass">
-                                        <FontAwesomeIcon style={{fontSize: '22px'}} icon={faLock}/>
+                                <div className="form-group">
+                                    <label htmlFor="re_pass">
+                                        <FontAwesomeIcon icon={faLock} />
                                     </label>
                                     <input
                                         type={showRePassword ? "text" : "password"}
@@ -173,18 +176,18 @@ const Register = () => {
                                         onChange={(e) => setRePassword(e.target.value)}
                                         required
                                     />
-                                    <i
-                                        className={`fa ${showRePassword ? 'fa-eye-slash' : 'fa-eye'} password-icon`}
+                                    <FontAwesomeIcon
+                                        icon={showRePassword ? faEyeSlash : faEye}
+                                        className="password-icon"
                                         onClick={() => setShowRePassword(!showRePassword)}
                                         style={{
-                                            fontSize: "18px",
-                                            cursor: "pointer",
-                                            position: "absolute",
-                                            top: "50%",
-                                            right: "10px",
-                                            transform: "translateY(-50%)"
+                                            cursor: 'pointer',
+                                            position: 'absolute',
+                                            top: '50%',
+                                            right: '10px',
+                                            transform: 'translateY(-50%)'
                                         }}
-                                    ></i>
+                                    />
                                 </div>
                                 <div className="form-group"
                                      style={{display: 'flex', alignItems: 'center', marginTop: '-10px'}}>
