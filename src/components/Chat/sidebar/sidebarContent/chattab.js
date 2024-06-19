@@ -7,16 +7,18 @@ import {useNavigate} from "react-router-dom";
 
 
 
-function ChatTab() {
+function ChatTab({ toggleSidebar }) {
     const dispatch = useDispatch();
-    const userList = useSelector(state => state.userList.data);
+    const userList = useSelector(state => state.userList.data || []);
 
     useEffect(() => {
         getUsersList();
     }, [dispatch]);
 
-
-
+    // danh sach cac nguoi dung
+    const friendsList = userList.filter(user => user.type === 0);
+    // danh sach phong chat
+    const groupsList = userList.filter(user => user.type === 1);
 
     return (
         <div className="d-flex flex-column h-100">
@@ -31,6 +33,7 @@ function ChatTab() {
                                 <button
                                     className="navigation-toggle btn btn-secondary btn-icon d-xl-none"
                                     type="button"
+                                    onClick={toggleSidebar}
                                 >
                                     <i className="ri-menu-line" />
                                 </button>
@@ -51,7 +54,7 @@ function ChatTab() {
                             id="pills-direct-tab"
                             role="tab"
                         >
-                            Direct
+                            Bạn bè
                         </a>
                     </li>
                     <li className="nav-item" role="presentation">
@@ -64,7 +67,7 @@ function ChatTab() {
                             id="pills-group-tab"
                             role="tab"
                         >
-                            Groups
+                            Nhóm
                         </a>
                     </li>
                 </ul>
@@ -74,54 +77,59 @@ function ChatTab() {
                     <div className="tab-pane fade show active" id="direct-tab" role="tabpanel">
                         <ul className="list-unstyled js-contact-list mb-0">
                             {/* Nội dung của tab "Direct" */}
-                            <li className="card contact-item">
+                            {friendsList.length === 0 ? (
+                                <li>Loading...</li>
+                            ) : (
+                                friendsList.map((user, index) => (
+                            <li className="card contact-item" key={index}>
                                 <a className="contact-link" href="#" />
                                 <div className="card-body">
                                     <div className="d-flex align-items-center">
                                         <div className="avatar avatar-busy me-4">
-                                            <span className="avatar-label bg-soft-info text-info">JP</span>
+                                            <span className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
                                         </div>
                                         <div className="flex-grow-1 overflow-hidden">
                                             <div className="d-flex align-items-center mb-1">
-                                                <h5 className="text-truncate mb-0 me-auto">Jerry Prater</h5>
+                                                <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
                                                 <p className="small text-muted text-nowrap ms-4 mb-0">14/03</p>
                                             </div>
                                             <div className="d-flex align-items-center">
                                                 <div className="line-clamp me-auto">
-                                                    There are a few bugs to fix, I can help with that.
+                                                    Hi, {user.name}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </li>
+                                ))
+                            )}
                         </ul>
                     </div>
 
                     <div className="tab-pane fade" id="groups-tab" role="tabpanel">
-                        {!userList || userList.length === 0 ? (
+                        {groupsList === 0 ? (
                             <ul className="list-unstyled">
                                 <li>Loading...</li>
                             </ul>
                         ) : (
                             <ul className="list-unstyled js-contact-list mb-0">
-                                {userList.map((user, index) => (
+                                {groupsList.map((group, index) => (
                                     <li className="card contact-item mb-3" key={index}>
-                                        <a className="contact-link" href="chat-group.html" />
+                                        <a className="contact-link" href="#" />
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
                                                 <div className="avatar avatar-online me-4">
-                                                    <span className="avatar-label bg-soft-info text-info">JP</span>
+                                                    <span className="avatar-label bg-soft-info text-info">{group.name.charAt(0)}</span>
                                                 </div>
                                                 <div className="flex-grow-1 overflow-hidden">
                                                     <div className="d-flex align-items-center mb-1">
-                                                        <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
+                                                        <h5 className="text-truncate mb-0 me-auto">{group.name}</h5>
                                                         <p className="small text-muted text-nowrap ms-4 mb-0">11:45 AM</p>
                                                     </div>
                                                     <div className="d-flex align-items-center">
                                                         <div className="line-clamp me-auto">
-                                                            Hi, John, can you show a photo from the last meeting, I would
-                                                            like to have a look at all of you.
+                                                            Hi, {group.name}
                                                         </div>
                                                         <span className="badge rounded-pill bg-primary ms-2">5</span>
                                                     </div>

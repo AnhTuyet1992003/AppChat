@@ -11,6 +11,7 @@ import { database } from "./firebase";
 import { get, child, ref } from "firebase/database";
 import React, {Fragment, useEffect, useState} from 'react';
 import {initializeSocket} from "./socket/socket";
+import ChatTab from "./components/Chat/sidebar/sidebarContent/chattab";
 function App() {
     initializeSocket('ws://140.238.54.136:8080/chat/chat');
     return (
@@ -22,6 +23,8 @@ function App() {
                         <Route path="/Home" element={<Home/>} />
                         <Route path="/Register" element={<Register/>} />
                         <Route path="/Sidebar" element={<Sidebar/>} />
+                        <Route path="/ChatTab" element={<ChatTab />} />
+
                     </Routes>
                 </BrowserRouter>
         </Fragment>

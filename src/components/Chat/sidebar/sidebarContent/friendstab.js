@@ -154,6 +154,7 @@ function FriendsTab(props) {
                                 </ul>
 
                             )))}
+
                     </div>
                 </div>
             </div>

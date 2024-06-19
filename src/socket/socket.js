@@ -226,7 +226,7 @@ export const getPeopleChatMes = async (name) =>{
               page: 1
           }
       }
-  }));
+  }))};
 
 export const register = (user, pass) => {
     if (!socket) return;
@@ -263,7 +263,6 @@ export const socketActions = {
     sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
     sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
     checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
-    // fetchUserList: () => store.dispatch(getUsersList(socket)),
+    fetchUserList: () => store.dispatch(getUsersList(socket)),
     logoutUser: () => logoutUsers(),
-};
 };
