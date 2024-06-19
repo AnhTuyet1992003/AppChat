@@ -29,7 +29,6 @@ const initialState = {
     active2: {},
     data2: {},
     data3: {},
-
 };
 
 const socketReducer = (state = initialState, action) => {

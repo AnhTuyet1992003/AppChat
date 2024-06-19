@@ -29,6 +29,7 @@ console.log("user:"+localStorage.getItem("username"))
 
         }
     }, [dispatch, navigate, login]);
+
     useEffect(() => {
         $(document).on('click', '.js-contact-list .contact-item', function () {
             $(".contact-item").removeClass("active");

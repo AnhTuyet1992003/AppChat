@@ -10,7 +10,7 @@ import {useNavigate} from "react-router-dom";
 function ChatTab({ toggleSidebar }) {
     const dispatch = useDispatch();
     const userList = useSelector(state => state.userList.data || []);
-
+    const navigate = useNavigate();
     useEffect(() => {
         getUsersList();
     }, [dispatch]);
@@ -19,7 +19,11 @@ function ChatTab({ toggleSidebar }) {
     const friendsList = userList.filter(user => user.type === 0);
     // danh sach phong chat
     const groupsList = userList.filter(user => user.type === 1);
+    const handleUserClick = (name) => {
+        getPeopleChatMes(name);
+        navigate(`/Home/${name}`);
 
+    };
     return (
         <div className="d-flex flex-column h-100">
             <div className="tab-header d-flex align-items-center border-bottom">
@@ -81,7 +85,10 @@ function ChatTab({ toggleSidebar }) {
                                 <li>Loading...</li>
                             ) : (
                                 friendsList.map((user, index) => (
-                            <li className="card contact-item" key={index}>
+                            <li className="card contact-item"
+                                key={index}
+                                onClick={() => handleUserClick(user.name)}
+                            >
                                 <a className="contact-link" href="#" />
                                 <div className="card-body">
                                     <div className="d-flex align-items-center">
@@ -115,7 +122,10 @@ function ChatTab({ toggleSidebar }) {
                         ) : (
                             <ul className="list-unstyled js-contact-list mb-0">
                                 {groupsList.map((group, index) => (
-                                    <li className="card contact-item mb-3" key={index}>
+                                    <li className="card contact-item mb-3"
+                                        key={index}
+                                        onClick={() => handleUserClick(group.name)}
+                                    >
                                         <a className="contact-link" href="#" />
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">

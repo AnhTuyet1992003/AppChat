@@ -4,7 +4,6 @@ import {
     createRoom,
     joinRoom,
     getRoomChatMessages,
-    getPeopleChatMessages,
     createRoomSuccess,
     createRoomError,
     sendChatToRoom,
@@ -215,18 +214,35 @@ export const logoutUsers = () => {
     }));
 };
 
-export const getPeopleChatMes = async (name) =>{
-  if (!socket)return;
-  socket.send(JSON.stringify({
-      action: "onchat",
-      data: {
-          event: "GET_PEOPLE_CHAT_MES",
-          data: {
-              name: name,
-              page: 1
-          }
-      }
-  }))};
+export const getPeopleChatMes = async (name) => {
+    if (!socket) return;
+
+    const sendMessage = () => {
+        socket.send(JSON.stringify({
+            action: "onchat",
+            data: {
+                event: "GET_PEOPLE_CHAT_MES",
+                data: {
+                    name: name,
+                    page: 1
+                }
+            }
+        }));
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+        sendMessage();
+    } else if (socket.readyState === WebSocket.CONNECTING) {
+        const intervalId = setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+                clearInterval(intervalId);
+                sendMessage();
+            }
+        }, 100); // Retry every 100ms until connected
+    } else {
+        console.log("Socket is closed");
+    }
+};
 
 export const register = (user, pass) => {
     if (!socket) return;
@@ -259,7 +275,7 @@ export const socketActions = {
     createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
     joinChatRoom: (nameRoom) => store.dispatch(joinRoom(socket, nameRoom)),
     fetchRoomChatMessages: (roomName, page) => store.dispatch(getRoomChatMessages(socket, roomName, page)),
-    fetchPeopleChatMessages: (userName, page) => store.dispatch(getPeopleChatMessages(socket, userName, page)),
+    // fetchPeopleChatMessages: (userName, page) => store.dispatch(getPeopleChatMessages(socket, userName, page)),
     sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
     sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
     checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),

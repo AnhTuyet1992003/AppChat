@@ -75,7 +75,6 @@ function FriendsTab(props) {
                 <div className="m-4">
                     <div>
 
-                        {/*<h5 className="p-2 text-primary">A</h5>*/}
                         {!filteredUsers || filteredUsers.length === 0 ? (
 
                             <ul className="list-unstyled">
@@ -91,6 +90,7 @@ function FriendsTab(props) {
                                                 <div className="avatar avatar-busy me-4">
 
                                                 <span className="avatar-label bg-soft-primary text-primary">
+                                                     {user.name.charAt(0)}
                                                 </span>
                                                 </div>
                                                 <div className="flex-grow-1 overflow-hidden">

@@ -12,6 +12,9 @@ import { get, child, ref } from "firebase/database";
 import React, {Fragment, useEffect, useState} from 'react';
 import {initializeSocket} from "./socket/socket";
 import ChatTab from "./components/Chat/sidebar/sidebarContent/chattab";
+import ChatBox from "./components/Chat/chat";
+import ChatContent from "./components/Chat/content/chatcontent/chatcontent";
+import ChatHeader from "./components/Chat/content/chatheader/chatheader";
 function App() {
     initializeSocket('ws://140.238.54.136:8080/chat/chat');
     return (
@@ -20,7 +23,10 @@ function App() {
                     <Routes>
                         <Route path="/" element={<Navigate to="/Login" replace />} />
                         <Route path="/Login" element={<Login/>} />
-                        <Route path="/Home" element={<Home/>} />
+                        <Route path="/Home" element={<Home/>}>
+                            <Route path=":name" element={<ChatHeader />} />
+                            <Route path=":name" element={<ChatContent />} />
+                        </Route>
                         <Route path="/Register" element={<Register/>} />
                         <Route path="/Sidebar" element={<Sidebar/>} />
                         <Route path="/ChatTab" element={<ChatTab />} />
