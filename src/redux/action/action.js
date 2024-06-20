@@ -29,7 +29,7 @@ export const sendMessage = (socket, message) => {
         };
     }
 };
-// login
+// dang nhap
 export const NOT_LOGIN = 'NOT_LOGIN';
 
 export const notLogin = () => ({
@@ -46,16 +46,19 @@ export const REGISTER_SUCCESS = "REGISTER_SUCCESS";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const registerError = (error) => ({type: REGISTER_ERROR, error});
 
-
+// lay danh sach nguoi da nhan tin
 export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';
 export const GET_USER_LIST_FAILURE = 'GET_USER_LIST_FAILURE';
 export const getUserListSuccess = (data) => ({type: GET_USER_LIST_SUCCESS, data});
 export const getUserListFailure = (error) => ({type: GET_USER_LIST_FAILURE, error});
 
+// ket noi lai khi tai lai trang hoac mat ket noi
 export const RE_LOGIN_SUCCESS = 'RE_LOGIN_SUCCESS';
 export const reLoginSuccess = (data) => ({ type: RE_LOGIN_SUCCESS, data });
 export const RE_LOGIN_ERROR = 'RE_LOGIN_ERROR';
 export const reLoginError = (error) => ({ type: RE_LOGIN_ERROR, error });
+
+// Tạo phòng
 export const CREATE_ROOM_SUCCESS = "CREATE_ROOM_SUCCESS";
 export const CREATE_ROOM_ERROR = "CREATE_ROOM_ERROR";
 export const createRoomSuccess = (data) => ({type: CREATE_ROOM_SUCCESS, data});
@@ -67,6 +70,19 @@ export const sendChatToPeopleSuccess = (data) => ({ type: SEND_CHAT_TO_PEOPLE_SU
 
 export const SEND_CHAT_TO_PEOPLE_FAILURE = 'SEND_CHAT_TO_PEOPLE_FAILURE';
 export const sendChatToPeopleFailure = (error) => ({ type: SEND_CHAT_TO_PEOPLE_FAILURE, error });
+// Lay tin nhan cua 2 nguoi
+export const GET_PEOPLE_CHAT_MES_SUCCESS = 'GET_PEOPLE_CHAT_MES_SUCCESS';
+export const getPeopleChatMesSuccess = (data) => ({ type: GET_PEOPLE_CHAT_MES_SUCCESS, data });
+
+export const GET_PEOPLE_CHAT_MES_FAILURE = 'GET_PEOPLE_CHAT_MES_FAILURE';
+export const getPeopleChatMesFailure = (error) => ({ type: GET_PEOPLE_CHAT_MES_FAILURE, error });
+
+// Tham gia phòng
+export const JOIN_ROOM_SUCCESS = "JOIN_ROOM_SUCCESS";
+export const joinRoomSuccess = (data) => ({type: JOIN_ROOM_SUCCESS, data});
+
+export const JOIN_ROOM_FAILURE = "JOIN_ROOM_FAILURE";
+export const joinRoomFailure = (error) => ({type: JOIN_ROOM_FAILURE, error});
 
 // websocket actions
 export const register = (socket, user, pass) => sendMessage(socket, {

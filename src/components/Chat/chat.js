@@ -13,6 +13,7 @@ import ChatContent from "./content/chatcontent/chatcontent";
 import ChatHeader from "./content/chatheader/chatheader";
 import SearchChat from "./content/searchchat";
 
+
 function ChatBox() {
     return (
         <>

@@ -1,9 +1,16 @@
 
-import React from 'react';
+import React, {useEffect} from 'react';
+import {useParams} from "react-router-dom";
+import {getPeopleChatMes} from "../../../socket/socket";
 
 
 function UserProfile() {
-
+    const { name } = useParams();
+    useEffect(() => {
+        if (name) {
+            getPeopleChatMes(name);
+        }
+    }, [name]);
     return (
         <div className="chat-info h-100 border-start">
             <div className="d-flex flex-column h-100">
@@ -11,7 +18,7 @@ function UserProfile() {
                     <ul className="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
                         <li>
                             <h3 className="mb-0">
-                                User Profile
+                                Thông tin của {name}
                             </h3>
                         </li>
                         <li>
@@ -25,21 +32,13 @@ function UserProfile() {
                     <div className="text-center p-4 pt-14">
                         <div className="avatar avatar-xl mb-4">
                   <span className="avatar-label bg-soft-primary text-primary fs-3">
-                    AM
+                    {name ? name.charAt(0) : ""}
                   </span>
                         </div>
                         <h5>
-                            Ariel Martinez
+                            {name}
                         </h5>
-                        <p className="text-muted fs-6">
-                            UX/UI Design
-                        </p>
                         <div className="text-center">
-                  <span className="text-muted mb-0">
-                    Graphic designer.
-                    <br/>
-                    Working with landing pages and templates.
-                  </span>
                         </div>
                     </div>
                     <div className="text-center mb-2">

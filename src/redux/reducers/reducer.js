@@ -9,7 +9,12 @@ import {
     RE_LOGIN_SUCCESS,
     SEND_CHAT_TO_PEOPLE_FAILURE,
     SEND_CHAT_TO_PEOPLE_SUCCESS,
-    LOGOUT_SUCCESS, LOGOUT_ERROR, RESET_LOGOUT_STATUS, NOT_LOGIN
+    LOGOUT_SUCCESS,
+    LOGOUT_ERROR,
+    RESET_LOGOUT_STATUS,
+    NOT_LOGIN,
+    GET_PEOPLE_CHAT_MES_SUCCESS,
+    GET_PEOPLE_CHAT_MES_FAILURE, JOIN_ROOM_SUCCESS, JOIN_ROOM_FAILURE, CREATE_ROOM_SUCCESS, CREATE_ROOM_ERROR, NULL
 } from "../action/action";
 import data from "bootstrap/js/src/dom/data";
 
@@ -24,7 +29,8 @@ const initialState = {
     active2: {},
     data2: {},
     data3: {},
-
+    joinRoom: { data: null, error: null },
+    createRoom: { data: null, error: null },
 };
 
 const socketReducer = (state = initialState, action) => {
@@ -104,6 +110,29 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 logout: {},
+            };
+        case GET_PEOPLE_CHAT_MES_SUCCESS:
+            return {
+              ...state,
+                messages: {data: action.data, error: null}
+            };
+        case GET_PEOPLE_CHAT_MES_FAILURE:
+            return {
+                ...state,
+                messages: {data: action.data, error: action.error}
+            };
+
+        case JOIN_ROOM_SUCCESS:
+            const roomJoin = action.data;
+            return {
+                ...state,
+                messages: { error: null },
+                joinRoom: { data: [...state.userList.data, roomJoin], error: null, status: 'success'}
+            };
+        case JOIN_ROOM_FAILURE:
+            return {
+                ...state,
+                joinRoom: { data: [...state.userList.data],  error: action.error, status: 'error'}
             };
         default:
             return state;
