@@ -1,14 +1,8 @@
 // src/socket/socket.js
 import store from "../redux/store/store";
-// src/socket/socket.js
 import {
-    registerSuccess,
-    registerError,
-    logout,
     createRoom,
-    joinRoom,
     getRoomChatMessages,
-    getPeopleChatMessages,
     createRoomSuccess,
     createRoomError,
     sendChatToRoom,
@@ -19,7 +13,13 @@ import {
     sendChatToPeopleSuccess,
     sendChatToPeopleFailure,
     reLoginSuccess,
-    logoutSuccess, getUserListSuccess, getUserListFailure, logoutError,
+    logoutSuccess,
+    getUserListSuccess,
+    getUserListFailure,
+    registerSuccess,
+    registerError,
+    logoutError,
+    getPeopleChatMesSuccess, getPeopleChatMesFailure, joinRoomSuccess, joinRoomFailure,
 } from "../redux/action/action";
 export let socket;
 export let isSocketOpen = false;
@@ -86,7 +86,7 @@ export const initializeSocket = (url) => {
                 if (response.status === "success") {
                     store.dispatch(getUserListSuccess(response.data));
                 } else {
-                    store.dispatch(getUserListFailure(response.mes));
+                    store.dispatch(getUserListFailure(response.error));
                 }
                 break;
             case "SEND_CHAT":
@@ -103,7 +103,14 @@ export const initializeSocket = (url) => {
                     localStorage.clear();
                     store.dispatch(logoutSuccess(response.data || {}));
                 } else {
-                    store.dispatch(logoutError(response.mes));
+                    store.dispatch(logoutError(response.error));
+                }
+                break;
+            case "GET_PEOPLE_CHAT_MES":
+                if (response.status === "success"){
+                    store.dispatch(getPeopleChatMesSuccess(response.data));
+                }else{
+                    store.dispatch(getPeopleChatMesFailure(response.error));
                 }
                 break;
             case "CREATE_ROOM":
@@ -115,7 +122,14 @@ export const initializeSocket = (url) => {
                     store.dispatch(createRoomError(response.mes));
                 }
                 break;
-
+            case "JOIN_ROOM":
+                if (response.status === "success") {
+                    store.dispatch(joinRoomSuccess(response.data));
+                    getUsersList();  // Gọi lại getUsersList để cập nhật danh sách người dùng
+                } else {
+                    store.dispatch(joinRoomFailure(response.mes));
+                }
+                break;
             default:
                 console.warn("Unhandled socket event:", response.event);
                 break;
@@ -205,6 +219,37 @@ export const logoutUsers = () => {
         },
     }));
 };
+
+export const getPeopleChatMes = async (name) => {
+    if (!socket) return;
+
+    const sendMessage = () => {
+        socket.send(JSON.stringify({
+            action: "onchat",
+            data: {
+                event: "GET_PEOPLE_CHAT_MES",
+                data: {
+                    name: name,
+                    page: 1
+                }
+            }
+        }));
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+        sendMessage();
+    } else if (socket.readyState === WebSocket.CONNECTING) {
+        const intervalId = setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+                clearInterval(intervalId);
+                sendMessage();
+            }
+        }, 100); // Retry every 100ms until connected
+    } else {
+        console.log("Socket is closed");
+    }
+};
+
 export const register = (user, pass) => {
     if (!socket) return;
     socket.send(JSON.stringify({
@@ -229,16 +274,30 @@ export const create_room = async (name) => {
             }
         }
     }));
+
 };
+export const joinRoom = (name) => {
+    if (!socket) return;
+    socket.send(JSON.stringify({
+        action: "onchat",
+        data: {
+            event: "JOIN_ROOM",
+            data: {
+                name: name
+            }
+        }
+    }));
+};
+
 export const socketActions = {
-    registerUser: (user, pass) => store.dispatch(register(user, pass)),
-    createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
-    joinChatRoom: (nameRoom) => store.dispatch(joinRoom(socket, nameRoom)),
-    fetchRoomChatMessages: (roomName, page) => store.dispatch(getRoomChatMessages(socket, roomName, page)),
-    fetchPeopleChatMessages: (userName, page) => store.dispatch(getPeopleChatMessages(socket, userName, page)),
-    sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
-    sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
-    checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
-    // fetchUserList: () => store.dispatch(getUserList(socket))
-    logoutUser: () => logoutUsers()
+    // // registerUser: (user, pass) => store.dispatch(register(user, pass)),
+    // createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
+    // // joinChatRoom: (nameRoom) => store.dispatch(joinRoom(socket, nameRoom)),
+    // fetchRoomChatMessages: (roomName, page) => store.dispatch(getRoomChatMessages(socket, roomName, page)),
+    // // fetchPeopleChatMessages: (userName, page) => store.dispatch(getPeopleChatMessages(socket, userName, page)),
+    // sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
+    // sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
+    // checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
+    // // fetchUserList: () => store.dispatch(getUsersList(socket)),
+    logoutUser: () => logoutUsers(),
 };
