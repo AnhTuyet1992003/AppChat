@@ -1,35 +1,134 @@
-
-
-import React, {useEffect, useRef} from 'react';
-import {getPeopleChatMes, getUsersList, initializeSocket, reLoginUser} from "../../../../socket/socket";
-import {useDispatch, useSelector} from "react-redux";
-import {useNavigate} from "react-router-dom";
-
-
+import React, { useEffect, useState } from 'react';
+import {
+    create_room,
+    getPeopleChatMes,
+    getUsersList,
+    initializeSocket,
+    joinRoom,
+    reLoginUser
+} from "../../../../socket/socket";
+import { useDispatch, useSelector } from "react-redux";
+import {useNavigate, useParams} from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { Modal, Button, Form, Toast, ToastContainer } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../../../../App.css'
 
 function ChatTab({ toggleSidebar }) {
     const dispatch = useDispatch();
     const userList = useSelector(state => state.userList.data || []);
     const navigate = useNavigate();
+    const login = useSelector((state) => state.login);
+
+    // Tham gia phòng
+    const [roomName, setRoomName] = useState('');
+    const joinRoomStatus = useSelector(state => state.joinRoom.status);
+
+
+    // State quản lý việc hiển thị modal
+    const [showJoinModal, setShowJoinModal] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [modalClosed, setModalClosed] = useState(true);
+
+    // State quản lý thông báo lỗi và toast
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [showToast, setShowToast] = useState(false);
+
+    // Đăng nhập lại khi mất kết nối
+    useEffect(() => {
+        if (!login.status) {
+            if (localStorage.getItem("reLogin") !== null) {
+                // Reconnect socket
+                initializeSocket('ws://140.238.54.136:8080/chat/chat');
+                reLoginUser(localStorage.getItem("username"), localStorage.getItem("reLogin"));
+            } else {
+                navigate("/login");
+            }
+        }
+    }, [dispatch, navigate, login]);
     useEffect(() => {
         getUsersList();
     }, [dispatch]);
 
-    // danh sach cac nguoi dung
+    // Danh sách các người dùng
     const friendsList = userList.filter(user => user.type === 0);
-    // danh sach phong chat
     const groupsList = userList.filter(user => user.type === 1);
-    const handleUserClick = (name) => {
-        getPeopleChatMes(name);
-        navigate(`/Home/${name}`);
 
+
+    // Sự kiện khi bấm vào 1 người hoặc 1 nhóm để mở đoạn chat
+    const handleUserClick = (name) => {
+        // Lấy tin nhắn người đó
+        getPeopleChatMes(name);
+        // Chuyển trang tới cuộc trò chuyện của người đó
+        navigate(`/Home/${name}`);
     };
+
+    // Sự kiện bấm vào dấu + để mở bảng
+    const handlePlusClick = () => {
+        setShowModal(true);
+    };
+
+    // Đóng các bảng modal
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setShowJoinModal(false);
+        setErrorMessage('');
+        setSuccessMessage('');
+        setShowToast(false);
+        setModalClosed(true); // Đánh dấu là đã đóng modal
+        // Reset các state khi đóng modal
+        setRoomName('');
+        setGroupName('');
+        setGroupInfo('');
+    };
+
+    const handleJoinClick = () => {
+        setShowModal(false);
+        setShowJoinModal(true);
+    };
+
+    const handleCreateClick = () => {
+        setShowModal(false);
+        setShowCreateModal(true);
+    };
+
+    // Tham gia phòng
+    useEffect(() => {
+        if (!modalClosed) {
+            if (joinRoomStatus === "success") {
+                setErrorMessage("");
+                setSuccessMessage("Bạn đã tham gia thành công!");
+            } else if (joinRoomStatus === "error") {
+                setErrorMessage("Phòng không tồn tại. Vui lòng kiểm tra lại.");
+                setShowToast(true);
+            }
+        }
+    }, [joinRoomStatus, navigate, roomName, modalClosed]);
+
+    const handleRoomNameChange = (e) => setRoomName(e.target.value);
+    const handleJoinRoom = async (e) => {
+        e.preventDefault();
+        if (roomName.trim()) {
+            await joinRoom(roomName);
+            setModalClosed(false);
+            navigate(`/Home/${roomName}`);
+        } else {
+            setErrorMessage("Vui lòng nhập tên nhóm.");
+            setShowToast(true);
+        }
+    };
+
+
     return (
         <div className="d-flex flex-column h-100">
             <div className="tab-header d-flex align-items-center border-bottom">
                 <ul className="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
-                    <li>
+                    <li className="d-flex justify-content-between align-items-center w-100">
                         <h3 className="mb-0">Chats</h3>
+                        <FontAwesomeIcon icon={faPlus} size="2x" onClick={handlePlusClick} />
                     </li>
                     <li>
                         <ul className="list-inline">
@@ -80,42 +179,41 @@ function ChatTab({ toggleSidebar }) {
                 <div className="tab-content m-4 mt-1">
                     <div className="tab-pane fade show active" id="direct-tab" role="tabpanel">
                         <ul className="list-unstyled js-contact-list mb-0">
-                            {/* Nội dung của tab "Direct" */}
                             {friendsList.length === 0 ? (
                                 <li>Loading...</li>
                             ) : (
                                 friendsList.map((user, index) => (
-                            <li className="card contact-item"
-                                key={index}
-                                onClick={() => handleUserClick(user.name)}
-                            >
-                                <a className="contact-link" href="#" />
-                                <div className="card-body">
-                                    <div className="d-flex align-items-center">
-                                        <div className="avatar avatar-busy me-4">
-                                            <span className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
-                                        </div>
-                                        <div className="flex-grow-1 overflow-hidden">
-                                            <div className="d-flex align-items-center mb-1">
-                                                <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
-                                                <p className="small text-muted text-nowrap ms-4 mb-0">14/03</p>
-                                            </div>
+                                    <li className="card contact-item"
+                                        key={index}
+                                        onClick={() => handleUserClick(user.name)}
+                                    >
+                                        <a className="contact-link" href="#" />
+                                        <div className="card-body">
                                             <div className="d-flex align-items-center">
-                                                <div className="line-clamp me-auto">
-                                                    Hi, {user.name}
+                                                <div className="avatar avatar-busy me-4">
+                                                    <span className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
+                                                </div>
+                                                <div className="flex-grow-1 overflow-hidden">
+                                                    <div className="d-flex align-items-center mb-1">
+                                                        <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
+                                                        <p className="small text-muted text-nowrap ms-4 mb-0">14/03</p>
+                                                    </div>
+                                                    <div className="d-flex align-items-center">
+                                                        <div className="line-clamp me-auto">
+                                                            Hi, {user.name}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </li>
+                                    </li>
                                 ))
                             )}
                         </ul>
                     </div>
 
                     <div className="tab-pane fade" id="groups-tab" role="tabpanel">
-                        {groupsList === 0 ? (
+                        {groupsList.length === 0 ? (
                             <ul className="list-unstyled">
                                 <li>Loading...</li>
                             </ul>
@@ -149,7 +247,7 @@ function ChatTab({ toggleSidebar }) {
                                         <div className="card-footer d-flex align-items-center justify-content-between overflow-hidden">
                                             <h5 className="mb-0 text-truncate">General</h5>
                                             <p className="mb-0 small text-muted text-nowrap">
-                                                 Members
+                                                Members
                                             </p>
                                         </div>
                                     </li>
@@ -159,6 +257,79 @@ function ChatTab({ toggleSidebar }) {
                     </div>
                 </div>
             </div>
+            <Modal show={showModal} onHide={handleCloseModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Lựa chọn</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center">
+                    <Button variant="primary" onClick={handleCreateClick} className="m-2">
+                        Tạo phòng
+                    </Button>
+                    <Button variant="secondary" onClick={handleJoinClick} className="m-2">
+                        Tham gia phòng
+                    </Button>
+                </Modal.Body>
+            </Modal>
+            <Modal show={showJoinModal} onHide={handleCloseModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Tham gia phòng chat</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="joinGroupName" className="input-group-custom">
+                            <Form.Control
+                                type="text"
+                                placeholder=" "
+                                value={roomName}
+                                onChange={handleRoomNameChange}
+                            />
+                            <Form.Label>Nhập tên phòng</Form.Label>
+                        </Form.Group>
+                    </Form>
+                    {successMessage && <p className="text-success">{successMessage}</p>}
+                    {errorMessage && <p className="text-danger">{errorMessage}</p>}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Đóng
+                    </Button>
+                    <Button variant="primary" onClick={handleJoinRoom}>
+                        Tham gia
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showCreateModal} onHide={handleCloseModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Tạo phòng chat</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="createGroupName" className="input-group-custom">
+                            <Form.Control
+                                type="text"
+                                placeholder=" "
+                            />
+                            <Form.Label>Nhập tên phòng</Form.Label>
+                        </Form.Group>
+                    </Form>
+                    {successMessage && <p className="text-success">{successMessage}</p>}
+                    {errorMessage && <p className="text-danger">{errorMessage}</p>}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Đóng
+                    </Button>
+                    <Button variant="primary">
+                        Tạo
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <ToastContainer position="top-end" className="p-3">
+                <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide>
+                    <Toast.Body>{errorMessage}</Toast.Body>
+                </Toast>
+            </ToastContainer>
         </div>
     );
 }

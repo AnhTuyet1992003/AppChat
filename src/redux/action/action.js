@@ -57,6 +57,8 @@ export const RE_LOGIN_SUCCESS = 'RE_LOGIN_SUCCESS';
 export const reLoginSuccess = (data) => ({ type: RE_LOGIN_SUCCESS, data });
 export const RE_LOGIN_ERROR = 'RE_LOGIN_ERROR';
 export const reLoginError = (error) => ({ type: RE_LOGIN_ERROR, error });
+
+// Tạo phòng
 export const CREATE_ROOM_SUCCESS = "CREATE_ROOM_SUCCESS";
 export const CREATE_ROOM_ERROR = "CREATE_ROOM_ERROR";
 export const createRoomSuccess = (data) => ({type: CREATE_ROOM_SUCCESS, data});
@@ -74,6 +76,13 @@ export const getPeopleChatMesSuccess = (data) => ({ type: GET_PEOPLE_CHAT_MES_SU
 
 export const GET_PEOPLE_CHAT_MES_FAILURE = 'GET_PEOPLE_CHAT_MES_FAILURE';
 export const getPeopleChatMesFailure = (error) => ({ type: GET_PEOPLE_CHAT_MES_FAILURE, error });
+
+// Tham gia phòng
+export const JOIN_ROOM_SUCCESS = "JOIN_ROOM_SUCCESS";
+export const joinRoomSuccess = (data) => ({type: JOIN_ROOM_SUCCESS, data});
+
+export const JOIN_ROOM_FAILURE = "JOIN_ROOM_FAILURE";
+export const joinRoomFailure = (error) => ({type: JOIN_ROOM_FAILURE, error});
 
 // websocket actions
 export const register = (socket, user, pass) => sendMessage(socket, {
