@@ -2,7 +2,6 @@
 import store from "../redux/store/store";
 import {
     createRoom,
-    joinRoom,
     getRoomChatMessages,
     createRoomSuccess,
     createRoomError,
@@ -20,7 +19,7 @@ import {
     registerSuccess,
     registerError,
     logoutError,
-    getPeopleChatMesSuccess, getPeopleChatMesFailure,
+    getPeopleChatMesSuccess, getPeopleChatMesFailure, joinRoomSuccess, joinRoomFailure,
 } from "../redux/action/action";
 export let socket;
 export let isSocketOpen = false;
@@ -123,7 +122,14 @@ export const initializeSocket = (url) => {
                     store.dispatch(createRoomError(response.mes));
                 }
                 break;
-
+            case "JOIN_ROOM":
+                if (response.status === "success") {
+                    store.dispatch(joinRoomSuccess(response.data));
+                    getUsersList();  // Gọi lại getUsersList để cập nhật danh sách người dùng
+                } else {
+                    store.dispatch(joinRoomFailure(response.mes));
+                }
+                break;
             default:
                 console.warn("Unhandled socket event:", response.event);
                 break;
@@ -270,15 +276,28 @@ export const create_room = async (name) => {
     }));
 
 };
+export const joinRoom = (name) => {
+    if (!socket) return;
+    socket.send(JSON.stringify({
+        action: "onchat",
+        data: {
+            event: "JOIN_ROOM",
+            data: {
+                name: name
+            }
+        }
+    }));
+};
+
 export const socketActions = {
-    // registerUser: (user, pass) => store.dispatch(register(user, pass)),
-    createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
-    joinChatRoom: (nameRoom) => store.dispatch(joinRoom(socket, nameRoom)),
-    fetchRoomChatMessages: (roomName, page) => store.dispatch(getRoomChatMessages(socket, roomName, page)),
-    // fetchPeopleChatMessages: (userName, page) => store.dispatch(getPeopleChatMessages(socket, userName, page)),
-    sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
-    sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
-    checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
-    fetchUserList: () => store.dispatch(getUsersList(socket)),
+    // // registerUser: (user, pass) => store.dispatch(register(user, pass)),
+    // createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
+    // // joinChatRoom: (nameRoom) => store.dispatch(joinRoom(socket, nameRoom)),
+    // fetchRoomChatMessages: (roomName, page) => store.dispatch(getRoomChatMessages(socket, roomName, page)),
+    // // fetchPeopleChatMessages: (userName, page) => store.dispatch(getPeopleChatMessages(socket, userName, page)),
+    // sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
+    // sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
+    // checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
+    // // fetchUserList: () => store.dispatch(getUsersList(socket)),
     logoutUser: () => logoutUsers(),
 };
