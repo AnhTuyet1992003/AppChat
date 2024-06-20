@@ -113,7 +113,7 @@ const socketReducer = (state = initialState, action) => {
             };
         case GET_PEOPLE_CHAT_MES_SUCCESS:
             return {
-              ...state,
+                ...state,
                 messages: {data: action.data, error: null}
             };
         case GET_PEOPLE_CHAT_MES_FAILURE:
@@ -133,6 +133,18 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 joinRoom: { data: [...state.userList.data],  error: action.error, status: 'error'}
+            };
+        case CREATE_ROOM_SUCCESS:
+            const room = action.data;
+            return {
+                ...state,
+                messages: { error: null },
+                createRoom: { data: [...state.userList.data, room], error: null, status: 'success'}
+            };
+        case CREATE_ROOM_ERROR:
+            return {
+                ...state,
+                createRoom: { data: [...state.userList.data],  error: action.error, status: 'error'}
             };
         default:
             return state;
