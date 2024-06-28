@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faEnvelope, faLock, faPhone, faImage, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { register } from '../../redux/action/action';
-import { initializeSocket } from '../../socket/socket';
-import $ from "jquery"; // Đảm bảo đường dẫn chính xác đến initializeSocket
+
+import {initializeSocket, register} from '../../socket/socket';
+import $ from "jquery";
+import {useDispatch, useSelector} from "react-redux";
+import {resetStatus} from "../../redux/action/action"; // Đảm bảo đường dẫn chính xác đến initializeSocket
 
 const Register = () => {
     const [username, setUsername] = useState('');
@@ -20,6 +22,8 @@ const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showRePassword, setShowRePassword] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const registerStatus = useSelector((state) => state.register.status);
     useEffect(() => {
         setError("");
         initializeSocket('ws://140.238.54.136:8080/chat/chat');
@@ -32,6 +36,15 @@ const Register = () => {
         const regex = /^0\d{9}$/;
         return regex.test(phoneNumber);
     };
+    useEffect(() => {
+        if (registerStatus === "success") {
+            setError("");
+            navigate('/Login');
+            dispatch(resetStatus());
+        } else if (registerStatus === "error") {
+            setError("Ten dang nhap da ton tai");
+        }
+    }, [registerStatus, navigate]);
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -57,27 +70,7 @@ const Register = () => {
             setError('Vui lòng tải lên ảnh đại diện.');
             return;
         }
-        const socket = new WebSocket('ws://140.238.54.136:8080/chat/chat');
-        socket.onopen = () => {
-            register(username, password);
-        };
-        socket.onmessage = (event) => {
-            const response = JSON.parse(event.data);
-            if (response.event === 'REGISTER' && response.status === 'success') {
-                navigate('/Login');
-            } else if (response.event === 'REGISTER' && response.status === 'error') {
-                setAccountExists(true);
-                setError(response.message);
-            }
-        };
-
-        socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
-
-        return () => {
-            socket.close();
-        };
+        register(username, password);
     };
     const handleImageChange = (e) => {
         const file = e.target.files[0];

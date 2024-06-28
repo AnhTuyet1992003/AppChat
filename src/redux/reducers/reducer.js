@@ -1,5 +1,3 @@
-
-// reducer.js
 import {
     GET_USER_LIST_FAILURE,
     GET_USER_LIST_SUCCESS,
@@ -11,12 +9,16 @@ import {
     SEND_CHAT_TO_PEOPLE_SUCCESS,
     LOGOUT_SUCCESS,
     LOGOUT_ERROR,
-    RESET_LOGOUT_STATUS,
-    NOT_LOGIN,
+    RESET_STATUS,
     GET_PEOPLE_CHAT_MES_SUCCESS,
-    GET_PEOPLE_CHAT_MES_FAILURE, JOIN_ROOM_SUCCESS, JOIN_ROOM_FAILURE, CREATE_ROOM_SUCCESS, CREATE_ROOM_ERROR, NULL
+    GET_PEOPLE_CHAT_MES_FAILURE,
+    JOIN_ROOM_SUCCESS,
+    JOIN_ROOM_FAILURE,
+    CREATE_ROOM_SUCCESS,
+    CREATE_ROOM_ERROR,
+    CHECK_USER_SUCCESS,
+    CHECK_USER_ERROR, REGISTER_SUCCESS, REGISTER_ERROR,
 } from "../action/action";
-import data from "bootstrap/js/src/dom/data";
 
 const initialState = {
     register: {},
@@ -25,12 +27,10 @@ const initialState = {
     messages: { data: null, error: null },
     active: { name: '', type: null },
     userList: { data: null, error: null },
-    userData: {},
-    active2: {},
-    data2: {},
-    data3: {},
-    joinRoom: { data: null, error: null },
-    createRoom: { data: null, error: null },
+    checkUser: { status: null, data: null, error: null }, // Thêm trạng thái kiểm tra người dùng
+    userStatuses: {}, // Thêm trạng thái của bạn bè
+    joinRoom: { status: null, data: null, error: null }, // Thêm trạng thái joinRoom
+    createRoom: { status: null, data: null, error: null }, // Thêm trạng thái createRoom
 };
 
 const socketReducer = (state = initialState, action) => {
@@ -41,17 +41,20 @@ const socketReducer = (state = initialState, action) => {
         console.error('Received action without type:', action);
         return state;
     }
+
     switch (action.type) {
-        case NOT_LOGIN:
+        case REGISTER_SUCCESS:
             return {
                 ...state,
-                login: {},
-            };
+                register: {status: 'success', data: action.data}};
+        case REGISTER_ERROR:
+            return {
+                ...state,
+                register: {status: 'error', error: action.error}};
         case LOGIN_SUCCESS:
             return {
                 ...state,
                 login: { status: 'success', data: action.data },
-
             };
         case LOGIN_ERROR:
             return {
@@ -106,20 +109,21 @@ const socketReducer = (state = initialState, action) => {
                 ...state,
                 logout: { status: 'error', error: action.error }
             };
-        case RESET_LOGOUT_STATUS:
+        case RESET_STATUS:
             return {
                 ...state,
                 logout: {},
+                register: {},
             };
         case GET_PEOPLE_CHAT_MES_SUCCESS:
             return {
                 ...state,
-                messages: {data: action.data, error: null}
+                messages: { data: action.data, error: null }
             };
         case GET_PEOPLE_CHAT_MES_FAILURE:
             return {
                 ...state,
-                messages: {data: action.data, error: action.error}
+                messages: { data: action.data, error: action.error }
             };
 
         case JOIN_ROOM_SUCCESS:
@@ -127,27 +131,47 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 messages: { error: null },
-                joinRoom: { data: [...state.userList.data, roomJoin], error: null, status: 'success'}
+                joinRoom: { data: [...(state.joinRoom.data || []), roomJoin], error: null, status: 'success' }
             };
         case JOIN_ROOM_FAILURE:
             return {
                 ...state,
-                joinRoom: { data: [...state.userList.data],  error: action.error, status: 'error'}
+                joinRoom: { data: state.joinRoom.data, error: action.error, status: 'error' }
             };
         case CREATE_ROOM_SUCCESS:
             const room = action.data;
             return {
                 ...state,
                 messages: { error: null },
-                createRoom: { data: [...state.userList.data, room], error: null, status: 'success'}
+                createRoom: { data: [...(state.createRoom.data || []), room], error: null, status: 'success' }
             };
         case CREATE_ROOM_ERROR:
             return {
                 ...state,
-                createRoom: { data: [...state.userList.data],  error: action.error, status: 'error'}
+                createRoom: { data: state.createRoom.data, error: action.error, status: 'error' }
+            };
+        case CHECK_USER_SUCCESS:
+            if (action.payload && action.payload.user) {
+                return {
+                    ...state,
+                    userStatuses: {
+                        ...state.userStatuses,
+                        [action.payload.user]: action.payload.status === 'online' ? 'online' : 'offline',
+                    },
+                    checkUser: { status: 'success', data: action.payload, error: null },
+                };
+            } else {
+                return state; // Xử lý nếu action.payload không hợp lệ
+            }
+
+        case CHECK_USER_ERROR:
+            return {
+                ...state,
+                checkUser: { status: 'error', data: null, error: action.payload },
             };
         default:
             return state;
     }
 };
+
 export default socketReducer;
