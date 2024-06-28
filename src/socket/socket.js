@@ -7,7 +7,6 @@ import {
     createRoomError,
     sendChatToRoom,
     sendChatToPeople,
-    checkUser,
     loginSuccess,
     loginError,
     sendChatToPeopleSuccess,
@@ -19,7 +18,12 @@ import {
     registerSuccess,
     registerError,
     logoutError,
-    getPeopleChatMesSuccess, getPeopleChatMesFailure, joinRoomSuccess, joinRoomFailure,
+    getPeopleChatMesSuccess,
+    getPeopleChatMesFailure,
+    joinRoomSuccess,
+    joinRoomFailure,
+    checkUserSuccess,
+    checkUserError,
 } from "../redux/action/action";
 export let socket;
 export let isSocketOpen = false;
@@ -130,6 +134,15 @@ export const initializeSocket = (url) => {
                     store.dispatch(joinRoomFailure(response.mes));
                 }
                 break;
+            case "CHECK_USER":
+                if (response.status === "success") {
+                    store.dispatch(checkUserSuccess(response.data)); // Gửi action CHECK_USER_SUCCESS với dữ liệu từ server
+                } else {
+                    store.dispatch(checkUserError(response.message)); // Gửi action CHECK_USER_ERROR nếu có lỗi
+                }
+                break;
+
+
             default:
                 console.warn("Unhandled socket event:", response.event);
                 break;
@@ -287,6 +300,62 @@ export const joinRoom = (name) => {
             }
         }
     }));
+};
+
+export const checkUser = (user) => {
+    return new Promise((resolve, reject) => {
+        // Gửi yêu cầu tới server
+        const sendMessage = () => {
+            socket.send(JSON.stringify({
+                action: "onchat",
+                data: {
+                    event: "CHECK_USER",
+                    data: {
+                        user: user
+                    }
+                }
+            }));
+        };
+
+        // Xử lý phản hồi từ server
+        const handleResponse = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data && data.event === "CHECK_USER") {
+                    if (data.status === "success" && data.data && typeof data.data.status === "boolean") {
+                        resolve(data.data.status ? "online" : "offline"); // Trả về 'online' nếu true, 'offline' nếu false
+                    } else {
+                        reject("Invalid data format from server");
+                    }
+                }
+            } catch (error) {
+                reject("Error parsing server response");
+            }
+        };
+
+        // Xử lý lỗi khi gửi hoặc nhận tin nhắn từ server
+        const handleError = (error) => {
+            reject(error); // Xử lý lỗi socket
+        };
+
+        // Đăng ký các event listener cho socket
+        socket.addEventListener("message", handleResponse);
+        socket.addEventListener("error", handleError);
+
+        // Kiểm tra trạng thái socket và gửi tin nhắn
+        if (socket.readyState === WebSocket.OPEN) {
+            sendMessage();
+        } else if (socket.readyState === WebSocket.CONNECTING) {
+            const intervalId = setInterval(() => {
+                if (socket.readyState === WebSocket.OPEN) {
+                    clearInterval(intervalId);
+                    sendMessage();
+                }
+            }, 100); // Thử lại mỗi 100ms cho đến khi kết nối thành công
+        } else {
+            reject("Socket is closed"); // Xử lý socket đã đóng
+        }
+    });
 };
 
 export const socketActions = {

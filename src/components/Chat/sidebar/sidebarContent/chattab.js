@@ -1,6 +1,6 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
+    checkUser,
     create_room,
     getPeopleChatMes,
     getUsersList,
@@ -162,6 +162,10 @@ function ChatTab({ toggleSidebar }) {
             console.error('Error creating room:', error);
         }
     };
+
+    // Memoize the checkUser function
+     const memoizedCheckUser = useCallback((name) => checkUser(name), []);
+
     return (
         <div className="d-flex flex-column h-100">
             <div className="tab-header d-flex align-items-center border-bottom">
@@ -230,19 +234,18 @@ function ChatTab({ toggleSidebar }) {
                                         <a className="contact-link" href="#"/>
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
-                                                <div className="avatar avatar-busy me-4">
-                                                    <span
-                                                        className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
+                                                <AvatarComponent key={user.name}  userName={user.name} checkUser={memoizedCheckUser} />
+                                                <span
+                                                    className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
+                                            </div>
+                                            <div className="flex-grow-1 overflow-hidden">
+                                                <div className="d-flex align-items-center mb-1">
+                                                    <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
+                                                    <p className="small text-muted text-nowrap ms-4 mb-0">14/03</p>
                                                 </div>
-                                                <div className="flex-grow-1 overflow-hidden">
-                                                    <div className="d-flex align-items-center mb-1">
-                                                        <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
-                                                        <p className="small text-muted text-nowrap ms-4 mb-0">14/03</p>
-                                                    </div>
-                                                    <div className="d-flex align-items-center">
-                                                        <div className="line-clamp me-auto">
-                                                            Hi, {user.name}
-                                                        </div>
+                                                <div className="d-flex align-items-center">
+                                                    <div className="line-clamp me-auto">
+                                                        Hi, {user.name}
                                                     </div>
                                                 </div>
                                             </div>
@@ -379,5 +382,28 @@ function ChatTab({ toggleSidebar }) {
         </div>
     );
 }
+const AvatarComponent = ({userName}) => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const status = await checkUser(userName);
+                setIsLoggedIn(status === 'online');
+            } catch (error) {
+                console.error("Error checking user:", error);
+                setIsLoggedIn(false);
+            }
+        };
+        fetchData();
+    }, [userName]);
+
+    return (
+        <div>
+            <p>{isLoggedIn ? "Online" : "Offline"}</p>
+        </div>
+    );
+};
+
 
 export default ChatTab;
