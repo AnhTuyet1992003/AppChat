@@ -25,7 +25,7 @@ function ChatBox() {
                             <ChatHeader />
                             <SearchChat />
                             <ChatContent />
-                            <ChatFooter />
+                            <ChatFooter  name={name} />
                         </div>
                         <UserProfile />
                     </div>

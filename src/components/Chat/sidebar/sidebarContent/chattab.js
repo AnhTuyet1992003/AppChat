@@ -20,11 +20,14 @@ function ChatTab({ toggleSidebar }) {
     const userList = useSelector(state => state.userList.data || []);
     const navigate = useNavigate();
     const login = useSelector((state) => state.login);
+    // Tạo phòng
+    const [groupName, setGroupName] = useState('');
+    const [groupInfo, setGroupInfo] = useState('');
+    const createRoomStatus = useSelector(state => state.createRoom.status);
 
     // Tham gia phòng
     const [roomName, setRoomName] = useState('');
     const joinRoomStatus = useSelector(state => state.joinRoom.status);
-
 
     // State quản lý việc hiển thị modal
     const [showJoinModal, setShowJoinModal] = useState(false);
@@ -35,9 +38,10 @@ function ChatTab({ toggleSidebar }) {
     // State quản lý thông báo lỗi và toast
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [successMessageCreate, setSuccessMessageCreate] = useState('');
+    const [errorMessageCreate, setErrorMessageCreate] = useState('');
     const [showToast, setShowToast] = useState(false);
 
-    // Đăng nhập lại khi mất kết nối
     useEffect(() => {
         if (!login.status) {
             if (localStorage.getItem("reLogin") !== null) {
@@ -49,6 +53,7 @@ function ChatTab({ toggleSidebar }) {
             }
         }
     }, [dispatch, navigate, login]);
+
     useEffect(() => {
         getUsersList();
     }, [dispatch]);
@@ -56,7 +61,6 @@ function ChatTab({ toggleSidebar }) {
     // Danh sách các người dùng
     const friendsList = userList.filter(user => user.type === 0);
     const groupsList = userList.filter(user => user.type === 1);
-
 
     // Sự kiện khi bấm vào 1 người hoặc 1 nhóm để mở đoạn chat
     const handleUserClick = (name) => {
@@ -75,6 +79,9 @@ function ChatTab({ toggleSidebar }) {
     const handleCloseModal = () => {
         setShowModal(false);
         setShowJoinModal(false);
+        setShowCreateModal(false);
+        setErrorMessageCreate('');
+        setSuccessMessageCreate('');
         setErrorMessage('');
         setSuccessMessage('');
         setShowToast(false);
@@ -108,9 +115,23 @@ function ChatTab({ toggleSidebar }) {
         }
     }, [joinRoomStatus, navigate, roomName, modalClosed]);
 
+    // Tạo phòng
+    useEffect(() => {
+        if (!modalClosed) {
+            if (createRoomStatus === "success") {
+                setErrorMessageCreate("");
+                setSuccessMessageCreate("Bạn đã tạo phòng thành công!");
+            } else if (createRoomStatus === "error") {
+                setErrorMessageCreate("Phòng đã tồn tại. Vui lòng nhập tên khác!");
+                setShowToast(true);
+            }
+        }
+    }, [createRoomStatus, navigate, groupName, modalClosed]);
+
     const handleRoomNameChange = (e) => setRoomName(e.target.value);
+    // Su kien tham gia phong
     const handleJoinRoom = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // ngăn các sự kiện click
         if (roomName.trim()) {
             await joinRoom(roomName);
             setModalClosed(false);
@@ -121,14 +142,35 @@ function ChatTab({ toggleSidebar }) {
         }
     };
 
+    const handleGroupNameChange = (e) => setGroupName(e.target.value);
 
+    const handleCreateRoom = async () => {
+        // Reset error message
+        setErrorMessageCreate('');
+        // Check if groupName is empty
+        if (groupName.trim() === '') {
+            setErrorMessageCreate('Vui lòng nhập tên nhóm');
+            setShowToast(true);
+            return;
+        }
+
+        try {
+            await create_room(groupName, groupInfo);
+            setModalClosed(false);
+            navigate(`/Home/${groupName}`);
+        } catch (error) {
+            setErrorMessageCreate('Phòng đã tồn tại. Vui lòng nhập tên khác!');
+            setShowToast(true);
+            console.error('Error creating room:', error);
+        }
+    };
     return (
         <div className="d-flex flex-column h-100">
             <div className="tab-header d-flex align-items-center border-bottom">
                 <ul className="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
                     <li className="d-flex justify-content-between align-items-center w-100">
                         <h3 className="mb-0">Chats</h3>
-                        <FontAwesomeIcon icon={faPlus} size="2x" onClick={handlePlusClick} />
+                        <FontAwesomeIcon icon={faPlus} size="2x" onClick={handlePlusClick}/>
                     </li>
                     <li>
                         <ul className="list-inline">
@@ -138,7 +180,7 @@ function ChatTab({ toggleSidebar }) {
                                     type="button"
                                     onClick={toggleSidebar}
                                 >
-                                    <i className="ri-menu-line" />
+                                    <i className="ri-menu-line"/>
                                 </button>
                             </li>
                         </ul>
@@ -187,11 +229,12 @@ function ChatTab({ toggleSidebar }) {
                                         key={index}
                                         onClick={() => handleUserClick(user.name)}
                                     >
-                                        <a className="contact-link" href="#" />
+                                        <a className="contact-link" href="#"/>
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
                                                 <div className="avatar avatar-busy me-4">
-                                                    <span className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
+                                                    <span
+                                                        className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
                                                 </div>
                                                 <div className="flex-grow-1 overflow-hidden">
                                                     <div className="d-flex align-items-center mb-1">
@@ -224,16 +267,18 @@ function ChatTab({ toggleSidebar }) {
                                         key={index}
                                         onClick={() => handleUserClick(group.name)}
                                     >
-                                        <a className="contact-link" href="#" />
+                                        <a className="contact-link" href="#"/>
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
                                                 <div className="avatar avatar-online me-4">
-                                                    <span className="avatar-label bg-soft-info text-info">{group.name.charAt(0)}</span>
+                                                    <span
+                                                        className="avatar-label bg-soft-info text-info">{group.name.charAt(0)}</span>
                                                 </div>
                                                 <div className="flex-grow-1 overflow-hidden">
                                                     <div className="d-flex align-items-center mb-1">
                                                         <h5 className="text-truncate mb-0 me-auto">{group.name}</h5>
-                                                        <p className="small text-muted text-nowrap ms-4 mb-0">11:45 AM</p>
+                                                        <p className="small text-muted text-nowrap ms-4 mb-0">11:45
+                                                            AM</p>
                                                     </div>
                                                     <div className="d-flex align-items-center">
                                                         <div className="line-clamp me-auto">
@@ -244,7 +289,8 @@ function ChatTab({ toggleSidebar }) {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="card-footer d-flex align-items-center justify-content-between overflow-hidden">
+                                        <div
+                                            className="card-footer d-flex align-items-center justify-content-between overflow-hidden">
                                             <h5 className="mb-0 text-truncate">General</h5>
                                             <p className="mb-0 small text-muted text-nowrap">
                                                 Members
@@ -309,18 +355,20 @@ function ChatTab({ toggleSidebar }) {
                             <Form.Control
                                 type="text"
                                 placeholder=" "
+                                value={groupName}
+                                onChange={handleGroupNameChange}
                             />
                             <Form.Label>Nhập tên phòng</Form.Label>
                         </Form.Group>
                     </Form>
-                    {successMessage && <p className="text-success">{successMessage}</p>}
-                    {errorMessage && <p className="text-danger">{errorMessage}</p>}
+                    {successMessageCreate && <p className="text-success">{successMessageCreate}</p>}
+                    {errorMessageCreate && <p className="text-danger">{errorMessageCreate}</p>}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseModal}>
                         Đóng
                     </Button>
-                    <Button variant="primary">
+                    <Button variant="primary" onClick={handleCreateRoom}>
                         Tạo
                     </Button>
                 </Modal.Footer>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect, useRef} from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPeopleChatMes, initializeSocket, reLoginUser } from "../../../../socket/socket";
@@ -11,7 +11,7 @@ function ChatContent() {
     const dispatch = useDispatch();
     const { name } = useParams();
     const messages = useSelector((state) => state.messages?.data);
-
+    const messagesEndRef = useRef(null);
     useEffect(() => {
         if (!login.status) {
             if (localStorage.getItem("reLogin") !== null) {
@@ -30,7 +30,9 @@ function ChatContent() {
             getPeopleChatMes(name);
         }
     }, [name]);
-
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
     // Sap xep tin nhan theo ngay gio gui
     const sortedMessages = messages ? [...messages].sort((a, b) => new Date(a.createAt) - new Date(b.createAt)) : [];
 
@@ -83,7 +85,8 @@ function ChatContent() {
                                     </span>
                                 </div>
                             )}
-                            <div className={`message ${message.name === localStorage.getItem("username") ? "self" : ""}`}>
+                            <div
+                                className={`message ${message.name === localStorage.getItem("username") ? "self" : ""}`}>
                                 <div className="message-wrap">
                                     <div className="message-item">
                                         <div className="message-content">
@@ -152,7 +155,7 @@ function ChatContent() {
                         </React.Fragment>
                     );
                 })}
-                <div className="js-scroll-to-bottom"/>
+                <div ref={messagesEndRef}/>
             </div>
         </div>
     );

@@ -12,9 +12,13 @@ import {
     LOGOUT_SUCCESS,
     LOGOUT_ERROR,
     RESET_LOGOUT_STATUS,
-    NOT_LOGIN,
     GET_PEOPLE_CHAT_MES_SUCCESS,
-    GET_PEOPLE_CHAT_MES_FAILURE, JOIN_ROOM_SUCCESS, JOIN_ROOM_FAILURE, CREATE_ROOM_SUCCESS, CREATE_ROOM_ERROR, NULL
+    GET_PEOPLE_CHAT_MES_FAILURE,
+    JOIN_ROOM_SUCCESS,
+    JOIN_ROOM_FAILURE,
+    CREATE_ROOM_SUCCESS,
+    CREATE_ROOM_ERROR,
+    ADD_NEW_MESSAGE, REGISTER_SUCCESS, REGISTER_ERROR
 } from "../action/action";
 import data from "bootstrap/js/src/dom/data";
 
@@ -22,7 +26,7 @@ const initialState = {
     register: {},
     login: {},
     logout: {},
-    messages: { data: null, error: null },
+    messages: { data: [], error: null },
     active: { name: '', type: null },
     userList: { data: null, error: null },
     userData: {},
@@ -42,11 +46,6 @@ const socketReducer = (state = initialState, action) => {
         return state;
     }
     switch (action.type) {
-        case NOT_LOGIN:
-            return {
-                ...state,
-                login: {},
-            };
         case LOGIN_SUCCESS:
             return {
                 ...state,
@@ -111,17 +110,6 @@ const socketReducer = (state = initialState, action) => {
                 ...state,
                 logout: {},
             };
-        case GET_PEOPLE_CHAT_MES_SUCCESS:
-            return {
-              ...state,
-                messages: {data: action.data, error: null}
-            };
-        case GET_PEOPLE_CHAT_MES_FAILURE:
-            return {
-                ...state,
-                messages: {data: action.data, error: action.error}
-            };
-
         case JOIN_ROOM_SUCCESS:
             const roomJoin = action.data;
             return {
@@ -133,6 +121,33 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 joinRoom: { data: [...state.userList.data],  error: action.error, status: 'error'}
+            };
+        case CREATE_ROOM_SUCCESS:
+            const room = action.data;
+            return {
+                ...state,
+                messages: { error: null },
+                createRoom: { data: [...state.userList.data, room], error: null, status: 'success'}
+            };
+        case CREATE_ROOM_ERROR:
+            return {
+                ...state,
+                createRoom: { data: [...state.userList.data],  error: action.error, status: 'error'}
+            };
+        case GET_PEOPLE_CHAT_MES_SUCCESS:
+            return {
+                ...state,
+                messages: {data: action.data, error: null}
+            };
+        case GET_PEOPLE_CHAT_MES_FAILURE:
+            return {
+                ...state,
+                messages: {data: [], error: action.error}
+            };
+        case ADD_NEW_MESSAGE:
+            return {
+                ...state,
+                messages: { data: [...state.messages.data, action.payload], error: null }
             };
         default:
             return state;

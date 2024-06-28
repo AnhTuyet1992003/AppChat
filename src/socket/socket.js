@@ -1,13 +1,8 @@
 // src/socket/socket.js
 import store from "../redux/store/store";
 import {
-    createRoom,
-    getRoomChatMessages,
     createRoomSuccess,
     createRoomError,
-    sendChatToRoom,
-    sendChatToPeople,
-    checkUser,
     loginSuccess,
     loginError,
     sendChatToPeopleSuccess,
@@ -288,16 +283,36 @@ export const joinRoom = (name) => {
         }
     }));
 };
+export const sendChatToPeople = (to, message) => {
+    if (!socket) return;
 
+    const sendMessage = () => {
+        socket.send(JSON.stringify({
+            action: "onchat",
+            data: {
+                event: "SEND_CHAT",
+                data: {
+                    type: "people",
+                    to: to,
+                    mes: message
+                }
+            }
+        }));
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+        sendMessage();
+    } else if (socket.readyState === WebSocket.CONNECTING) {
+        const intervalId = setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+                clearInterval(intervalId);
+                sendMessage();
+            }
+        }, 100); // Retry every 100ms until connected
+    } else {
+        console.log("Socket is closed");
+    }
+};
 export const socketActions = {
-    // // registerUser: (user, pass) => store.dispatch(register(user, pass)),
-    // createChatRoom: (nameRoom) => store.dispatch(createRoom(socket, nameRoom)),
-    // // joinChatRoom: (nameRoom) => store.dispatch(joinRoom(socket, nameRoom)),
-    // fetchRoomChatMessages: (roomName, page) => store.dispatch(getRoomChatMessages(socket, roomName, page)),
-    // // fetchPeopleChatMessages: (userName, page) => store.dispatch(getPeopleChatMessages(socket, userName, page)),
-    // sendChatRoom: (roomName, message) => store.dispatch(sendChatToRoom(socket, roomName, message)),
-    // sendChatPeople: (userName, message) => store.dispatch(sendChatToPeople(socket, userName, message)),
-    // checkIfUserExists: (userName) => store.dispatch(checkUser(socket, userName)),
-    // // fetchUserList: () => store.dispatch(getUsersList(socket)),
     logoutUser: () => logoutUsers(),
 };
