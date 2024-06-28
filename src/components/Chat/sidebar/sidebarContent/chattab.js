@@ -81,6 +81,8 @@ function ChatTab({ toggleSidebar }) {
         setShowModal(false);
         setShowJoinModal(false);
         setShowCreateModal(false);
+        setErrorMessageCreate('');
+        setSuccessMessageCreate('');
         setErrorMessage('');
         setSuccessMessage('');
         setShowToast(false);
@@ -128,8 +130,9 @@ function ChatTab({ toggleSidebar }) {
     }, [createRoomStatus, navigate, groupName, modalClosed]);
 
     const handleRoomNameChange = (e) => setRoomName(e.target.value);
+    // Su kien tham gia phong
     const handleJoinRoom = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // ngăn các sự kiện click
         if (roomName.trim()) {
             await joinRoom(roomName);
             setModalClosed(false);
@@ -165,6 +168,8 @@ function ChatTab({ toggleSidebar }) {
 
     // Memoize the checkUser function
      const memoizedCheckUser = useCallback((name) => checkUser(name), []);
+
+
 
     return (
         <div className="d-flex flex-column h-100">
@@ -234,6 +239,7 @@ function ChatTab({ toggleSidebar }) {
                                         <a className="contact-link" href="#"/>
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
+
                                                 <AvatarComponent key={user.name}  userName={user.name} checkUser={memoizedCheckUser} />
                                                 <span
                                                     className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
@@ -242,6 +248,7 @@ function ChatTab({ toggleSidebar }) {
                                                 <div className="d-flex align-items-center mb-1">
                                                     <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
                                                     <p className="small text-muted text-nowrap ms-4 mb-0">14/03</p>
+
                                                 </div>
                                                 <div className="d-flex align-items-center">
                                                     <div className="line-clamp me-auto">

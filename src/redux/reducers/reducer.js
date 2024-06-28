@@ -16,6 +16,7 @@ import {
     JOIN_ROOM_FAILURE,
     CREATE_ROOM_SUCCESS,
     CREATE_ROOM_ERROR,
+    ADD_NEW_MESSAGE,
     CHECK_USER_SUCCESS,
     CHECK_USER_ERROR, REGISTER_SUCCESS, REGISTER_ERROR,
 } from "../action/action";
@@ -24,7 +25,7 @@ const initialState = {
     register: {},
     login: {},
     logout: {},
-    messages: { data: null, error: null },
+    messages: { data: [], error: null },
     active: { name: '', type: null },
     userList: { data: null, error: null },
     checkUser: { status: null, data: null, error: null }, // Thêm trạng thái kiểm tra người dùng
@@ -115,17 +116,6 @@ const socketReducer = (state = initialState, action) => {
                 logout: {},
                 register: {},
             };
-        case GET_PEOPLE_CHAT_MES_SUCCESS:
-            return {
-                ...state,
-                messages: { data: action.data, error: null }
-            };
-        case GET_PEOPLE_CHAT_MES_FAILURE:
-            return {
-                ...state,
-                messages: { data: action.data, error: action.error }
-            };
-
         case JOIN_ROOM_SUCCESS:
             const roomJoin = action.data;
             return {
@@ -168,6 +158,21 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 checkUser: { status: 'error', data: null, error: action.payload },
+            };
+        case GET_PEOPLE_CHAT_MES_SUCCESS:
+            return {
+                ...state,
+                messages: {data: action.data, error: null}
+            };
+        case GET_PEOPLE_CHAT_MES_FAILURE:
+            return {
+                ...state,
+                messages: {data: [], error: action.error}
+            };
+        case ADD_NEW_MESSAGE:
+            return {
+                ...state,
+                messages: { data: [...state.messages.data, action.payload], error: null }
             };
         default:
             return state;

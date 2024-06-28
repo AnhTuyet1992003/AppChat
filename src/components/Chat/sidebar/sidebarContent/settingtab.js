@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import {initializeSocket, socketActions} from '../../../../socket/socket';
+import {initializeSocket, logoutUsers, socketActions} from '../../../../socket/socket';
 
 
     function SettingTab() {
@@ -48,7 +48,7 @@ import {initializeSocket, socketActions} from '../../../../socket/socket';
         //     navigate("/login");
         // }, 500); // Thời gian trễ 500ms để đảm bảo mọi thứ đã được xử lý
         e.preventDefault();
-        socketActions.logoutUser();
+        logoutUsers();
     };
 
     return (

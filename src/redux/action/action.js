@@ -1,5 +1,6 @@
 // redux/actions/action.js
 
+
 export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
 export const LOGOUT_ERROR = 'LOGOUT_ERROR';
 
@@ -12,6 +13,10 @@ export const logoutError = (error) => ({
     type: LOGOUT_ERROR,
     error
 });
+
+
+// đăng nhập
+
 // action/action.js
 export const RESET_STATUS = 'RESET_STATUS';
 
@@ -20,6 +25,7 @@ export const resetStatus = () => ({
 });
 
 // dang nhap
+
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const loginSuccess = (data) => ({ type: LOGIN_SUCCESS, data });
 export const LOGIN_ERROR = 'LOGIN_ERROR';
@@ -49,10 +55,16 @@ export const CREATE_ROOM_ERROR = "CREATE_ROOM_ERROR";
 export const createRoomSuccess = (data) => ({type: CREATE_ROOM_SUCCESS, data});
 export const createRoomError = (error) => ({type: CREATE_ROOM_ERROR, error});
 
-// send chat to people
+// Gửi tin nhắn
 export const SEND_CHAT_TO_PEOPLE_SUCCESS = 'SEND_CHAT_TO_PEOPLE_SUCCESS';
 export const sendChatToPeopleSuccess = (data) => ({ type: SEND_CHAT_TO_PEOPLE_SUCCESS, data });
 
+//
+export const ADD_NEW_MESSAGE = 'ADD_NEW_MESSAGE';
+export const addNewMessage = (message) => ({
+    type: ADD_NEW_MESSAGE,
+    payload: message
+});
 export const SEND_CHAT_TO_PEOPLE_FAILURE = 'SEND_CHAT_TO_PEOPLE_FAILURE';
 export const sendChatToPeopleFailure = (error) => ({ type: SEND_CHAT_TO_PEOPLE_FAILURE, error });
 // Lay tin nhan cua 2 nguoi
@@ -71,4 +83,3 @@ export const CHECK_USER_SUCCESS = "CHECK_USER_SUCCESS";
 export const CHECK_USER_ERROR = "CHECK_USER_ERROR";
 export const checkUserSuccess = (data) => ({type: CHECK_USER_SUCCESS, data});
 export const checkUserError = (error) => ({type: CHECK_USER_ERROR, error});
-
