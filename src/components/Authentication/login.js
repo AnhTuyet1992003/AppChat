@@ -8,7 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './Authentication.css';
 import {initializeSocket, loginUser, reLoginUser, socketActions} from "../../socket/socket";
 import $ from 'jquery';
-import { resetLogoutStatus} from "../../redux/action/action";
+import { resetStatus} from "../../redux/action/action";
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -60,7 +60,7 @@ const Login = () => {
             return;
         }
         setError("");
-        dispatch(resetLogoutStatus());
+        dispatch(resetStatus());
         loginUser(username, password);
     };
 

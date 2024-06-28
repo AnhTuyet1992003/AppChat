@@ -1,7 +1,6 @@
 // redux/actions/action.js
-let messageQueue = [];
 
-// action/action.js
+
 export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
 export const LOGOUT_ERROR = 'LOGOUT_ERROR';
 
@@ -15,23 +14,28 @@ export const logoutError = (error) => ({
     error
 });
 
-// đặt lại trạng thái khi logout thành công tránh bi
-export const RESET_LOGOUT_STATUS = 'RESET_LOGOUT_STATUS';
-export const resetLogoutStatus = () => ({
-    type: RESET_LOGOUT_STATUS,
-});
 
 // đăng nhập
+
+// action/action.js
+export const RESET_STATUS = 'RESET_STATUS';
+
+export const resetStatus = () => ({
+    type: RESET_STATUS,
+});
+
+// dang nhap
+
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const loginSuccess = (data) => ({ type: LOGIN_SUCCESS, data });
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const loginError = (error) => ({ type: LOGIN_ERROR, error });
-export const registerSuccess = (data) => ({type: REGISTER_SUCCESS, data: data});
-
 // đăng ký
+export const registerSuccess = (data) => ({type: REGISTER_SUCCESS, data: data});
 export const REGISTER_SUCCESS = "REGISTER_SUCCESS";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const registerError = (error) => ({type: REGISTER_ERROR, error});
+
 
 // lay danh sach nguoi da nhan tin
 export const GET_USER_LIST_SUCCESS = 'GET_USER_LIST_SUCCESS';
@@ -69,28 +73,13 @@ export const getPeopleChatMesSuccess = (data) => ({ type: GET_PEOPLE_CHAT_MES_SU
 
 export const GET_PEOPLE_CHAT_MES_FAILURE = 'GET_PEOPLE_CHAT_MES_FAILURE';
 export const getPeopleChatMesFailure = (error) => ({ type: GET_PEOPLE_CHAT_MES_FAILURE, error });
-
 // Tham gia phòng
 export const JOIN_ROOM_SUCCESS = "JOIN_ROOM_SUCCESS";
 export const joinRoomSuccess = (data) => ({type: JOIN_ROOM_SUCCESS, data});
 
 export const JOIN_ROOM_FAILURE = "JOIN_ROOM_FAILURE";
 export const joinRoomFailure = (error) => ({type: JOIN_ROOM_FAILURE, error});
-
-// websocket actions
-export const register = (socket, user, pass) => sendMessage(socket, {
-    action: "onchat",
-    data: {
-        event: 'REGISTER',
-        data: { user, pass }
-    }
-});
-
-
-export const checkUser = (socket, userName) => sendMessage(socket, {
-    action: "onchat",
-    data: {
-        event: 'CHECK_USER',
-        data: { user: userName }
-    }
-});
+export const CHECK_USER_SUCCESS = "CHECK_USER_SUCCESS";
+export const CHECK_USER_ERROR = "CHECK_USER_ERROR";
+export const checkUserSuccess = (data) => ({type: CHECK_USER_SUCCESS, data});
+export const checkUserError = (error) => ({type: CHECK_USER_ERROR, error});
