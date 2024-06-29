@@ -34,12 +34,15 @@ function ChatContent() {
     }, [dispatch, navigate, login, username]);
 
     useEffect(() => {
-        if (name) {
+        if (name && username) {
             const messagesRef = ref(database, 'messages');
+
             // Truy vấn các tin nhắn gửi từ người dùng hiện tại
             const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
+
             // Truy vấn các tin nhắn gửi đến người dùng hiện tại
             const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
+
             const handleValue = (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -53,6 +56,7 @@ function ChatContent() {
 
             const userUnsubscribe = onValue(userQuery, handleValue);
             const toUserUnsubscribe = onValue(toUserQuery, handleValue);
+
             return () => {
                 userUnsubscribe();
                 toUserUnsubscribe();

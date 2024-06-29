@@ -162,7 +162,7 @@ const socketReducer = (state = initialState, action) => {
         case GET_PEOPLE_CHAT_MES_SUCCESS:
             return {
                 ...state,
-                messages: {data: action.data, error: null}
+                messages: {data: action.data, error: null},
             };
         case GET_PEOPLE_CHAT_MES_FAILURE:
             return {
