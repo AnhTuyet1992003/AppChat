@@ -2,21 +2,25 @@ import React, {useEffect, useRef} from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPeopleChatMes, initializeSocket, reLoginUser } from "../../../../socket/socket";
-import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap CSS is included
+import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import {database, onValue, ref} from "../../../../firebase";
-import {addNewMessage} from "../../../../redux/action/action"; // Ensure Bootstrap JS is included
+import {database, query, ref, orderByChild, equalTo, onValue } from "../../../../firebase";
+import {addNewMessage} from "../../../../redux/action/action";
 
 function ChatContent() {
+    // Lấy trạng thái đăng nhập từ Redux store
     const login = useSelector((state) => state.login);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { name } = useParams();
+    const { name } = useParams(); // lấy ra tên người nhận
+    // Lấy dữ liệu tin nhắn từ Redux store
     const messages = useSelector((state) => state.messages?.data);
+    // Tạo tham chiếu để cuộn đến cuối tin nhắn
     const messagesEndRef = useRef(null);
 
     const username = localStorage.getItem("username");
 
+    // kiểm tra đăng nhập
     useEffect(() => {
         if (!login.status) {
             if (localStorage.getItem("reLogin") !== null) {
@@ -29,33 +33,45 @@ function ChatContent() {
         }
     }, [dispatch, navigate, login, username]);
 
-    // useEffect(() => {
-    //     if (name) {
-    //         // lay danh sach tin nhan theo ten da chon trong danh sach ban be/ group
-    //         getPeopleChatMes(name);
-    //     }
-    // }, [name]);
     useEffect(() => {
-        if (name) {
-            // Lắng nghe thay đổi từ Firebase cho người dùng hoặc nhóm được chọn
+        if (name && username) {
             const messagesRef = ref(database, 'messages');
-            onValue(messagesRef, (snapshot) => {
+
+            // Truy vấn các tin nhắn gửi từ người dùng hiện tại
+            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
+
+            // Truy vấn các tin nhắn gửi đến người dùng hiện tại
+            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
+
+            const handleValue = (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    // Lọc tin nhắn theo điều kiện name và to
-                    const messagesArray = Object.values(data).filter(message => (message.name === name && message.to === username) || (message.to === name && message.name === username));
-                    messagesArray.forEach(message => {
-                        dispatch(addNewMessage(message)); // Cập nhật Redux store với các tin nhắn mới
-                    });
+                    const messagesArray = Object.values(data).filter(message =>
+                        (message.name === name && message.to === username) ||
+                        (message.to === name && message.name === username)
+                    );
+                    dispatch(addNewMessage(messagesArray));
                 }
-            });
+            };
+
+            const userUnsubscribe = onValue(userQuery, handleValue);
+            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
+
+            return () => {
+                userUnsubscribe();
+                toUserUnsubscribe();
+            };
         }
     }, [name, username, dispatch]);
+    // cuộn xuong cuối khi co tin nhắn mới
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // không hiển thị nếu đoaạn tin nhắn rỗng
+    const filteredMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '') : [];
     // Sap xep tin nhan theo ngay gio gui
-    const sortedMessages = messages ? [...messages].sort((a, b) => new Date(a.createAt) - new Date(b.createAt)) : [];
+    const sortedMessages = filteredMessages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
 
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);
@@ -111,8 +127,7 @@ function ChatContent() {
                                     </span>
                                 </div>
                             )}
-                            <div
-                                className={`message ${message.name === localStorage.getItem("username") ? "self" : ""}`}>
+                            <div className={`message ${message.name === localStorage.getItem("username") ? "self" : ""}`}>
                                 <div className="message-wrap">
                                     <div className="message-item">
                                         <div className="message-content">
@@ -127,7 +142,7 @@ function ChatContent() {
                                                 data-bs-toggle="dropdown"
                                                 type="button"
                                             >
-                                                <i className="ri-more-2-fill"/>
+                                                <i className="ri-more-2-fill" />
                                             </button>
                                             <ul className="dropdown-menu">
                                                 <li>
@@ -136,7 +151,7 @@ function ChatContent() {
                                                         href="#"
                                                     >
                                                         Edit
-                                                        <i className="ri-edit-line"/>
+                                                        <i className="ri-edit-line" />
                                                     </a>
                                                 </li>
                                                 <li>
@@ -145,7 +160,7 @@ function ChatContent() {
                                                         href="#"
                                                     >
                                                         Share
-                                                        <i className="ri-share-line"/>
+                                                        <i className="ri-share-line" />
                                                     </a>
                                                 </li>
                                                 <li>
@@ -154,7 +169,7 @@ function ChatContent() {
                                                         href="#"
                                                     >
                                                         Delete
-                                                        <i className="ri-delete-bin-line"/>
+                                                        <i className="ri-delete-bin-line" />
                                                     </a>
                                                 </li>
                                             </ul>
@@ -164,7 +179,7 @@ function ChatContent() {
                                 <div className="message-info">
                                     <div className="avatar avatar-sm">
                                         <span className="avatar-label bg-soft-primary text-primary fs-6">
-                                            {message.name.charAt(0)}
+                                            {message.name ? message.name.charAt(0) : ""}
                                         </span>
                                     </div>
                                     <div>
@@ -173,7 +188,7 @@ function ChatContent() {
                                         </h6>
                                         <small className="text-muted">
                                             {formatTimestamp(message.createAt)}
-                                            <i className="ri-check-double-line align-bottom text-success fs-5"/>
+                                            <i className="ri-check-double-line align-bottom text-success fs-5" />
                                         </small>
                                     </div>
                                 </div>
@@ -181,7 +196,7 @@ function ChatContent() {
                         </React.Fragment>
                     );
                 })}
-                <div ref={messagesEndRef}/>
+                <div ref={messagesEndRef} />
             </div>
         </div>
     );

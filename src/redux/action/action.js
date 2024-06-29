@@ -61,9 +61,11 @@ export const sendChatToPeopleSuccess = (data) => ({ type: SEND_CHAT_TO_PEOPLE_SU
 
 //
 export const ADD_NEW_MESSAGE = 'ADD_NEW_MESSAGE';
-export const addNewMessage = (message) => ({
+
+// Thay đổi hàm hành động để nhận một mảng các tin nhắn
+export const addNewMessage = (messages) => ({
     type: ADD_NEW_MESSAGE,
-    payload: message
+    payload: messages
 });
 export const SEND_CHAT_TO_PEOPLE_FAILURE = 'SEND_CHAT_TO_PEOPLE_FAILURE';
 export const sendChatToPeopleFailure = (error) => ({ type: SEND_CHAT_TO_PEOPLE_FAILURE, error });
