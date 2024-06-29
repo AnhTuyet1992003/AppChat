@@ -3,7 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPeopleChatMes, initializeSocket, reLoginUser } from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap CSS is included
-import 'bootstrap/dist/js/bootstrap.bundle.min'; // Ensure Bootstrap JS is included
+import 'bootstrap/dist/js/bootstrap.bundle.min';
+import {database, onValue, ref} from "../../../../firebase";
+import {addNewMessage} from "../../../../redux/action/action"; // Ensure Bootstrap JS is included
 
 function ChatContent() {
     const login = useSelector((state) => state.login);
@@ -12,24 +14,43 @@ function ChatContent() {
     const { name } = useParams();
     const messages = useSelector((state) => state.messages?.data);
     const messagesEndRef = useRef(null);
+
+    const username = localStorage.getItem("username");
+
     useEffect(() => {
         if (!login.status) {
             if (localStorage.getItem("reLogin") !== null) {
                 // Reconnect socket
                 initializeSocket('ws://140.238.54.136:8080/chat/chat');
-                reLoginUser(localStorage.getItem("username"), localStorage.getItem("reLogin"));
+                reLoginUser(username, localStorage.getItem("reLogin"));
             } else {
                 navigate("/login");
             }
         }
-    }, [dispatch, navigate, login]);
+    }, [dispatch, navigate, login, username]);
 
+    // useEffect(() => {
+    //     if (name) {
+    //         // lay danh sach tin nhan theo ten da chon trong danh sach ban be/ group
+    //         getPeopleChatMes(name);
+    //     }
+    // }, [name]);
     useEffect(() => {
         if (name) {
-            // lay danh sach tin nhan theo ten da chon trong danh sach ban be/ group
-            getPeopleChatMes(name);
+            // Lắng nghe thay đổi từ Firebase cho người dùng hoặc nhóm được chọn
+            const messagesRef = ref(database, 'messages');
+            onValue(messagesRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    // Lọc tin nhắn theo điều kiện name và to
+                    const messagesArray = Object.values(data).filter(message => (message.name === name && message.to === username) || (message.to === name && message.name === username));
+                    messagesArray.forEach(message => {
+                        dispatch(addNewMessage(message)); // Cập nhật Redux store với các tin nhắn mới
+                    });
+                }
+            });
         }
-    }, [name]);
+    }, [name, username, dispatch]);
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
@@ -38,6 +59,9 @@ function ChatContent() {
 
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);
+        if (isNaN(date.getTime())) {
+            return ""; // Trả về chuỗi rỗng nếu timestamp không hợp lệ
+        }
         const now = new Date();
         const isToday = date.toDateString() === now.toDateString();
         const options = {
@@ -52,6 +76,9 @@ function ChatContent() {
 
     const formatDateSeparator = (timestamp) => {
         const date = new Date(timestamp);
+        if (isNaN(date.getTime())) {
+            return ""; // Trả về chuỗi rỗng nếu timestamp không hợp lệ
+        }
         const now = new Date();
         const isToday = date.toDateString() === now.toDateString();
         if (isToday) {
@@ -64,7 +91,6 @@ function ChatContent() {
             timeZone: 'Asia/Ho_Chi_Minh'
         }).format(date);
     };
-
     if (!name) {
         return <div className="chat-content hide-scrollbar h-100 d-flex justify-content-center align-items-center">
             <p className="text-muted">Chọn người bạn muốn nhắn để bắt đầu trò chuyện!</p>
