@@ -16,7 +16,7 @@ function ChatFooter() {
     const handleSendMessage = async () => {
         if (message.trim() === '') return;
 
-        // Get the next message ID
+        // tạo id mới
         const nextMessageId = await getNextMessageId();
 
         const newMessage = {
@@ -33,7 +33,7 @@ function ChatFooter() {
         // lưu tin nhắn vao firebase
         await set(ref(database, 'messages/' + nextMessageId), newMessage);
 
-        setMessage(''); // Reset input field
+        setMessage('');
 
 
 
@@ -78,7 +78,7 @@ function ChatFooter() {
                             />
                             <button
                                 className="btn btn-white btn-lg border"
-                                type="button"  onClick={handleSendMessage}
+                                type="button"
                             >
                                 <i className="ri-chat-smile-2-line"/>
                             </button>
@@ -90,6 +90,7 @@ function ChatFooter() {
                                 <button
                                     className="btn btn-icon btn-primary btn-lg rounded-circle"
                                     type="submit"
+                                    onClick={handleSendMessage}
                                 >
                                     <i className="ri-send-plane-fill"/>
                                 </button>

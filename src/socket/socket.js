@@ -19,7 +19,7 @@ import {
     joinRoomSuccess,
     joinRoomFailure,
     checkUserSuccess,
-    checkUserError,
+    checkUserError, addNewMessage,
 } from "../redux/action/action";
 export let socket;
 export let isSocketOpen = false;
@@ -93,6 +93,7 @@ export const initializeSocket = (url) => {
                 if (response.data.type === "people") {
                     if (response.status === "success") {
                         store.dispatch(sendChatToPeopleSuccess(response.data));
+                        store.dispatch(addNewMessage(response.data.message));
                     } else {
                         store.dispatch(sendChatToPeopleFailure(response.error));
                     }
