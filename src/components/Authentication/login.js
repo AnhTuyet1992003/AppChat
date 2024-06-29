@@ -72,11 +72,20 @@ const Login = () => {
 
             if (existingUser.password === password) {
                 console.log('User already exists with correct password');
-                return;
+            } else {
+                setError("Tên đăng nhập đã tồn tại với mật khẩu khác");
             }
         } else {
+            // Get the highest existing userId
+            const allUsersSnapshot = await get(usersRef);
+            let newUserId = 1;
+            if (allUsersSnapshot.exists()) {
+                const users = allUsersSnapshot.val();
+                const userIds = Object.keys(users).map(id => parseInt(id, 10));
+                newUserId = Math.max(...userIds) + 1;
+            }
+
             // Save new user
-            const newUserId = Date.now(); // Use a timestamp as a unique ID
             set(ref(db, `users/${newUserId}`), {
                 id: newUserId,
                 username: username,
