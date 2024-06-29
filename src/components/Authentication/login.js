@@ -35,6 +35,7 @@ const Login = () => {
             if (localStorage.getItem("username") === null) {
                 localStorage.setItem("username", username);
             }
+            saveUserToFirebase();
             navigate('/Home');
         } else if (loginStatus === "error") {
             localStorage.removeItem("reLogin");
@@ -59,23 +60,15 @@ const Login = () => {
         setError("");
         dispatch(resetStatus());
         loginUser(username, password);
+    };
 
+    const saveUserToFirebase = async () => {
         const db = getDatabase();
         const usersRef = ref(db, 'users');
         const userQuery = query(usersRef, orderByChild('username'), equalTo(username));
         const snapshot = await get(userQuery);
 
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            const userKey = Object.keys(userData)[0]; // Assuming username is unique
-            const existingUser = userData[userKey];
-
-            if (existingUser.password === password) {
-                console.log('User already exists with correct password');
-            } else {
-                setError("Tên đăng nhập đã tồn tại với mật khẩu khác");
-            }
-        } else {
+        if (!snapshot.exists()) {
             // Get the highest existing userId
             const allUsersSnapshot = await get(usersRef);
             let newUserId = 1;
