@@ -12,7 +12,9 @@ import { useDispatch, useSelector } from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { Modal, Button, Form, Toast, ToastContainer } from 'react-bootstrap';
+import { Modal, Button, Form, Toast} from 'react-bootstrap';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../../../App.css'
 
