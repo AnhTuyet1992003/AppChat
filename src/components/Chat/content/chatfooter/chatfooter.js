@@ -1,26 +1,42 @@
 
 import React, {useState} from 'react';
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
 import {sendChatToPeople} from "../../../../socket/socket";
 import {addNewMessage} from "../../../../redux/action/action";
+import {database, ref, set, child, get} from "../../../../firebase";
+
 
 
 function ChatFooter() {
     const [message, setMessage] = useState('');
     const dispatch = useDispatch();
     const { name } = useParams();
-
-    const handleSendMessage = () => {
+    const username = localStorage.getItem('username');
+    const handleSendMessage = async () => {
         if (message.trim() === '') return;
+
+        // Get the next message ID
+        const nextMessageId = await getNextMessageId();
+
         const newMessage = {
-            name: localStorage.getItem('username'),
+            id: nextMessageId,
+            name: username,
+            to: name,
             mes: message,
             createAt: new Date().toISOString(),
         };
+
         dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
         sendChatToPeople(name, message); // Gửi tin nhắn tới server
+
+        // lưu tin nhắn vao firebase
+        await set(ref(database, 'messages/' + nextMessageId), newMessage);
+
         setMessage(''); // Reset input field
+
+
+
     };
 
     const handleKeyPress = (e) => {
@@ -28,7 +44,14 @@ function ChatFooter() {
             handleSendMessage();
         }
     };
-
+    // hàm lưu id là số tăng dần
+    const getNextMessageId = async () => {
+        const dbRef = ref(database);
+        const snapshot = await get(child(dbRef, 'messages'));
+        const messages = snapshot.val();
+        const ids = messages ? Object.keys(messages).map(Number) : [];
+        return ids.length ? Math.max(...ids) + 1 : 1;
+    };
     if (!name) {
         return null;
     }
