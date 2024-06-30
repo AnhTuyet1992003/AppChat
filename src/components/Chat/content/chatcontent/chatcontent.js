@@ -43,7 +43,7 @@ function ChatContent() {
                 const data = snapshot.val();
                 if (data) {
                     // Lọc tin nhắn theo điều kiện name và to
-                    const messagesArray = Object.values(data).filter(message => (message.name === name && message.to === username) || (message.to === name && message.name === username));
+                    const messagesArray = Object.values(data).filter(message => (message.name === name && message.to === username)|| (message.to === name && message.name === username));
                     messagesArray.forEach(message => {
                         dispatch(addNewMessage(message)); // Cập nhật Redux store với các tin nhắn mới
                     });
