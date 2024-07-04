@@ -20,7 +20,13 @@ import {
     joinRoomFailure,
     checkUserSuccess,
     checkUserError,
+    addNewMessage,
+    getRoomChatMesSuccess,
+    getRoomChatMesFailure,
+    sendChatToRoomSuccess,
+    sendChatToRoomFailure,
 } from "../redux/action/action";
+
 export let socket;
 export let isSocketOpen = false;
 export const messageQueue = [];
@@ -93,8 +99,16 @@ export const initializeSocket = (url) => {
                 if (response.data.type === "people") {
                     if (response.status === "success") {
                         store.dispatch(sendChatToPeopleSuccess(response.data));
+                        store.dispatch(addNewMessage(response.data.message));
                     } else {
                         store.dispatch(sendChatToPeopleFailure(response.error));
+                    }
+                } else if (response.data.type === "room") {
+                    if (response.status === "success") {
+                        store.dispatch(sendChatToRoomSuccess(response.data));
+                        store.dispatch(addNewMessage(response.data.message));
+                    } else {
+                        store.dispatch(sendChatToRoomFailure(response.error));
                     }
                 }
                 break;
@@ -107,10 +121,17 @@ export const initializeSocket = (url) => {
                 }
                 break;
             case "GET_PEOPLE_CHAT_MES":
-                if (response.status === "success"){
+                if (response.status === "success") {
                     store.dispatch(getPeopleChatMesSuccess(response.data));
-                }else{
+                } else {
                     store.dispatch(getPeopleChatMesFailure(response.error));
+                }
+                break;
+            case "GET_ROOM_CHAT_MES":
+                if (response.status === "success") {
+                    store.dispatch(getRoomChatMesSuccess(response.data));
+                } else {
+                    store.dispatch(getRoomChatMesFailure(response.error));
                 }
                 break;
             case "CREATE_ROOM":
@@ -159,19 +180,19 @@ export const initializeSocket = (url) => {
 export const loginUser = (user, pass) => {
     if (!socket) return;
     // socket được mở
-    if (socket.readyState === WebSocket.OPEN){
+    if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
             action: "onchat",
             data: {
                 event: "LOGIN",
-                data:{
+                data: {
                     user: user,
                     pass: pass,
                 },
             },
         }));
         // đang trong quá trình kết nối
-    } else if (socket.readyState === WebSocket.CONNECTING){
+    } else if (socket.readyState === WebSocket.CONNECTING) {
         setTimeout(() => {
             loginUser(user, pass);
         }, 2000);
@@ -208,7 +229,7 @@ export const getUsersList = () => {
     if (!socket) return;
     const request = () => socket.send(JSON.stringify({
         action: "onchat",
-        data: { event: "GET_USER_LIST" },
+        data: {event: "GET_USER_LIST"},
     }));
 
     if (socket.readyState === WebSocket.OPEN) {
@@ -252,6 +273,35 @@ export const getPeopleChatMes = async (name) => {
             if (socket.readyState === WebSocket.OPEN) {
                 clearInterval(intervalId);
                 sendMessage();
+            }
+        }, 100); // Retry every 100ms until connected
+    } else {
+        console.log("Socket is closed");
+    }
+};
+export const getRoomChatMes = async (name) => {
+    if (!socket) return;
+
+    const sendMessage1 = () => {
+        socket.send(JSON.stringify({
+            action: "onchat",
+            data: {
+                event: "GET_ROOM_CHAT_MES",
+                data: {
+                    name: name,
+                    page: 1
+                }
+            }
+        }));
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+        sendMessage1();
+    } else if (socket.readyState === WebSocket.CONNECTING) {
+        const intervalId = setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+                clearInterval(intervalId);
+                sendMessage1();
             }
         }, 100); // Retry every 100ms until connected
     } else {
@@ -307,6 +357,36 @@ export const sendChatToPeople = (to, message) => {
                 event: "SEND_CHAT",
                 data: {
                     type: "people",
+                    to: to,
+                    mes: message
+                }
+            }
+        }));
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+        sendMessage();
+    } else if (socket.readyState === WebSocket.CONNECTING) {
+        const intervalId = setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+                clearInterval(intervalId);
+                sendMessage();
+            }
+        }, 100); // Retry every 100ms until connected
+    } else {
+        console.log("Socket is closed");
+    }
+};
+export const sendChatToRoom = (to, message) => {
+    if (!socket) return;
+
+    const sendMessage = () => {
+        socket.send(JSON.stringify({
+            action: "onchat",
+            data: {
+                event: "SEND_CHAT",
+                data: {
+                    type: "room",
                     to: to,
                     mes: message
                 }

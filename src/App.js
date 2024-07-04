@@ -16,6 +16,7 @@ import ChatContent from "./components/Chat/content/chatcontent/chatcontent";
 import ChatHeader from "./components/Chat/content/chatheader/chatheader";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
+import ChatGroup from "./components/Chat/content/chatcontent/chatgroup";
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDwplCXmmoBcfvUhKX1a50Zzn1mQ4F45xw",
@@ -56,12 +57,15 @@ function App() {
     return (
         <Fragment>
                 <BrowserRouter>
+                    {/*<Redirect exact from="/" to="/Login"/>*/}
                     <Routes>
                         <Route path="/" element={<Navigate to="/Login" replace />} />
                         <Route path="/Login" element={<Login/>} />
                         <Route path="/Home" element={<Home/>}>
-                            <Route path=":name" element={<ChatHeader />} />
-                            <Route path=":name" element={<ChatContent />} />
+                            <Route path=":type/:name" element={<>
+                                <ChatHeader />
+                                <ChatContent />
+                            </>} />
                         </Route>
                         <Route path="/Register" element={<Register/>} />
                         <Route path="/Sidebar" element={<Sidebar/>} />
