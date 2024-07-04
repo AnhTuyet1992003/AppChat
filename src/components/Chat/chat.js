@@ -38,7 +38,7 @@ function ChatBox() {
                         <div className="chat-body h-100 w-100 d-flex flex-column">
                             <ChatHeader />
                             <SearchChat />
-                            <ChatGroup/>
+                            <ChatContent/>
                             {/*{activeComponent === 'ChatFriend' && <ChatFriend name={name} />}*/}
                             {/*{activeComponent === 'ChatGroup' && <ChatGroup name={name} />}*/}
                             <ChatFooter name={name} />
