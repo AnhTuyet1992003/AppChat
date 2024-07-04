@@ -135,7 +135,7 @@ const socketReducer = (state = initialState, action) => {
                 register: {},
             };
         case JOIN_ROOM_SUCCESS:
-            const roomJoin = action.data;
+            const roomJoin = action.data.chatData;
             return {
                 ...state,
                 messages: {error: null},
