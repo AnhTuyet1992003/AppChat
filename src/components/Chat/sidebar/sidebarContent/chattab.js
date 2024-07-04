@@ -155,7 +155,7 @@ function ChatTab({ toggleSidebar }) {
         if (roomName.trim()) {
             await joinRoom(roomName);
             setModalClosed(false);
-            navigate(`/Home/1/${roomName}`);
+            navigate(`/Home/group/${roomName}`);
         } else {
             setErrorMessage("Vui lòng nhập tên nhóm.");
             setShowToast(true);
