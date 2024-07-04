@@ -2,7 +2,7 @@
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
-import {sendChatToPeople} from "../../../../socket/socket";
+import {sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
 import {addNewMessage} from "../../../../redux/action/action";
 import {database, ref, set, child, get} from "../../../../firebase";
 
@@ -11,7 +11,7 @@ import {database, ref, set, child, get} from "../../../../firebase";
 function ChatFooter() {
     const [message, setMessage] = useState('');
     const dispatch = useDispatch();
-    const { name } = useParams();
+    const {type, name } = useParams();
     const username = localStorage.getItem('username');
     const handleSendMessage = async () => {
         if (message.trim() === '') return;
@@ -28,8 +28,12 @@ function ChatFooter() {
         };
 
         dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
-        sendChatToPeople(name, message); // Gửi tin nhắn tới server
-
+        // let data = {"name": username, "type": type, "to": name};
+        if(type==='friend'){
+            sendChatToPeople(name, message); // Gửi tin nhắn tới server
+        }else if(type==='group'){
+            sendChatToRoom(name,message);
+        }
         // lưu tin nhắn vao firebase
         await set(ref(database, 'messages/' + nextMessageId), newMessage);
 
