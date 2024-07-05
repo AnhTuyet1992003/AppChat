@@ -2,27 +2,28 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
     checkUser,
     create_room,
-    getPeopleChatMes,
+    getPeopleChatMes, getRoomChatMes,
     getUsersList,
     initializeSocket,
     joinRoom,
     reLoginUser
 } from "../../../../socket/socket";
 import { useDispatch, useSelector } from "react-redux";
-import {useNavigate, useParams} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { Modal, Button, Form, Toast} from 'react-bootstrap';
+import { Modal, Button, Form, Toast } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../../../../App.css'
+import '../../../../App.css';
 
 function ChatTab({ toggleSidebar }) {
     const dispatch = useDispatch();
     const userList = useSelector(state => state.userList.data || []);
     const navigate = useNavigate();
     const login = useSelector((state) => state.login);
+
     // Tạo phòng
     const [groupName, setGroupName] = useState('');
     const [groupInfo, setGroupInfo] = useState('');
@@ -36,7 +37,7 @@ function ChatTab({ toggleSidebar }) {
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [modalClosed, setModalClosed] = useState(true);
+    const [modalClosed, setModalClosed] = useState(true); // Đã đóng modal
 
     // State quản lý thông báo lỗi và toast
     const [successMessage, setSuccessMessage] = useState('');
@@ -65,13 +66,29 @@ function ChatTab({ toggleSidebar }) {
     const friendsList = userList.filter(user => user.type === 0);
     const groupsList = userList.filter(user => user.type === 1);
 
-    // Sự kiện khi bấm vào 1 người hoặc 1 nhóm để mở đoạn chat
-    const handleUserClick = (name) => {
-        // Lấy tin nhắn người đó
-        getPeopleChatMes(name);
-        // Chuyển trang tới cuộc trò chuyện của người đó
-        navigate(`/Home/${name}`);
+    // Hàm xử lý sự kiện chọn người dùng
+    const onSelectUser = (type, userName) => {
+        console.log(`Selected ${type}: ${userName}`);
     };
+
+    // Sự kiện khi bấm vào 1 người hoặc 1 nhóm để mở đoạn chat
+    const handleUserClick = (user) => {
+        if (user.type === 0) {
+            // Lấy tin nhắn người đó
+            getPeopleChatMes(user.name);
+            // onSelectUser('ChatContent', user.name);
+            // Chuyển trang tới cuộc trò chuyện của người đó
+            navigate(`/Home/friend/${user.name}`);
+        } else if (user.type === 1) {
+            // Tham gia phòng
+            getRoomChatMes(user.name)
+            // joinRoom(user.name);
+            // onSelectUser('ChatGroup', user.name);
+            // Chuyển trang tới cuộc trò chuyện của nhóm
+            navigate(`/Home/group/${user.name}`);
+        }
+    };
+
 
     // Sự kiện bấm vào dấu + để mở bảng
     const handlePlusClick = () => {
@@ -132,13 +149,13 @@ function ChatTab({ toggleSidebar }) {
     }, [createRoomStatus, navigate, groupName, modalClosed]);
 
     const handleRoomNameChange = (e) => setRoomName(e.target.value);
-    // Su kien tham gia phong
+
     const handleJoinRoom = async (e) => {
         e.preventDefault(); // ngăn các sự kiện click
         if (roomName.trim()) {
             await joinRoom(roomName);
             setModalClosed(false);
-            navigate(`/Home/${roomName}`);
+            navigate(`/Home/group/${roomName}`);
         } else {
             setErrorMessage("Vui lòng nhập tên nhóm.");
             setShowToast(true);
@@ -169,6 +186,7 @@ function ChatTab({ toggleSidebar }) {
     };
 
 
+
     // Trạng thái người dùng
     const [userStatuses, setUserStatuses] = useState({});
 
@@ -187,6 +205,7 @@ function ChatTab({ toggleSidebar }) {
             setUserStatuses(statuses);
         };
 
+
         fetchUserStatuses();
     }, [friendsList]);
     return (
@@ -195,7 +214,7 @@ function ChatTab({ toggleSidebar }) {
                 <ul className="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
                     <li className="d-flex justify-content-between align-items-center w-100">
                         <h3 className="mb-0">Chats</h3>
-                        <FontAwesomeIcon icon={faPlus} size="2x" onClick={handlePlusClick}/>
+                        <FontAwesomeIcon icon={faPlus} size="2x" onClick={handlePlusClick} />
                     </li>
                     <li>
                         <ul className="list-inline">
@@ -205,7 +224,7 @@ function ChatTab({ toggleSidebar }) {
                                     type="button"
                                     onClick={toggleSidebar}
                                 >
-                                    <i className="ri-menu-line"/>
+                                    <i className="ri-menu-line" />
                                 </button>
                             </li>
                         </ul>
@@ -250,13 +269,15 @@ function ChatTab({ toggleSidebar }) {
                                 <li>Loading...</li>
                             ) : (
                                 friendsList.map((user, index) => (
-                                    <li className="card contact-item"
+                                    <li
+                                        className="card contact-item"
                                         key={index}
-                                        onClick={() => handleUserClick(user.name)}
+                                        onClick={() => handleUserClick(user)}
                                     >
-                                        <a className="contact-link" href="#"/>
+                                        <a className="contact-link" href="#" />
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
+
                                                 <AvatarComponent
                                                     userName={user.name}
                                                     isLoggedIn={userStatuses[user.name]}
@@ -272,6 +293,7 @@ function ChatTab({ toggleSidebar }) {
                                                             Hi, {user.name}
                                                         </div>
                                                     </div>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -289,38 +311,34 @@ function ChatTab({ toggleSidebar }) {
                         ) : (
                             <ul className="list-unstyled js-contact-list mb-0">
                                 {groupsList.map((group, index) => (
-                                    <li className="card contact-item mb-3"
+                                    <li
+                                        className="card contact-item mb-3"
                                         key={index}
-                                        onClick={() => handleUserClick(group.name)}
+                                        onClick={() => handleUserClick(group)}
                                     >
-                                        <a className="contact-link" href="#"/>
+                                        <a className="contact-link" href="#" />
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
                                                 <div className="avatar avatar-online me-4">
-                                                    <span
-                                                        className="avatar-label bg-soft-info text-info">{group.name.charAt(0)}</span>
+                                                    <span className="avatar-label bg-soft-info text-info">
+                                                        {group.name.charAt(0)}
+                                                    </span>
                                                 </div>
                                                 <div className="flex-grow-1 overflow-hidden">
                                                     <div className="d-flex align-items-center mb-1">
                                                         <h5 className="text-truncate mb-0 me-auto">{group.name}</h5>
-                                                        <p className="small text-muted text-nowrap ms-4 mb-0">11:45
-                                                            AM</p>
+                                                        <p className="small text-muted text-nowrap ms-4 mb-0">11:45 AM</p>
                                                     </div>
                                                     <div className="d-flex align-items-center">
-                                                        <div className="line-clamp me-auto">
-                                                            Hi, {group.name}
-                                                        </div>
+                                                        <div className="line-clamp me-auto">Hi, {group.name}</div>
                                                         <span className="badge rounded-pill bg-primary ms-2">5</span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div
-                                            className="card-footer d-flex align-items-center justify-content-between overflow-hidden">
+                                        <div className="card-footer d-flex align-items-center justify-content-between overflow-hidden">
                                             <h5 className="mb-0 text-truncate">General</h5>
-                                            <p className="mb-0 small text-muted text-nowrap">
-                                                Members
-                                            </p>
+                                            <p className="mb-0 small text-muted text-nowrap">Members</p>
                                         </div>
                                     </li>
                                 ))}
@@ -409,6 +427,7 @@ function ChatTab({ toggleSidebar }) {
     );
 }
 const AvatarComponent = ({ userName, isLoggedIn }) => {
+
     return (
         <div className={`avatar ${isLoggedIn ? 'avatar-online' : 'avatar-busy'}`}>
            <span
@@ -417,4 +436,6 @@ const AvatarComponent = ({ userName, isLoggedIn }) => {
     );
 };
 
+
 export default ChatTab;
+

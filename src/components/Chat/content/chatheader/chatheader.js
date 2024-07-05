@@ -1,18 +1,21 @@
-
 import React, {useEffect} from 'react';
-import {getPeopleChatMes} from "../../../../socket/socket";
+import {getPeopleChatMes, getRoomChatMes} from "../../../../socket/socket";
 import {useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 
 
 function ChatHeader() {
     const messages = useSelector((state) => state.messages?.data);
-    const { name } = useParams();
+    const {type, name} = useParams();
     useEffect(() => {
-        if (name) {
-            getPeopleChatMes(name);
+        if (type && name) {
+            if (type === 'friend') {
+                getPeopleChatMes(name);
+            } else if (type === 'group') {
+                getRoomChatMes(name);
+            }
         }
-    }, [name]);
+    }, [type,name]);
     return (
         <div className="chat-header d-flex align-items-center border-bottom px-2">
             <div className="container-fluid">

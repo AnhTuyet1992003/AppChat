@@ -1,16 +1,20 @@
 
 import React, {useEffect} from 'react';
 import {useParams} from "react-router-dom";
-import {getPeopleChatMes} from "../../../socket/socket";
+import {getPeopleChatMes,getRoomChatMes} from "../../../socket/socket";
 
 
 function UserProfile() {
-    const { name } = useParams();
+    const {type, name } = useParams();
     useEffect(() => {
         if (name) {
-            getPeopleChatMes(name);
+            if (type === 'friend') {
+                getPeopleChatMes(name);
+            } else if (type === 'group') {
+                getRoomChatMes(name);
+            }
         }
-    }, [name]);
+    }, [type,name]);
     return (
         <div className="chat-info h-100 border-start">
             <div className="d-flex flex-column h-100">
