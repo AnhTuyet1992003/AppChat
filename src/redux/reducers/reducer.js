@@ -18,26 +18,28 @@ import {
     CREATE_ROOM_ERROR,
     ADD_NEW_MESSAGE,
     CHECK_USER_SUCCESS,
+
     CHECK_USER_ERROR,
     REGISTER_SUCCESS,
     REGISTER_ERROR,
     SEND_CHAT_TO_ROOM_SUCCESS,
     SEND_CHAT_TO_ROOM_FAILURE,
     GET_ROOM_CHAT_MES_SUCCESS, GET_ROOM_CHAT_MES_FAILURE,
+
 } from "../action/action";
 
 const initialState = {
     register: {},
     login: {},
     logout: {},
-    messages: {data: [], error: null},
-    // chatData: {data: [], error: null},
-    active: {name: '', type: null},
-    userList: {data: null, error: null},
-    checkUser: {status: null, data: null, error: null}, // Thêm trạng thái kiểm tra người dùng
-    userStatuses: {}, // Thêm trạng thái của bạn bè
-    joinRoom: {status: null, data: null, error: null}, // Thêm trạng thái joinRoom
-    createRoom: {status: null, data: null, error: null}, // Thêm trạng thái createRoom
+    messages: { data: [], error: null },
+    active: { name: '', type: null },
+    userList: { data: null, error: null },
+    checkUser: { status: null, data: null, error: null }, // Thêm trạng thái kiểm tra người dùng
+    userStatuses: [],
+    joinRoom: { status: null, data: null, error: null }, // Thêm trạng thái joinRoom
+    createRoom: { status: null, data: null, error: null }, // Thêm trạng thái createRoom
+
 };
 
 const socketReducer = (state = initialState, action) => {
@@ -159,24 +161,17 @@ const socketReducer = (state = initialState, action) => {
                 createRoom: {data: state.createRoom.data, error: action.error, status: 'error'}
             };
         case CHECK_USER_SUCCESS:
-            if (action.payload && action.payload.user) {
-                return {
-                    ...state,
-                    userStatuses: {
-                        ...state.userStatuses,
-                        [action.payload.user]: action.payload.status === 'online' ? 'online' : 'offline',
-                    },
-                    checkUser: {status: 'success', data: action.payload, error: null},
-                };
-            } else {
-                return state; // Xử lý nếu action.payload không hợp lệ
-            }
-
+            return {
+                ...state,
+                userStatuses: action.data, // Update userStatuses with data received
+            };
         case CHECK_USER_ERROR:
             return {
                 ...state,
-                checkUser: {status: 'error', data: null, error: action.payload},
+                userStatuses: [], // Reset userStatuses or handle error case
+           
             };
+
         case GET_PEOPLE_CHAT_MES_SUCCESS:
             return {
                 ...state,
