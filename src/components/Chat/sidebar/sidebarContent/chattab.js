@@ -168,11 +168,27 @@ function ChatTab({ toggleSidebar }) {
         }
     };
 
-    // Memoize the checkUser function
-     const memoizedCheckUser = useCallback((name) => checkUser(name), []);
 
+    // Trạng thái người dùng
+    const [userStatuses, setUserStatuses] = useState({});
 
+    useEffect(() => {
+        const fetchUserStatuses = async () => {
+            const statuses = {};
+            for (const user of friendsList) {
+                try {
+                    const status = await checkUser(user.name);
+                    statuses[user.name] = status === 'online';
+                } catch (error) {
+                    console.error("Error checking user:", error);
+                    statuses[user.name] = false;
+                }
+            }
+            setUserStatuses(statuses);
+        };
 
+        fetchUserStatuses();
+    }, [friendsList]);
     return (
         <div className="d-flex flex-column h-100">
             <div className="tab-header d-flex align-items-center border-bottom">
@@ -241,20 +257,20 @@ function ChatTab({ toggleSidebar }) {
                                         <a className="contact-link" href="#"/>
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
+                                                <AvatarComponent
+                                                    userName={user.name}
+                                                    isLoggedIn={userStatuses[user.name]}
+                                                />
+                                                <div className="flex-grow-1 overflow-hidden">
+                                                    <div className="d-flex align-items-center mb-1">
+                                                        <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
+                                                        <p className="small text-muted text-nowrap ms-4 mb-0">14/03</p>
 
-                                                <AvatarComponent key={user.name}  userName={user.name} checkUser={memoizedCheckUser} />
-                                                <span
-                                                    className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
-                                            </div>
-                                            <div className="flex-grow-1 overflow-hidden">
-                                                <div className="d-flex align-items-center mb-1">
-                                                    <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
-                                                    <p className="small text-muted text-nowrap ms-4 mb-0">14/03</p>
-
-                                                </div>
-                                                <div className="d-flex align-items-center">
-                                                    <div className="line-clamp me-auto">
-                                                        Hi, {user.name}
+                                                    </div>
+                                                    <div className="d-flex align-items-center">
+                                                        <div className="line-clamp me-auto">
+                                                            Hi, {user.name}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -333,13 +349,13 @@ function ChatTab({ toggleSidebar }) {
                 <Modal.Body>
                     <Form>
                         <Form.Group controlId="joinGroupName" className="input-group-custom">
+                            <Form.Text style={{ fontSize: '17px'}}>Nhập tên phòng</Form.Text>
                             <Form.Control
                                 type="text"
                                 placeholder=" "
                                 value={roomName}
                                 onChange={handleRoomNameChange}
                             />
-                            <Form.Label>Nhập tên phòng</Form.Label>
                         </Form.Group>
                     </Form>
                     {successMessage && <p className="text-success">{successMessage}</p>}
@@ -355,6 +371,7 @@ function ChatTab({ toggleSidebar }) {
                 </Modal.Footer>
             </Modal>
 
+
             <Modal show={showCreateModal} onHide={handleCloseModal} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Tạo phòng chat</Modal.Title>
@@ -362,13 +379,13 @@ function ChatTab({ toggleSidebar }) {
                 <Modal.Body>
                     <Form>
                         <Form.Group controlId="createGroupName" className="input-group-custom">
+                            <Form.Text style={{ fontSize: '17px'}}>Nhập tên phòng</Form.Text>
                             <Form.Control
                                 type="text"
                                 placeholder=" "
                                 value={groupName}
                                 onChange={handleGroupNameChange}
                             />
-                            <Form.Label>Nhập tên phòng</Form.Label>
                         </Form.Group>
                     </Form>
                     {successMessageCreate && <p className="text-success">{successMessageCreate}</p>}
@@ -391,28 +408,13 @@ function ChatTab({ toggleSidebar }) {
         </div>
     );
 }
-const AvatarComponent = ({userName}) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const status = await checkUser(userName);
-                setIsLoggedIn(status === 'online');
-            } catch (error) {
-                console.error("Error checking user:", error);
-                setIsLoggedIn(false);
-            }
-        };
-        fetchData();
-    }, [userName]);
-
+const AvatarComponent = ({ userName, isLoggedIn }) => {
     return (
-        <div>
-            <p>{isLoggedIn ? "Online" : "Offline"}</p>
+        <div className={`avatar ${isLoggedIn ? 'avatar-online' : 'avatar-busy'}`}>
+           <span
+               className="avatar-label bg-soft-info text-info">{userName.charAt(0)}</span>
         </div>
     );
 };
-
 
 export default ChatTab;

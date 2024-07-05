@@ -81,5 +81,18 @@ export const JOIN_ROOM_FAILURE = "JOIN_ROOM_FAILURE";
 export const joinRoomFailure = (error) => ({type: JOIN_ROOM_FAILURE, error});
 export const CHECK_USER_SUCCESS = "CHECK_USER_SUCCESS";
 export const CHECK_USER_ERROR = "CHECK_USER_ERROR";
-export const checkUserSuccess = (data) => ({type: CHECK_USER_SUCCESS, data});
-export const checkUserError = (error) => ({type: CHECK_USER_ERROR, error});
+export const checkUserSuccess = (name) => ({
+    type: CHECK_USER_SUCCESS,
+    payload: { name }
+});
+
+export const checkUserError = (name) => ({
+    type: CHECK_USER_ERROR,
+    payload: { name }
+});
+export const UPDATE_USER_STATUS = "UPDATE_USER_STATUS";
+// userActions.js
+export const updateUserStatus = (username, status) => ({
+    type: 'UPDATE_USER_STATUS',
+    payload: { username, status }
+});

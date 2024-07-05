@@ -332,7 +332,7 @@ export const checkUser = (user) => {
     return new Promise((resolve, reject) => {
         // Gửi yêu cầu tới server
         const sendMessage = () => {
-            socket.send(JSON.stringify({
+            const message = JSON.stringify({
                 action: "onchat",
                 data: {
                     event: "CHECK_USER",
@@ -340,7 +340,11 @@ export const checkUser = (user) => {
                         user: user
                     }
                 }
-            }));
+            });
+
+            console.log("Sending request to server:", message); // Log the message to console
+
+            socket.send(message);
         };
 
         // Xử lý phản hồi từ server

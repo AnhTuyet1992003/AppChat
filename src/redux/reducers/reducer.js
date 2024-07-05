@@ -18,7 +18,7 @@ import {
     CREATE_ROOM_ERROR,
     ADD_NEW_MESSAGE,
     CHECK_USER_SUCCESS,
-    CHECK_USER_ERROR, REGISTER_SUCCESS, REGISTER_ERROR,
+    CHECK_USER_ERROR, REGISTER_SUCCESS, REGISTER_ERROR, UPDATE_USER_STATUS,
 } from "../action/action";
 
 const initialState = {
@@ -29,7 +29,7 @@ const initialState = {
     active: { name: '', type: null },
     userList: { data: null, error: null },
     checkUser: { status: null, data: null, error: null }, // Thêm trạng thái kiểm tra người dùng
-    userStatuses: {}, // Thêm trạng thái của bạn bè
+    userStatuses: [],
     joinRoom: { status: null, data: null, error: null }, // Thêm trạng thái joinRoom
     createRoom: { status: null, data: null, error: null }, // Thêm trạng thái createRoom
 };
@@ -141,24 +141,25 @@ const socketReducer = (state = initialState, action) => {
                 createRoom: { data: state.createRoom.data, error: action.error, status: 'error' }
             };
         case CHECK_USER_SUCCESS:
-            if (action.payload && action.payload.user) {
-                return {
-                    ...state,
-                    userStatuses: {
-                        ...state.userStatuses,
-                        [action.payload.user]: action.payload.status === 'online' ? 'online' : 'offline',
-                    },
-                    checkUser: { status: 'success', data: action.payload, error: null },
-                };
-            } else {
-                return state; // Xử lý nếu action.payload không hợp lệ
-            }
-
+            return {
+                ...state,
+                userStatuses: action.data, // Update userStatuses with data received
+            };
         case CHECK_USER_ERROR:
             return {
                 ...state,
-                checkUser: { status: 'error', data: null, error: action.payload },
+                userStatuses: [], // Reset userStatuses or handle error case
             };
+        case UPDATE_USER_STATUS:
+            const { username, status } = action.payload;
+            // Update user status in the store
+            const updatedUserStatuses = state.userStatuses.map(user => {
+                if (user.username === username) {
+                    return { ...user, status };
+                }
+                return user;
+            });
+            return { ...state, userStatuses: updatedUserStatuses };
         case GET_PEOPLE_CHAT_MES_SUCCESS:
             return {
                 ...state,
