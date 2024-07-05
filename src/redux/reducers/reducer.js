@@ -18,7 +18,7 @@ import {
     CREATE_ROOM_ERROR,
     ADD_NEW_MESSAGE,
     CHECK_USER_SUCCESS,
-    CHECK_USER_ERROR, REGISTER_SUCCESS, REGISTER_ERROR, UPDATE_USER_STATUS,
+    CHECK_USER_ERROR, REGISTER_SUCCESS, REGISTER_ERROR,
 } from "../action/action";
 
 const initialState = {
@@ -150,16 +150,7 @@ const socketReducer = (state = initialState, action) => {
                 ...state,
                 userStatuses: [], // Reset userStatuses or handle error case
             };
-        case UPDATE_USER_STATUS:
-            const { username, status } = action.payload;
-            // Update user status in the store
-            const updatedUserStatuses = state.userStatuses.map(user => {
-                if (user.username === username) {
-                    return { ...user, status };
-                }
-                return user;
-            });
-            return { ...state, userStatuses: updatedUserStatuses };
+
         case GET_PEOPLE_CHAT_MES_SUCCESS:
             return {
                 ...state,
