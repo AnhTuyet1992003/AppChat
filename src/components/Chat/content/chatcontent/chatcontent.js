@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { getPeopleChatMes, initializeSocket, reLoginUser } from "../../../../socket/socket";
+import {getPeopleChatMes, initializeSocket, reLoginUser, socket} from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import {database, query, ref, orderByChild, equalTo, onValue } from "../../../../firebase";
@@ -17,7 +17,7 @@ function ChatContent() {
     const messages = useSelector((state) => state.messages?.data);
     // Tạo tham chiếu để cuộn đến cuối tin nhắn
     const messagesEndRef = useRef(null);
-
+    console.log('Messages from Redux:', messages); // Thêm dòng này để kiểm tra dữ liệu tin nhắn từ Redux
     const username = localStorage.getItem("username");
 
     // kiểm tra đăng nhập
@@ -33,45 +33,38 @@ function ChatContent() {
         }
     }, [dispatch, navigate, login, username]);
 
+
     useEffect(() => {
         if (name && username) {
-            const messagesRef = ref(database, 'messages');
-
-            // Truy vấn các tin nhắn gửi từ người dùng hiện tại
-            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
-
-            // Truy vấn các tin nhắn gửi đến người dùng hiện tại
-            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
-
-            const handleValue = (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const messagesArray = Object.values(data).filter(message =>
-                        (message.name === name && message.to === username) ||
-                        (message.to === name && message.name === username)
-                    );
-                    dispatch(addNewMessage(messagesArray));
-                }
-            };
-
-            const userUnsubscribe = onValue(userQuery, handleValue);
-            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
-
-            return () => {
-                userUnsubscribe();
-                toUserUnsubscribe();
-            };
+            getPeopleChatMes(name);
         }
-    }, [name, username, dispatch]);
+    }, [name, username]);
+
+    // useEffect(() => {
+    //     if (name) {
+    //         // Lắng nghe thay đổi từ Firebase cho người dùng hoặc nhóm được chọn
+    //         const messagesRef = ref(database, 'messages');
+    //         onValue(messagesRef, (snapshot) => {
+    //             const data = snapshot.val();
+    //             if (data) {
+    //                 // Lọc tin nhắn theo điều kiện name và to
+    //                 const messagesArray = Object.values(data).filter(message => (message.name === name && message.to === username) || (message.to === name && message.name === username));
+    //                 messagesArray.forEach(message => {
+    //                     dispatch(addNewMessage(message)); // Cập nhật Redux store với các tin nhắn mới
+    //                 });
+    //             }
+    //         });
+    //     }
+    // }, [name, username, dispatch]);
     // cuộn xuong cuối khi co tin nhắn mới
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
     // không hiển thị nếu đoaạn tin nhắn rỗng
-    const filteredMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '') : [];
+    // const filteredMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '') : [];
     // Sap xep tin nhan theo ngay gio gui
-    const sortedMessages = filteredMessages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
+    const sortedMessages = messages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
 
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);

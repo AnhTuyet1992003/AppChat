@@ -56,7 +56,14 @@ export const initializeSocket = (url) => {
             console.error('Received response without event:', response);
             return;
         }
+        if (response.event === "ADD_NEW_MESSAGE") {
+            store.dispatch(addNewMessage(response.data));
+            console.log('Dispatched ADD_NEW_MESSAGE:', response.data); // Thêm dòng này để kiểm tra dữ liệu được dispatch
+        }
         switch (response.event) {
+            case "ADD_NEW_MESSAGE":
+                store.dispatch(addNewMessage(response.data));
+                break;
             // xử lý các sự kiện khác
             case "REGISTER":
                 if (response.status === "success") {

@@ -170,6 +170,7 @@ const socketReducer = (state = initialState, action) => {
                 messages: {data: [], error: action.error}
             };
         case ADD_NEW_MESSAGE:
+            console.log('Reducer - ADD_NEW_MESSAGE:', action.payload); // Thêm dòng này để kiểm tra dữ liệu được nhận vào reducer
             return {
                 ...state,
                 messages: { data: [...state.messages.data, action.payload], error: null }

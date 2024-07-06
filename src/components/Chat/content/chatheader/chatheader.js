@@ -8,11 +8,11 @@ import {useSelector} from "react-redux";
 function ChatHeader() {
     const messages = useSelector((state) => state.messages?.data);
     const { name } = useParams();
-    useEffect(() => {
-        if (name) {
-            getPeopleChatMes(name);
-        }
-    }, [name]);
+    // useEffect(() => {
+    //     if (name) {
+    //         getPeopleChatMes(name);
+    //     }
+    // }, [name]);
     return (
         <div className="chat-header d-flex align-items-center border-bottom px-2">
             <div className="container-fluid">

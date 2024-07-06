@@ -13,32 +13,51 @@ function ChatFooter() {
     const dispatch = useDispatch();
     const { name } = useParams();
     const username = localStorage.getItem('username');
-    const handleSendMessage = async () => {
+    const userList = useSelector(state => state.userList.data || []);
+    const friendsList = userList.filter(user => user.type === 0);
+    const groupsList = userList.filter(user => user.type === 1);
+    // const handleSendMessage = async () => {
+    //     if (message.trim() === '') return;
+    //
+    //     // tạo id mới
+    //     const nextMessageId = await getNextMessageId();
+    //
+    //     const newMessage = {
+    //         id: nextMessageId,
+    //         name: username,
+    //         to: name,
+    //         mes: message,
+    //         createAt: new Date().toISOString(),
+    //     };
+    //
+    //     const isFriend = friendsList.some(user => user.name === name);
+    //     if (isFriend) {
+    //         dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
+    //         sendChatToPeople(name, message); // Gửi tin nhắn tới server
+    //         // lưu tin nhắn vao firebase
+    //         await set(ref(database, 'messages/' + nextMessageId), newMessage);
+    //
+    //         setMessage('');
+    //     }
+    // };
+    const handleSendMessage = () => {
         if (message.trim() === '') return;
 
-        // tạo id mới
-        const nextMessageId = await getNextMessageId();
-
         const newMessage = {
-            id: nextMessageId,
             name: username,
             to: name,
             mes: message,
             createAt: new Date().toISOString(),
         };
 
-        dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
-        sendChatToPeople(name, message); // Gửi tin nhắn tới server
+        const isFriend = friendsList.some(user => user.name === name);
+        if (isFriend) {
+            dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
+            sendChatToPeople(name, message); // Gửi tin nhắn tới server
 
-        // lưu tin nhắn vao firebase
-        await set(ref(database, 'messages/' + nextMessageId), newMessage);
-
-        setMessage('');
-
-
-
+            setMessage('');
+        }
     };
-
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             handleSendMessage();

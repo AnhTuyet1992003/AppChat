@@ -38,6 +38,7 @@ function ChatTab({ toggleSidebar }) {
     const [showModal, setShowModal] = useState(false);
     const [modalClosed, setModalClosed] = useState(true);
 
+
     // State quản lý thông báo lỗi và toast
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
