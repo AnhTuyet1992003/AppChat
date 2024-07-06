@@ -35,6 +35,23 @@ function ChatGroup() {
         }
     }, [dispatch, navigate, login, username]);
 
+    // useEffect(() => {
+    //     if (name) {
+    //         // Lắng nghe thay đổi từ Firebase cho người dùng hoặc nhóm được chọn
+    //         const messagesRef = ref(database, 'messages');
+    //         onValue(messagesRef, (snapshot) => {
+    //             const data = snapshot.val();
+    //             if (data) {
+    //                 // Lọc tin nhắn theo điều kiện name và to
+    //                 const messagesArray = Object.values(data).filter(message => (message.name === name && message.to === username) || (message.to === name && message.name === username));
+    //                 messagesArray.forEach(message => {
+    //                     dispatch(addNewMessage(message)); // Cập nhật Redux store với các tin nhắn mới
+    //                 });
+    //             }
+    //         });
+    //     }
+    // }, [name, username, dispatch]);
+
     useEffect(() => {
         if (name && username) {
             const messagesRef = ref(database, 'messages');

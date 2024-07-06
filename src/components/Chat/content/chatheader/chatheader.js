@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 
 function ChatHeader() {
     const messages = useSelector((state) => state.messages?.data);
+
     const { type, name } = useParams();
 
     useEffect(() => {

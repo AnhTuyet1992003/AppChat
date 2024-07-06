@@ -62,7 +62,14 @@ export const initializeSocket = (url) => {
             console.error('Received response without event:', response);
             return;
         }
+        if (response.event === "ADD_NEW_MESSAGE") {
+            store.dispatch(addNewMessage(response.data));
+            console.log('Dispatched ADD_NEW_MESSAGE:', response.data); // Thêm dòng này để kiểm tra dữ liệu được dispatch
+        }
         switch (response.event) {
+            case "ADD_NEW_MESSAGE":
+                store.dispatch(addNewMessage(response.data));
+                break;
             // xử lý các sự kiện khác
             case "REGISTER":
                 if (response.status === "success") {
@@ -111,6 +118,7 @@ export const initializeSocket = (url) => {
                         store.dispatch(sendChatToRoomFailure(response.error));
                     }
                 }
+                store.dispatch(getUsersList);
                 break;
             case "LOGOUT":
                 if (response.status === "success") {
@@ -225,19 +233,38 @@ export const reLoginUser = (user, code) => {
         console.log("Socket is close")
     }
 };
+// export const getUsersList = () => {
+//     if (!socket) return;
+//     const request = () => socket.send(JSON.stringify({
+//         action: "onchat",
+//         data: {event: "GET_USER_LIST"},
+//     }));
+//
+//     if (socket.readyState === WebSocket.OPEN) {
+//         request();
+//     } else if (socket.readyState === WebSocket.CONNECTING) {
+//         setTimeout(request, 2000);
+//     } else {
+//         console.log("Socket is closed");
+//     }
+// };
 export const getUsersList = () => {
     if (!socket) return;
-    const request = () => socket.send(JSON.stringify({
-        action: "onchat",
-        data: {event: "GET_USER_LIST"},
-    }));
-
     if (socket.readyState === WebSocket.OPEN) {
-        request();
+        socket.send(JSON.stringify({
+            action: "onchat",
+            data: {
+                event: "GET_USER_LIST",
+            },
+        }));
     } else if (socket.readyState === WebSocket.CONNECTING) {
-        setTimeout(request, 2000);
+        console.log("WebSocket connection is still in CONNECTING state. Retry in a moment.");
+        setTimeout(() => {
+            getUsersList();
+        }, 1000); // Retry after 1 second
     } else {
-        console.log("Socket is closed");
+        console.log("WebSocket connection is in CLOSING or CLOSED state.");
+        // Re-establish the WebSocket connection or handle the error as needed
     }
 };
 export const logoutUsers = () => {
