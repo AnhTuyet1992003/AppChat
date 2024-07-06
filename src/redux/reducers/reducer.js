@@ -31,6 +31,7 @@ const initialState = {
     register: {},
     login: {},
     logout: {},
+    listUser:{},
     messages: { data: [], error: null },
     active: { name: '', type: null },
     userList: { data: null, error: null },
@@ -182,15 +183,15 @@ const socketReducer = (state = initialState, action) => {
                 messages: {data: [], error: action.error}
             };
         case GET_ROOM_CHAT_MES_SUCCESS:
-            const newList = action.data.userList.map(user => ({name: user.name, role: "User"}));
+            const newList = action.data.userList.map(user => ({name: user.name}));
             // Phần tử mới
-            const newElement = {name: action.data.own, role: "Own"};
+            const newElement = {name: action.data.own};
             // Sử dụng toán tử spread
             const finalList = [newElement, ...newList];
             return {
                 ...state,
                 messages: {data: action.data.chatData, error: null},
-                // chatData: {data: messages[0].data}
+                listUser: finalList
             };
         case GET_ROOM_CHAT_MES_FAILURE:
             // const messroom = action.data;
@@ -199,6 +200,7 @@ const socketReducer = (state = initialState, action) => {
                 messages: {data: [], error: action.error}
             };
         case ADD_NEW_MESSAGE:
+            console.log('Reducer - ADD_NEW_MESSAGE:', action.payload); // Thêm dòng này để kiểm tra dữ liệu được nhận vào reducer
             return {
                 ...state,
                 messages: {data: [...state.messages.data, action.payload], error: null}
