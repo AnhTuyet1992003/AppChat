@@ -128,6 +128,7 @@ function ChatTab({ toggleSidebar }) {
             if (joinRoomStatus === "success") {
                 setErrorMessage("");
                 setSuccessMessage("Bạn đã tham gia thành công!");
+                handleCloseModal();
             } else if (joinRoomStatus === "error") {
                 setErrorMessage("Phòng không tồn tại. Vui lòng kiểm tra lại.");
                 setShowToast(true);
@@ -149,13 +150,19 @@ function ChatTab({ toggleSidebar }) {
     }, [createRoomStatus, navigate, groupName, modalClosed]);
 
     const handleRoomNameChange = (e) => setRoomName(e.target.value);
+    const nameGroup = userList.filter(user => user.type === 1).map(group => group.name); // Lấy danh sách tên nhóm
 
     const handleJoinRoom = async (e) => {
         e.preventDefault(); // ngăn các sự kiện click
         if (roomName.trim()) {
-            await joinRoom(roomName);
-            setModalClosed(false);
-            navigate(`/Home/group/${roomName}`);
+            if (nameGroup.includes(roomName.trim())) { // Kiểm tra nếu roomName có trong groupsList
+                setErrorMessage("Bạn đã tham gia phòng này.");
+                setShowToast(true);
+            } else {
+                await joinRoom(roomName);
+                setModalClosed(false);
+                navigate(`/Home/group/${roomName}`);
+            }
         } else {
             setErrorMessage("Vui lòng nhập tên nhóm.");
             setShowToast(true);
@@ -177,7 +184,7 @@ function ChatTab({ toggleSidebar }) {
         try {
             await create_room(groupName, groupInfo);
             setModalClosed(false);
-            navigate(`/Home/${groupName}`);
+            navigate(`/Home/group/${groupName}`);
         } catch (error) {
             setErrorMessageCreate('Phòng đã tồn tại. Vui lòng nhập tên khác!');
             setShowToast(true);
