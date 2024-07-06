@@ -2,7 +2,7 @@
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
-import {sendChatToPeople} from "../../../../socket/socket";
+import {sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
 import {addNewMessage} from "../../../../redux/action/action";
 import {database, ref, set, child, get} from "../../../../firebase";
 
@@ -11,53 +11,38 @@ import {database, ref, set, child, get} from "../../../../firebase";
 function ChatFooter() {
     const [message, setMessage] = useState('');
     const dispatch = useDispatch();
-    const { name } = useParams();
+    const {type, name } = useParams();
     const username = localStorage.getItem('username');
-    const userList = useSelector(state => state.userList.data || []);
-    const friendsList = userList.filter(user => user.type === 0);
-    const groupsList = userList.filter(user => user.type === 1);
-    // const handleSendMessage = async () => {
-    //     if (message.trim() === '') return;
-    //
-    //     // tạo id mới
-    //     const nextMessageId = await getNextMessageId();
-    //
-    //     const newMessage = {
-    //         id: nextMessageId,
-    //         name: username,
-    //         to: name,
-    //         mes: message,
-    //         createAt: new Date().toISOString(),
-    //     };
-    //
-    //     const isFriend = friendsList.some(user => user.name === name);
-    //     if (isFriend) {
-    //         dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
-    //         sendChatToPeople(name, message); // Gửi tin nhắn tới server
-    //         // lưu tin nhắn vao firebase
-    //         await set(ref(database, 'messages/' + nextMessageId), newMessage);
-    //
-    //         setMessage('');
-    //     }
-    // };
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (message.trim() === '') return;
 
+        // tạo id mới
+        const nextMessageId = await getNextMessageId();
+
         const newMessage = {
+            id: nextMessageId,
             name: username,
             to: name,
             mes: message,
             createAt: new Date().toISOString(),
         };
 
-        const isFriend = friendsList.some(user => user.name === name);
-        if (isFriend) {
-            dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
+        dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
+        // let data = {"name": username, "type": type, "to": name};
+        if(type==='friend'){
             sendChatToPeople(name, message); // Gửi tin nhắn tới server
-
-            setMessage('');
+        }else if(type==='group'){
+            sendChatToRoom(name,message);
         }
+        // lưu tin nhắn vao firebase
+        await set(ref(database, 'messages/' + nextMessageId), newMessage);
+
+        setMessage('');
+
+
+
     };
+
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             handleSendMessage();

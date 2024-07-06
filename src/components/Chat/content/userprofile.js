@@ -1,16 +1,22 @@
 
 import React, {useEffect} from 'react';
 import {useParams} from "react-router-dom";
-import {getPeopleChatMes} from "../../../socket/socket";
+import {getPeopleChatMes,getRoomChatMes} from "../../../socket/socket";
+import {useSelector} from "react-redux";
 
 
 function UserProfile() {
-    const { name } = useParams();
+    const {type, name } = useParams();
+    const listUser = useSelector((state) => state.listUser);
     useEffect(() => {
         if (name) {
-            getPeopleChatMes(name);
+            if (type === 'friend') {
+                getPeopleChatMes(name);
+            } else if (type === 'group') {
+                getRoomChatMes(name);
+            }
         }
-    }, [name]);
+    }, [type,name]);
     return (
         <div className="chat-info h-100 border-start">
             <div className="d-flex flex-column h-100">
@@ -95,11 +101,22 @@ function UserProfile() {
                         >
                             <ul className="list-group list-group-flush">
                                 <li className="list-group-item py-4">
-                                    <h6 className="mb-1">
-                                        Name
-                                    </h6>
+                                    <h6 className="mb-1">{type === 'group' ? 'Danh sách user' : 'Name'}</h6>
                                     <p className="text-truncate mb-0">
-                                        Ariel Martinez
+                                        {type === 'group' && (
+                                            /* Render danh sách người dùng */
+                                            <div>
+                                                {listUser && listUser.length > 0 ? (
+                                                    <p>
+                                                        {listUser.map((user, index) => (
+                                                            <li key={index}>{user.name}</li>
+                                                        ))}
+                                                    </p>
+                                                ) : (
+                                                    <span>Không có người dùng</span>
+                                                )}
+                                            </div>
+                                        )}
                                     </p>
                                 </li>
                                 <li className="list-group-item py-4">

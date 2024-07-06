@@ -58,7 +58,8 @@ export const createRoomError = (error) => ({type: CREATE_ROOM_ERROR, error});
 // Gửi tin nhắn
 export const SEND_CHAT_TO_PEOPLE_SUCCESS = 'SEND_CHAT_TO_PEOPLE_SUCCESS';
 export const sendChatToPeopleSuccess = (data) => ({ type: SEND_CHAT_TO_PEOPLE_SUCCESS, data });
-
+export const SEND_CHAT_TO_ROOM_SUCCESS = 'SEND_CHAT_TO_ROOM_SUCCESS';
+export const sendChatToRoomSuccess = (data) => ({ type: SEND_CHAT_TO_ROOM_SUCCESS, data });
 //
 export const ADD_NEW_MESSAGE = 'ADD_NEW_MESSAGE';
 
@@ -69,12 +70,17 @@ export const addNewMessage = (messages) => ({
 });
 export const SEND_CHAT_TO_PEOPLE_FAILURE = 'SEND_CHAT_TO_PEOPLE_FAILURE';
 export const sendChatToPeopleFailure = (error) => ({ type: SEND_CHAT_TO_PEOPLE_FAILURE, error });
+export const SEND_CHAT_TO_ROOM_FAILURE = 'SEND_CHAT_TO_ROOM_FAILURE';
+export const sendChatToRoomFailure = (error) => ({ type: SEND_CHAT_TO_ROOM_FAILURE, error });
 // Lay tin nhan cua 2 nguoi
 export const GET_PEOPLE_CHAT_MES_SUCCESS = 'GET_PEOPLE_CHAT_MES_SUCCESS';
 export const getPeopleChatMesSuccess = (data) => ({ type: GET_PEOPLE_CHAT_MES_SUCCESS, data });
-
 export const GET_PEOPLE_CHAT_MES_FAILURE = 'GET_PEOPLE_CHAT_MES_FAILURE';
 export const getPeopleChatMesFailure = (error) => ({ type: GET_PEOPLE_CHAT_MES_FAILURE, error });
+export const GET_ROOM_CHAT_MES_SUCCESS = 'GET_ROOM_CHAT_MES_SUCCESS';
+export const getRoomChatMesSuccess = (data) => ({ type: GET_ROOM_CHAT_MES_SUCCESS, data });
+export const GET_ROOM_CHAT_MES_FAILURE = 'GET_ROOM_CHAT_MES_FAILURE';
+export const getRoomChatMesFailure = (error) => ({ type: GET_ROOM_CHAT_MES_FAILURE, error });
 // Tham gia phòng
 export const JOIN_ROOM_SUCCESS = "JOIN_ROOM_SUCCESS";
 export const joinRoomSuccess = (data) => ({type: JOIN_ROOM_SUCCESS, data});
@@ -83,5 +89,18 @@ export const JOIN_ROOM_FAILURE = "JOIN_ROOM_FAILURE";
 export const joinRoomFailure = (error) => ({type: JOIN_ROOM_FAILURE, error});
 export const CHECK_USER_SUCCESS = "CHECK_USER_SUCCESS";
 export const CHECK_USER_ERROR = "CHECK_USER_ERROR";
-export const checkUserSuccess = (data) => ({type: CHECK_USER_SUCCESS, data});
-export const checkUserError = (error) => ({type: CHECK_USER_ERROR, error});
+export const checkUserSuccess = (name) => ({
+    type: CHECK_USER_SUCCESS,
+    payload: { name }
+});
+
+export const checkUserError = (name) => ({
+    type: CHECK_USER_ERROR,
+    payload: { name }
+});
+export const UPDATE_USER_STATUS = "UPDATE_USER_STATUS";
+// userActions.js
+export const updateUserStatus = (username, status) => ({
+    type: 'UPDATE_USER_STATUS',
+    payload: { username, status }
+});
