@@ -2,7 +2,7 @@
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
-import {sendChatToPeople} from "../../../../socket/socket";
+import {sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
 import {addNewMessage} from "../../../../redux/action/action";
 import {database, ref, set, child, get} from "../../../../firebase";
 
@@ -11,12 +11,12 @@ import {database, ref, set, child, get} from "../../../../firebase";
 function ChatFooter() {
     const [message, setMessage] = useState('');
     const dispatch = useDispatch();
-    const { name } = useParams();
+    const {type, name } = useParams();
     const username = localStorage.getItem('username');
     const handleSendMessage = async () => {
         if (message.trim() === '') return;
 
-        // Get the next message ID
+        // tạo id mới
         const nextMessageId = await getNextMessageId();
 
         const newMessage = {
@@ -28,12 +28,16 @@ function ChatFooter() {
         };
 
         dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
-        sendChatToPeople(name, message); // Gửi tin nhắn tới server
-
+        // let data = {"name": username, "type": type, "to": name};
+        if(type==='friend'){
+            sendChatToPeople(name, message); // Gửi tin nhắn tới server
+        }else if(type==='group'){
+            sendChatToRoom(name,message);
+        }
         // lưu tin nhắn vao firebase
         await set(ref(database, 'messages/' + nextMessageId), newMessage);
 
-        setMessage(''); // Reset input field
+        setMessage('');
 
 
 
@@ -78,7 +82,7 @@ function ChatFooter() {
                             />
                             <button
                                 className="btn btn-white btn-lg border"
-                                type="button"  onClick={handleSendMessage}
+                                type="button"
                             >
                                 <i className="ri-chat-smile-2-line"/>
                             </button>
@@ -90,6 +94,7 @@ function ChatFooter() {
                                 <button
                                     className="btn btn-icon btn-primary btn-lg rounded-circle"
                                     type="submit"
+                                    onClick={handleSendMessage}
                                 >
                                     <i className="ri-send-plane-fill"/>
                                 </button>
