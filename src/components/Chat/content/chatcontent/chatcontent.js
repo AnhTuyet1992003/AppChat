@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
-import {getPeopleChatMes, initializeSocket, reLoginUser} from "../../../../socket/socket";
+import {initializeSocket, reLoginUser} from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import {database, query, ref, orderByChild, equalTo, onValue} from "../../../../firebase";
@@ -19,7 +19,7 @@ function ChatGroup() {
 
     // Tạo tham chiếu để cuộn đến cuối tin nhắn
     const messagesEndRef = useRef(null);
-    console.log('Messages from Redux:', messages); // Thêm dòng này để kiểm tra dữ liệu tin nhắn từ Redux
+
     const username = localStorage.getItem("username");
 
     // kiểm tra đăng nhập
@@ -34,13 +34,6 @@ function ChatGroup() {
             }
         }
     }, [dispatch, navigate, login, username]);
-
-
-    useEffect(() => {
-        if (name && username) {
-            getPeopleChatMes(name);
-        }
-
 
     // useEffect(() => {
     //     if (name) {
@@ -59,6 +52,35 @@ function ChatGroup() {
     //     }
     // }, [name, username, dispatch]);
 
+    useEffect(() => {
+        if (name && username) {
+            const messagesRef = ref(database, 'messages');
+
+            // Truy vấn các tin nhắn gửi từ người dùng hiện tại
+            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
+
+            // Truy vấn các tin nhắn gửi đến người dùng hiện tại
+            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
+
+            const handleValue = (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const messagesArray = Object.values(data).filter(message =>
+                        (message.name === name && message.to === username) ||
+                        (message.to === name && message.name === username)
+                    );
+                    dispatch(addNewMessage(messagesArray));
+                }
+            };
+
+            const userUnsubscribe = onValue(userQuery, handleValue);
+            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
+
+            return () => {
+                userUnsubscribe();
+                toUserUnsubscribe();
+            };
+        }
     }, [name, username, dispatch]);
 
     // cuộn xuong cuối khi co tin nhắn mới
@@ -66,11 +88,10 @@ function ChatGroup() {
         messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
     }, [messages]);
 
-    // không hiển thị nếu đoaạn tin nhắn rỗng
+    // không hiển thị nếu đoạn tin nhắn rỗng
     const filteredMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '') : [];
-
     // Sap xep tin nhan theo ngay gio gui
-    const sortedMessages = messages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
+    const sortedMessages = filteredMessages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
 
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);

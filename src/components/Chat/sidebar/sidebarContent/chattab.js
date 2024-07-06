@@ -6,7 +6,7 @@ import {
     getUsersList,
     initializeSocket,
     joinRoom,
-    reLoginUser
+    reLoginUser, sendChatToPeople
 } from "../../../../socket/socket";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +24,9 @@ function ChatTab({ toggleSidebar }) {
     const navigate = useNavigate();
     const login = useSelector((state) => state.login);
 
+    //Gửi tin nhăn đến 1 user
+    const [nameUser, setnameUser] = useState('');
+
     // Tạo phòng
     const [groupName, setGroupName] = useState('');
     const [groupInfo, setGroupInfo] = useState('');
@@ -34,11 +37,11 @@ function ChatTab({ toggleSidebar }) {
     const joinRoomStatus = useSelector(state => state.joinRoom.status);
 
     // State quản lý việc hiển thị modal
+    const [showCreateNewChat, setShowCreateNewChat] = useState(false);
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalClosed, setModalClosed] = useState(true); // Đã đóng modal
-
 
     // State quản lý thông báo lỗi và toast
     const [successMessage, setSuccessMessage] = useState('');
@@ -60,8 +63,20 @@ function ChatTab({ toggleSidebar }) {
     }, [dispatch, navigate, login]);
 
     useEffect(() => {
-        getUsersList();
-    }, [dispatch]);
+        const fetchData = async () => {
+            try {
+                // Lấy danh sách người dùng
+                await dispatch(getUsersList);
+
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        };
+
+        fetchData().then(() => {});
+    }, []);
+    //     getUsersList();
+    // }, [dispatch]);
 
     // Danh sách các người dùng
     const friendsList = userList.filter(user => user.type === 0);
@@ -100,6 +115,7 @@ function ChatTab({ toggleSidebar }) {
     const handleCloseModal = () => {
         setShowModal(false);
         setShowJoinModal(false);
+        setShowCreateNewChat(false);
         setShowCreateModal(false);
         setErrorMessageCreate('');
         setSuccessMessageCreate('');
@@ -122,7 +138,10 @@ function ChatTab({ toggleSidebar }) {
         setShowModal(false);
         setShowCreateModal(true);
     };
-
+    const handleCreateNewChatClick = () => {
+        setShowModal(false);
+        setShowCreateNewChat(true);
+    };
     // Tham gia phòng
     useEffect(() => {
         if (!modalClosed) {
@@ -168,6 +187,29 @@ function ChatTab({ toggleSidebar }) {
             setErrorMessage("Vui lòng nhập tên nhóm.");
             setShowToast(true);
         }
+    };
+    const handleNameUserChange = (e) => setnameUser(e.target.value);
+    const handleCreateNewChat = async (e) => {
+        e.preventDefault(); // ngăn các sự kiện click
+        const fecthCreateNewChat = async () => {
+            if (nameUser.trim()) {
+                const userExists = friendsList.some(user => user.name === nameUser.trim());
+                if (userExists) {
+                    navigate(`/Home/friend/${nameUser}`);
+                } else {
+                    sendChatToPeople(nameUser, "");
+                    setModalClosed(true);
+                    navigate(`/Home/friend/${nameUser}`);
+                    // dispatch(getUsersList());
+                }
+            } else {
+                setErrorMessage("Vui lòng nhập tên người cần nhắn.");
+                setShowToast(true);
+            }
+        }
+        fecthCreateNewChat().then(r => {
+            dispatch(getUsersList);
+        });
     };
 
     const handleGroupNameChange = (e) => setGroupName(e.target.value);
@@ -360,14 +402,51 @@ function ChatTab({ toggleSidebar }) {
                     <Modal.Title>Lựa chọn</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="text-center">
-                    <Button variant="primary" onClick={handleCreateClick} className="m-2">
-                        Tạo phòng
-                    </Button>
-                    <Button variant="secondary" onClick={handleJoinClick} className="m-2">
-                        Tham gia phòng
-                    </Button>
+                    <div>
+                        <Button className="btn btn-primary" onClick={handleCreateNewChatClick}>
+                            Tạo cuộc trò chuyện mới
+                        </Button>
+                    </div>
+                    <div className="mb-3">
+                        <Button variant="primary" onClick={handleCreateClick} className="m-2">
+                            Tạo phòng
+                        </Button>
+                        <Button variant="secondary" onClick={handleJoinClick} className="m-2">
+                            Tham gia phòng
+                        </Button>
+                    </div>
                 </Modal.Body>
             </Modal>
+
+            <Modal show={showCreateNewChat} onHide={handleCloseModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Gửi tin nhắn tới</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="createGroupName" className="input-group-custom">
+                            <Form.Text style={{ fontSize: '17px'}}>Nhập tên người bạn muốn gửi tin nhắn</Form.Text>
+                            <Form.Control
+                                type="text"
+                                placeholder=" "
+                                value={nameUser}
+                                onChange={handleNameUserChange}
+                            />
+                        </Form.Group>
+                    </Form>
+                    {successMessageCreate && <p className="text-success">{successMessageCreate}</p>}
+                    {errorMessageCreate && <p className="text-danger">{errorMessageCreate}</p>}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Đóng
+                    </Button>
+                    <Button variant="primary" onClick={handleCreateNewChat}>
+                        Gửi
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
             <Modal show={showJoinModal} onHide={handleCloseModal} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Tham gia phòng chat</Modal.Title>
@@ -426,6 +505,7 @@ function ChatTab({ toggleSidebar }) {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
             <ToastContainer position="top-end" className="p-3">
                 <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide>
                     <Toast.Body>{errorMessage}</Toast.Body>
@@ -446,4 +526,3 @@ const AvatarComponent = ({ userName, isLoggedIn }) => {
 
 
 export default ChatTab;
-
