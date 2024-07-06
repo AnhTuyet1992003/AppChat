@@ -36,11 +36,7 @@ function ChatFooter() {
         }
         // lưu tin nhắn vao firebase
         await set(ref(database, 'messages/' + nextMessageId), newMessage);
-
         setMessage('');
-
-
-
     };
 
     const handleKeyPress = (e) => {

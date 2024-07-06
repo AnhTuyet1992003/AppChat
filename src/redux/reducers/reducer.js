@@ -34,6 +34,7 @@ const initialState = {
     logout: {},
     listUser:{},
     messages: { data: [], error: null },
+    message1:{data:[]},
     active: { name: '', type: null },
     userList: { data: null, error: null },
     checkUser: { status: null, data: null, error: null }, // Thêm trạng thái kiểm tra người dùng
@@ -192,6 +193,7 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 messages: {data: action.data.chatData, error: null},
+                message1: {data: action.data.chatData},
                 listUser: finalList
             };
         case GET_ROOM_CHAT_MES_FAILURE:

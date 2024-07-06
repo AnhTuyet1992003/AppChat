@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 function ChatHeader() {
-    const messages = useSelector((state) => state.messages?.data);
+    const messages = useSelector(state => state.messages?.data);
     const { type, name } = useParams();
 
     useEffect(() => {
@@ -53,7 +53,7 @@ function ChatHeader() {
                                     className="btn btn-icon btn-base"
                                     data-bs-target="#search-chat"
                                     data-bs-toggle="collapse"
-                                    title="Search"
+                                    title="Tìm kiếm"
                                     type="button"
                                 >
                                     <i className="ri-search-line"/>
@@ -62,7 +62,7 @@ function ChatHeader() {
                             <li className="list-inline-item d-none d-sm-inline-block">
                                 <button
                                     className="chat-info-toggle btn btn-icon btn-base"
-                                    title="Chat info"
+                                    title="Thông tin Chat"
                                     type="button"
                                 >
                                     <i className="ri-user-3-line"/>
@@ -88,7 +88,7 @@ function ChatHeader() {
                                                 data-bs-toggle="collapse"
                                                 href="#"
                                             >
-                                                Search
+                                                Tìm kiếm
                                                 <i className="ri-search-line"/>
                                             </a>
                                         </li>
@@ -97,7 +97,7 @@ function ChatHeader() {
                                                 className="chat-info-toggle dropdown-item d-flex align-items-center justify-content-between"
                                                 href="#"
                                             >
-                                                Chat Info
+                                                Thông tin Chat
                                                 <i className="ri-information-line"/>
                                             </a>
                                         </li>
@@ -106,7 +106,7 @@ function ChatHeader() {
                                                 className="dropdown-item d-flex align-items-center justify-content-between"
                                                 href="#"
                                             >
-                                                Archive
+                                                Lưu trữ
                                                 <i className="ri-archive-line"/>
                                             </a>
                                         </li>
@@ -115,7 +115,7 @@ function ChatHeader() {
                                                 className="dropdown-item d-flex align-items-center justify-content-between"
                                                 href="#"
                                             >
-                                                Mute
+                                                Tắt tiếng
                                                 <i className="ri-volume-mute-line"/>
                                             </a>
                                         </li>
@@ -127,7 +127,7 @@ function ChatHeader() {
                                                 className="dropdown-item d-flex align-items-center justify-content-between"
                                                 href="#"
                                             >
-                                                Block
+                                                Chặn
                                                 <i className="ri-forbid-line"/>
                                             </a>
                                         </li>
