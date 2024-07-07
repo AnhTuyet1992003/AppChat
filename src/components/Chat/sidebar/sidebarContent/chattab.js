@@ -17,6 +17,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../../../App.css';
+import debounce from 'lodash.debounce';
 
 function ChatTab({ toggleSidebar }) {
     const dispatch = useDispatch();
@@ -235,29 +236,51 @@ function ChatTab({ toggleSidebar }) {
         }
     };
 
-
-
     // Trạng thái người dùng
     const [userStatuses, setUserStatuses] = useState({});
+    const [userStatusCache, setUserStatusCache] = useState({});
 
-    useEffect(() => {
-        const fetchUserStatuses = async () => {
+    const debouncedFetchUserStatuses = useCallback(
+        debounce(async (friendsList) => {
             const statuses = {};
+            const newCache = { ...userStatusCache };
+
             for (const user of friendsList) {
                 try {
                     const status = await checkUser(user.name);
-                    statuses[user.name] = status === 'online';
+                    if (status === 'online') {
+                        newCache[user.name] = true;
+                        statuses[user.name] = true;
+                    } else {
+                        delete newCache[user.name];
+                        statuses[user.name] = false; // Đặt trạng thái người dùng thành false nếu họ đăng xuất
+                    }
                 } catch (error) {
                     console.error("Error checking user:", error);
-                    statuses[user.name] = false;
+                    delete newCache[user.name];
+                    statuses[user.name] = false; // Đặt trạng thái người dùng thành false nếu có lỗi
                 }
             }
-            setUserStatuses(statuses);
-        };
+
+            setUserStatusCache(newCache);
+            setUserStatuses((prevStatuses) => {
+                const newStatuses = { ...prevStatuses };
+                for (const key in statuses) {
+                    newStatuses[key] = statuses[key];
+                }
+                return newStatuses;
+            });
+        }, 300),
+        [userStatusCache]
+    );
+    useEffect(() => {
+        debouncedFetchUserStatuses(userList);
+    }, [userList, debouncedFetchUserStatuses]);
 
 
-        fetchUserStatuses();
-    }, [friendsList]);
+
+
+
     return (
         <div className="d-flex flex-column h-100">
             <div className="tab-header d-flex align-items-center border-bottom">
@@ -327,11 +350,14 @@ function ChatTab({ toggleSidebar }) {
                                         <a className="contact-link" href="#" />
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
+                                                <div className="avatar-container">
+                                                    <div
+                                                        className={`avatar ${userStatuses[user.name] ? 'avatar-online' : 'avatar-busy'}`}>
+                                                        <span
+                                                            className="avatar-label bg-soft-info text-info">{user.name.charAt(0)}</span>
+                                                    </div>
+                                                </div>
 
-                                                <AvatarComponent
-                                                    userName={user.name}
-                                                    isLoggedIn={userStatuses[user.name]}
-                                                />
                                                 <div className="flex-grow-1 overflow-hidden">
                                                     <div className="d-flex align-items-center mb-1">
                                                         <h5 className="text-truncate mb-0 me-auto">{user.name}</h5>
@@ -514,15 +540,7 @@ function ChatTab({ toggleSidebar }) {
         </div>
     );
 }
-const AvatarComponent = ({ userName, isLoggedIn }) => {
 
-    return (
-        <div className={`avatar ${isLoggedIn ? 'avatar-online' : 'avatar-busy'}`}>
-           <span
-               className="avatar-label bg-soft-info text-info">{userName.charAt(0)}</span>
-        </div>
-    );
-};
 
 
 export default ChatTab;
