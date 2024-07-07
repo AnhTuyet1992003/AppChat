@@ -79,18 +79,19 @@ function ChatContent() {
     };
 
     const renderMessageContent = (message) => {
-        const decodedMessage = decode(message.mes);
+        // const decodedMessage = decode(message.mes);
         if (message.mes.startsWith('GIF:')) {
-            const gifUrl = decodedMessage.replace('GIF:', '');
+            const gif = message.mes.replace('GIF:','')
+            const gifUrl = decode(gif);
             return (
                 <div className="message-gif">
-                    <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '200px' }} />
+                    <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '450px' }} />
                 </div>
             );
         } else {
             return (
                 <div className="message-content">
-                    <span>{decodedMessage}</span>
+                    <span>{decode(message.mes)}</span>
                 </div>
             );
         }
