@@ -13,7 +13,7 @@ export function decode(encodedText) {
         return encodedText;
     }
     try {
-        encodedText = encodedText.replace('encode', '');
+        encodedText = encodedText.replace('encode','');
         const byteArray = new Uint8Array(encodedText.split(',').map(byte => parseInt(byte)));
         return decoder.decode(byteArray);
     } catch (error) {
