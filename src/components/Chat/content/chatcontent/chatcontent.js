@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import {database, query, ref, orderByChild, equalTo, onValue} from "../../../../firebase";
 import {addNewMessage} from "../../../../redux/action/action";
+import {decode} from "../../../../utill/convert-text";
 
 function ChatGroup() {
     // Lấy trạng thái đăng nhập từ Redux store
@@ -34,6 +35,23 @@ function ChatGroup() {
             }
         }
     }, [dispatch, navigate, login, username]);
+
+    // useEffect(() => {
+    //     if (name) {
+    //         // Lắng nghe thay đổi từ Firebase cho người dùng hoặc nhóm được chọn
+    //         const messagesRef = ref(database, 'messages');
+    //         onValue(messagesRef, (snapshot) => {
+    //             const data = snapshot.val();
+    //             if (data) {
+    //                 // Lọc tin nhắn theo điều kiện name và to
+    //                 const messagesArray = Object.values(data).filter(message => (message.name === name && message.to === username) || (message.to === name && message.name === username));
+    //                 messagesArray.forEach(message => {
+    //                     dispatch(addNewMessage(message)); // Cập nhật Redux store với các tin nhắn mới
+    //                 });
+    //             }
+    //         });
+    //     }
+    // }, [name, username, dispatch]);
 
     useEffect(() => {
         if (name && username) {
@@ -128,7 +146,7 @@ function ChatGroup() {
                                 <div className="message-item">
                                     <div className="message-content">
                                         <span>
-                                            {message.mes}
+                                            {decode(message.mes)}
                                         </span>
                                     </div>
                                     <div className="dropdown align-self-center">

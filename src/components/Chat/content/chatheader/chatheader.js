@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 function ChatHeader() {
-    const messages = useSelector(state => state.messages?.data);
+    const messages = useSelector((state) => state.messages?.data);
     const { type, name } = useParams();
 
     useEffect(() => {
