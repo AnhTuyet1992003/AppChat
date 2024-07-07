@@ -85,7 +85,7 @@ function ChatContent() {
             const gifUrl = decode(gif);
             return (
                 <div className="message-gif">
-                    <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '450px' }} />
+                    <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '450px', borderRadius:'12px' }} />
                 </div>
             );
         } else {
