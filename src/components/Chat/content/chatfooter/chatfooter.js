@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { sendChatToPeople, sendChatToRoom } from "../../../../socket/socket";
-import {addNewMessage, sendChatSuccess} from "../../../../redux/action/action";
+import { addNewMessage } from "../../../../redux/action/action";
 import { database, ref, set, child, get } from "../../../../firebase";
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import {encode} from "../../../../utill/convert-text";
+import { encode } from "../../../../utill/convert-text";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGift } from "@fortawesome/free-solid-svg-icons/faGift";
 
 function ChatFooter() {
     const [message, setMessage] = useState('');
@@ -15,41 +17,47 @@ function ChatFooter() {
     const { type, name } = useParams();
     const username = localStorage.getItem('username');
     const [isPickerVisible, setPickerVisible] = useState(false);
+    const [isGifPickerVisible, setGifPickerVisible] = useState(false);
 
-    const handleSendMessage = async () => {
-        if (message.trim() === '') return;
+    const gifList = [
+        "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanNqMHpxcHo2cDFmbDlqNHk5Y3BhNHpzYTZqdjk2dTU4NWg0NndlZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7vDoUoDZHoUQxMPkd7/giphy.webp",
+        "https://media0.giphy.com/media/oKQGM5S2mwx5C/giphy.webp?cid=82a1493bo0nvjpdk35jsd5n6qte8jj8sruymuqpbsglhm5y0&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
+        "https://media0.giphy.com/media/e6BTJ8bAak7V5Kv2FB/200.webp?cid=82a1493bzu5igskf5yvdc25le0xzjfd0ue30lgvdc0cyxh6y&ep=v1_gifs_trending&rid=200.webp&ct=g",
+        "https://media3.giphy.com/media/C5oD3WouufnWORp7wP/giphy.webp?cid=82a1493bhnnzmesl9xiapoa4638em1rrncm6up7ed6074xt6&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
+        "https://media2.giphy.com/media/J2WQhnfK2WuUE/200.webp?cid=82a1493bhnnzmesl9xiapoa4638em1rrncm6up7ed6074xt6&ep=v1_gifs_trending&rid=200.webp&ct=g",
+        "https://media4.giphy.com/media/8H80IVPjAdKY8/200w.webp?cid=82a1493bhgilpwzgp6jfkr8lwq49yj294ind9yamxjudvii3&ep=v1_gifs_trending&rid=200w.webp&ct=g",
+        "https://media0.giphy.com/media/xD6m65jnkgkwTSOnDp/giphy.webp?cid=790b7611cb8xqe66nq90srrbhyquz14gy2uqj5d1vua9r0ry&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
+        "https://media1.giphy.com/media/YTbZzCkRQCEJa/200.webp?cid=790b7611cb8xqe66nq90srrbhyquz14gy2uqj5d1vua9r0ry&ep=v1_gifs_trending&rid=200.webp&ct=g",
+        "https://media1.giphy.com/media/tHIRLHtNwxpjIFqPdV/giphy.webp?cid=790b7611cb8xqe66nq90srrbhyquz14gy2uqj5d1vua9r0ry&ep=v1_gifs_trending&rid=giphy.webp&ct=g"
+    ];
+
+    const sendMessage = async (content, isGif = false) => {
+        if (content.trim() === '') return;
 
         const nextMessageId = await getNextMessageId();
+        const encodedContent = isGif ? `GIF:${encode(content)}` : encode(content);
 
         const newMessage = {
             id: nextMessageId,
             name: username,
             to: name,
-            mes: message,
+            mes: encodedContent,
             createAt: new Date().toISOString(),
         };
 
         dispatch(addNewMessage(newMessage));
 
-        // let mess3 = [];
-        // if (message !== '') {
-        //     let mess2 = {};
-        //     mess2 = {type: "text", content: encode(message)};
-        //     mess3.push(mess2);
-        //     setMessage('');
-        // }
-
-        // let data = {"name": username, "type": type, "to": name, "mes": JSON.stringify(mess3)};
-        // let mess2 = {};
-        // mess2 = encode(message);
         if (type === 'friend') {
-            sendChatToPeople(name,encode(message));
-            // dispatch(sendChatSuccess(data));
+            sendChatToPeople(name, encodedContent);
         } else if (type === 'group') {
-            sendChatToRoom(name, encode(message));
+            sendChatToRoom(name, encodedContent);
         }
 
         await set(ref(database, 'messages/' + nextMessageId), newMessage);
+    };
+
+    const handleSendMessage = () => {
+        sendMessage(message);
         setMessage('');
         setPickerVisible(false);
     };
@@ -58,6 +66,11 @@ function ChatFooter() {
         if (e.key === 'Enter') {
             handleSendMessage();
         }
+    };
+
+    const handleGifClick = (gifUrl) => {
+        sendMessage(gifUrl, true);
+        setGifPickerVisible(false);
     };
 
     const getNextMessageId = async () => {
@@ -73,16 +86,20 @@ function ChatFooter() {
     }
 
     return (
-        <div className="chat-footer d-flex align-items-center border-top px-2" >
+        <div className="chat-footer d-flex align-items-center border-top px-2">
             <div className="container-fluid" style={{ border: '1px solid #black' }}>
                 <div className="d-flex align-items-center g-4">
                     <div className="input-group">
-                        <button className="btn btn-white btn-lg border-0" type="button" onClick={() => setPickerVisible(!isPickerVisible)}>
+                        <button className="btn btn-white btn-lg border-0" type="button"
+                                onClick={() => setPickerVisible(!isPickerVisible)}>
                             <i className="far fa-grin" style={{ fontSize: '24px' }}></i>
                         </button>
+                        <button className="btn btn-white btn-lg border-0" type="button"
+                                onClick={() => setGifPickerVisible(!isGifPickerVisible)}>
+                            <FontAwesomeIcon icon={faGift} style={{ fontSize: '24px' }} />
+                        </button>
                         <div className={isPickerVisible ? 'd-block' : 'd-none'}
-                             style={{ position: 'absolute', bottom: '80px', zIndex: 1000 }}
-                        >
+                             style={{ position: 'absolute', bottom: '80px', zIndex: 1000 }}>
                             <Picker data={data} previewPosition="none" onEmojiSelect={(e) => {
                                 setMessage(message + e.native);
                             }} />
@@ -98,10 +115,10 @@ function ChatFooter() {
                             style={{ borderRadius: '0' }}
                         />
                         <button className="btn btn-white btn-lg border-0" type="button">
-                            <i className="ri-attachment-2"/>
+                            <i className="ri-attachment-2" />
                         </button>
                         <button className="btn btn-white btn-lg border-0" type="button">
-                            <i className="ri-chat-smile-2-line"/>
+                            <i className="ri-chat-smile-2-line" />
                         </button>
                     </div>
                     <button
@@ -109,10 +126,26 @@ function ChatFooter() {
                         type="submit"
                         onClick={handleSendMessage}
                     >
-                        <i className="ri-send-plane-fill"/>
+                        <i className="ri-send-plane-fill" />
                     </button>
                 </div>
             </div>
+
+            {isGifPickerVisible && (
+                <div className="gif-picker" style={{ position: 'absolute', bottom: '80px', zIndex: 1000, backgroundColor: 'white', padding: '10px', borderRadius: '8px' }}>
+                    <div className="d-flex flex-wrap">
+                        {gifList.map((gifUrl, index) => (
+                            <img
+                                key={index}
+                                src={gifUrl}
+                                alt={`gif-${index}`}
+                                style={{ width: '100px', height: '100px', margin: '5px', cursor: 'pointer' }}
+                                onClick={() => handleGifClick(gifUrl)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
