@@ -8,6 +8,7 @@ const Logout = () => {
     const dispatch = useDispatch();
     const logoutStatus = useSelector((state) => state.logout.status);
     const navigate = useNavigate();
+    const username = localStorage.getItem('username')
 
     useEffect(() => {
         const ws = initializeSocket('ws://140.238.54.136:8080/chat/chat');
@@ -80,7 +81,7 @@ const Logout = () => {
                                     JD
                                 </span>
                             </div>
-                            <h5 className="m-1">John Davis</h5>
+                            <h5 className="m-1">{username}</h5>
                             <p className="text-muted">Online</p>
                         </div>
                     </div>

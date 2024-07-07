@@ -1,22 +1,26 @@
-/*.App {*/
-/*    font-family: sans-serif;*/
-/*    text-align: center;*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    flex-direction: column;*/
-/*    color: #fff;*/
-/*}*/
+.App {
+    font-family: sans-serif;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    color: #fff;
+}
 
-/*.EmojiPickerReact {*/
-/*    position: absolute !important;*/
-/*    bottom: 100% !important;*/
-/*    display: none !important;*/
-/*}*/
+.EmojiPickerReact {
+    position: absolute !important;
+    bottom: 100% !important;
+    display: none !important;
+}
 
-/*.App .EmojiPickerReact {*/
-/*    --epr-picker-height: 500px;*/
-/*}*/
+.App .EmojiPickerReact {
+    --epr-picker-height: 500px;
+}
 
-/*.show-emoji {*/
-/*    padding-bottom: 15px;*/
-/*}*/
+.show-emoji {
+    padding-bottom: 15px;
+}
+.chat-content {
+    overflow-y: auto; /* Thiết lập thanh cuộn dọc khi nội dung vượt quá kích thước */
+    max-height: calc(100vh - 200px); /* Giới hạn chiều cao của chat content, để lại không gian cho footer và header */
+}
