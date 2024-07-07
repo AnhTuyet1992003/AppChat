@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import {database, query, ref, orderByChild, equalTo, onValue} from "../../../../firebase";
 import {addNewMessage} from "../../../../redux/action/action";
+import {decode} from "../../../../utill/convert-text";
 
 function ChatGroup() {
     // Lấy trạng thái đăng nhập từ Redux store
@@ -132,7 +133,7 @@ function ChatGroup() {
                                 <div className="message-item">
                                     <div className="message-content">
                                         <span>
-                                            {message.mes}
+                                            {decode(message.mes)}
                                         </span>
                                     </div>
                                     <div className="dropdown align-self-center">

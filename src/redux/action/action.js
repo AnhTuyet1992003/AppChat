@@ -56,6 +56,8 @@ export const createRoomSuccess = (data) => ({type: CREATE_ROOM_SUCCESS, data});
 export const createRoomError = (error) => ({type: CREATE_ROOM_ERROR, error});
 
 // Gửi tin nhắn
+export const SEND_CHAT_SUCCESS = "SEND_CHAT_SUCCESS";
+export const sendChatSuccess = (data) => ({type: SEND_CHAT_SUCCESS, data});
 export const SEND_CHAT_TO_PEOPLE_SUCCESS = 'SEND_CHAT_TO_PEOPLE_SUCCESS';
 export const sendChatToPeopleSuccess = (data) => ({ type: SEND_CHAT_TO_PEOPLE_SUCCESS, data });
 export const SEND_CHAT_TO_ROOM_SUCCESS = 'SEND_CHAT_TO_ROOM_SUCCESS';

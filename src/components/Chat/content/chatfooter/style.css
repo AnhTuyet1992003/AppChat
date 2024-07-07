@@ -1,0 +1,22 @@
+/*.App {*/
+/*    font-family: sans-serif;*/
+/*    text-align: center;*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    flex-direction: column;*/
+/*    color: #fff;*/
+/*}*/
+
+/*.EmojiPickerReact {*/
+/*    position: absolute !important;*/
+/*    bottom: 100% !important;*/
+/*    display: none !important;*/
+/*}*/
+
+/*.App .EmojiPickerReact {*/
+/*    --epr-picker-height: 500px;*/
+/*}*/
+
+/*.show-emoji {*/
+/*    padding-bottom: 15px;*/
+/*}*/

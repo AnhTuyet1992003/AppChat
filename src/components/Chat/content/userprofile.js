@@ -105,7 +105,7 @@ function UserProfile() {
                                     <p className="text-truncate mb-0">
                                         {type === 'group' && (
                                             /* Render danh sách người dùng */
-                                            <div>
+                                            <div style={{ marginLeft: '30px' }}>
                                                 {listUser && listUser.length > 0 ? (
                                                     <p>
                                                         {listUser.map((user, index) => (
