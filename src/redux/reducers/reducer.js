@@ -1,3 +1,4 @@
+
 import {
     GET_USER_LIST_FAILURE,
     GET_USER_LIST_SUCCESS,
@@ -25,9 +26,8 @@ import {
     GET_ROOM_CHAT_MES_SUCCESS, GET_ROOM_CHAT_MES_FAILURE, SEND_CHAT_SUCCESS,
 
 } from "../action/action";
+import { format } from 'date-fns'; // Import format từ date-fns
 import {sendChatToPeople} from "../../socket/socket"
-import { format } from 'date-fns';
-
 const initialState = {
     register: {},
     login: {},
@@ -100,9 +100,7 @@ const socketReducer = (state = initialState, action) => {
                 userList: {data: null, error: action.error},
             };
         case SEND_CHAT_TO_PEOPLE_SUCCESS:
-            // Lấy dữ liệu tin nhắn mới từ action payload
             let newmess = action.payload;
-            // Kiểm tra xem danh sách người dùng có tồn tại và người dùng mới có trong danh sách không
             if (state.userList.data && state.userList.data.findIndex(user => user && user.name === newmess.name && user.type === newmess.type) === -1) {
                 // Nếu không có, gửi tin nhắn trống đến người dùng mới để khởi tạo cuộc trò chuyện
                 sendChatToPeople(newmess.name, "");
@@ -131,18 +129,10 @@ const socketReducer = (state = initialState, action) => {
                 ...state,
                 messages: {data: null, error: action.error},
             };
-        // case SEND_CHAT_SUCCESS:
-        //     const newPeople = action.payload;
-        //     // const userExists = state.userList.data.findIndex(user => user.name === newPeople.name && user.type === newPeople.type) !== -1;
-        //     //
-        //     // if (!userExists) {
-        //     //     sendChatToPeople(newPeople.name, " ");
-        //     // }
-        //     return {
-        //         ...state,
-        //         message: {data: [...state.message.data, newPeople],
-        //             error: action.error},
-        //         userList: {...state.userList}};
+        case SEND_CHAT_SUCCESS:
+            let newmess3 = action.data;
+            newmess3.createAt = format(new Date(new Date().getTime() - 25200000), 'yyyy-MM-dd HH:mm:ss');
+            return {...state, message: {data: [...state.message.data, newmess3], error: action.error}};
         case LOGOUT_SUCCESS:
             console.log('Processing LOGOUT_SUCCESS action');
             return {

@@ -1,27 +1,24 @@
-
 import React, {useState} from 'react';
 import {useDispatch} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 import {getPeopleChatMes, getUsersList, sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
+
 import {database, ref, set, child, get} from "../../../../firebase";
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import {encode} from "../../../../utill/convert-text";
-
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGift} from "@fortawesome/free-solid-svg-icons/faGift";
 
-
 function ChatFooter() {
-    const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const dispatch = useDispatch();
     const {type, name} = useParams();
     const username = localStorage.getItem('username');
     const [isPickerVisible, setPickerVisible] = useState(false);
     const [isGifPickerVisible, setGifPickerVisible] = useState(false);
-
+    const navigate = useNavigate();
     const gifList = [
         "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanNqMHpxcHo2cDFmbDlqNHk5Y3BhNHpzYTZqdjk2dTU4NWg0NndlZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7vDoUoDZHoUQxMPkd7/giphy.webp",
         "https://media0.giphy.com/media/oKQGM5S2mwx5C/giphy.webp?cid=82a1493bo0nvjpdk35jsd5n6qte8jj8sruymuqpbsglhm5y0&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
@@ -52,13 +49,11 @@ function ChatFooter() {
             createAt: new Date().toISOString(),
         };
 
-
-
         const fecthSendChat = async () => {
             if (type === 'friend') {
                 sendChatToPeople(name, encodedContent);
                 dispatch(getUsersList);
-                // getPeopleChatMes(name);
+                getPeopleChatMes(name);
                 navigate(`/Home/friend/${name}`);
             } else if (type === 'group') {
                 sendChatToRoom(name, encodedContent);
@@ -69,7 +64,7 @@ function ChatFooter() {
             dispatch(getUsersList);
         });
 
-        await set(ref(database, 'messages/' + nextMessageId), newMessage);
+        // await set(ref(database, 'messages/' + nextMessageId), newMessage);
     };
 
     const handleSendMessage = () => {

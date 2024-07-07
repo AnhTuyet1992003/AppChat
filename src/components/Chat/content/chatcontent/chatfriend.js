@@ -5,7 +5,7 @@ import { initializeSocket, reLoginUser } from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import { database, query, ref, orderByChild, equalTo, onValue } from "../../../../firebase";
-import { addNewMessage } from "../../../../redux/action/action";
+
 
 function ChatContent() {
     // Lấy trạng thái đăng nhập từ Redux store
