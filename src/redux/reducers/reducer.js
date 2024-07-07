@@ -16,7 +16,6 @@ import {
     JOIN_ROOM_FAILURE,
     CREATE_ROOM_SUCCESS,
     CREATE_ROOM_ERROR,
-    ADD_NEW_MESSAGE,
     CHECK_USER_SUCCESS,
     CHECK_USER_ERROR,
     REGISTER_SUCCESS,
@@ -26,7 +25,8 @@ import {
     GET_ROOM_CHAT_MES_SUCCESS, GET_ROOM_CHAT_MES_FAILURE, SEND_CHAT_SUCCESS,
 
 } from "../action/action";
-import { format } from 'date-fns'; // Import format từ date-fns
+import {sendChatToPeople} from "../../socket/socket"
+import { format } from 'date-fns';
 
 const initialState = {
     register: {},
@@ -100,9 +100,18 @@ const socketReducer = (state = initialState, action) => {
                 userList: {data: null, error: action.error},
             };
         case SEND_CHAT_TO_PEOPLE_SUCCESS:
+            let newmess = action.payload;
+            if (state.userList.data && state.userList.data.findIndex(user => user && user.name === newmess.name && user.type === newmess.type) === -1) {
+                sendChatToPeople(newmess.name, "");
+            }
+
+            if (newmess.mes !== "") {
+                sendChatToPeople(newmess.name, "");
+            }
+
             return {
                 ...state,
-                messages: {data: action.data, error: null},
+                messages: { data: [...state.messages.data, newmess], error: null }
             };
         case SEND_CHAT_TO_PEOPLE_FAILURE:
             return {
@@ -119,10 +128,18 @@ const socketReducer = (state = initialState, action) => {
                 ...state,
                 messages: {data: null, error: action.error},
             };
-        case SEND_CHAT_SUCCESS:
-            let newmess3 = action.data;
-            newmess3.createAt = format(new Date(new Date().getTime() - 25200000), 'yyyy-MM-dd HH:mm:ss');
-            return {...state, message: {data: [...state.message.data, newmess3], error: action.error}};
+        // case SEND_CHAT_SUCCESS:
+        //     const newPeople = action.payload;
+        //     // const userExists = state.userList.data.findIndex(user => user.name === newPeople.name && user.type === newPeople.type) !== -1;
+        //     //
+        //     // if (!userExists) {
+        //     //     sendChatToPeople(newPeople.name, " ");
+        //     // }
+        //     return {
+        //         ...state,
+        //         message: {data: [...state.message.data, newPeople],
+        //             error: action.error},
+        //         userList: {...state.userList}};
         case LOGOUT_SUCCESS:
             console.log('Processing LOGOUT_SUCCESS action');
             return {
@@ -175,7 +192,7 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 userStatuses: [], // Reset userStatuses or handle error case
-           
+
             };
 
         case GET_PEOPLE_CHAT_MES_SUCCESS:
@@ -205,12 +222,6 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 messages: {data: [], error: action.error}
-            };
-        case ADD_NEW_MESSAGE:
-            console.log('Reducer - ADD_NEW_MESSAGE:', action.payload); // Thêm dòng này để kiểm tra dữ liệu được nhận vào reducer
-            return {
-                ...state,
-                messages: {data: [...state.messages.data, action.payload], error: null}
             };
         default:
             return state;

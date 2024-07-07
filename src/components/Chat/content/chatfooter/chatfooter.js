@@ -1,25 +1,15 @@
-<<<<<<< HEAD
 
-import React, {useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
-import {useNavigate, useParams} from "react-router-dom";
-import {getPeopleChatMes, getUsersList, sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
-import {addNewMessage} from "../../../../redux/action/action";
-import {database, ref, set, child, get} from "../../../../firebase";
-
-
-=======
 import React, { useState } from 'react';
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
-import { sendChatToPeople, sendChatToRoom } from "../../../../socket/socket";
-import {addNewMessage, sendChatSuccess} from "../../../../redux/action/action";
+import {useNavigate, useParams} from "react-router-dom";
+import {getPeopleChatMes, getUsersList, sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
 import { database, ref, set, child, get } from "../../../../firebase";
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import {encode} from "../../../../utill/convert-text";
->>>>>>> master
+import {addNewMessage} from "../../../../redux/action/action";
+
 
 function ChatFooter() {
     const navigate = useNavigate();
@@ -42,24 +32,6 @@ function ChatFooter() {
             createAt: new Date().toISOString(),
         };
 
-// <<<<<<< HEAD
-//         dispatch(addNewMessage(newMessage)); // Thêm tin nhắn mới vào Redux store ngay lập tức
-//         // let data = {"name": username, "type": type, "to": name};
-//         if(type==='friend'){
-//             sendChatToPeople(name, message); // Gửi tin nhắn tới server
-//             dispatch(getUsersList);
-//             getPeopleChatMes(name);
-//             navigate(`/Home/friend/${name}`);
-//         }else if(type==='group'){
-//             sendChatToRoom(name,message);
-//             dispatch(getUsersList);
-//             // await dispatch(getPeopleChatMes(name));
-//         }
-//         // lưu tin nhắn vao firebase
-//         // await set(ref(database, 'messages/' + nextMessageId), newMessage);
-//
-// =======
-        dispatch(addNewMessage(newMessage));
 
         // let mess3 = [];
         // if (message !== '') {
@@ -72,12 +44,21 @@ function ChatFooter() {
         // let data = {"name": username, "type": type, "to": name, "mes": JSON.stringify(mess3)};
         // let mess2 = {};
         // mess2 = encode(message);
-        if (type === 'friend') {
-            sendChatToPeople(name,encode(message));
-            // dispatch(sendChatSuccess(data));
-        } else if (type === 'group') {
-            sendChatToRoom(name, encode(message));
-        }
+        const fecthSendChat = async () => {
+            if (type === 'friend') {
+                sendChatToPeople(name, encode(message));
+                // dispatch(sendChatSuccess(data));
+                dispatch(getUsersList);
+                getPeopleChatMes(name);
+                navigate(`/Home/friend/${name}`);
+            } else if (type === 'group') {
+                sendChatToRoom(name, encode(message));
+                dispatch(getUsersList);
+            }
+        };
+        fecthSendChat().then(r => {
+            dispatch(getUsersList);
+        });
 
         await set(ref(database, 'messages/' + nextMessageId), newMessage);
 

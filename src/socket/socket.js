@@ -20,7 +20,6 @@ import {
     joinRoomFailure,
     checkUserSuccess,
     checkUserError,
-    addNewMessage,
     getRoomChatMesSuccess,
     getRoomChatMesFailure,
     sendChatToRoomSuccess,
@@ -62,15 +61,8 @@ export const initializeSocket = (url) => {
             console.error('Received response without event:', response);
             return;
         }
-        if (response.event === "ADD_NEW_MESSAGE") {
-            store.dispatch(addNewMessage(response.data));
-            console.log('Dispatched ADD_NEW_MESSAGE:', response.data); // Thêm dòng này để kiểm tra dữ liệu được dispatch
-        }
         switch (response.event) {
-            case "ADD_NEW_MESSAGE":
-                console.log('Dispatching ADD_NEW_MESSAGE with data:', response.data);
-                await dispatch(addNewMessage(response.data));
-                break;
+
             // xử lý các sự kiện khác
             case "REGISTER":
                 if (response.status === "success") {
@@ -104,17 +96,15 @@ export const initializeSocket = (url) => {
                 }
                 break;
             case "SEND_CHAT":
-                if (response.data.type === "people") {
+                if (response.data.type === 0) {
                     if (response.status === "success") {
                         store.dispatch(sendChatToPeopleSuccess(response.data));
-                        store.dispatch(addNewMessage(response.data.message));
                     } else {
                         store.dispatch(sendChatToPeopleFailure(response.error));
                     }
                 } else if (response.data.type === "room") {
                     if (response.status === "success") {
                         store.dispatch(sendChatToRoomSuccess(response.data));
-                        store.dispatch(addNewMessage(response.data.message));
                     } else {
                         store.dispatch(sendChatToRoomFailure(response.error));
                     }
@@ -375,10 +365,11 @@ export const joinRoom = (name) => {
         }
     }));
 };
-export const sendChatToPeople = (to, message) => {
-    if (!socket) return;
-
-    const sendMessage = () => {
+export const sendChatToPeople = (to, mes) => {
+    if (!socket) {
+        return;
+    }
+    if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
             action: "onchat",
             data: {
@@ -386,25 +377,21 @@ export const sendChatToPeople = (to, message) => {
                 data: {
                     type: "people",
                     to: to,
-                    mes: message
+                    mes: mes
                 }
             }
         }));
-    };
-
-    if (socket.readyState === WebSocket.OPEN) {
-        sendMessage();
     } else if (socket.readyState === WebSocket.CONNECTING) {
-        const intervalId = setInterval(() => {
-            if (socket.readyState === WebSocket.OPEN) {
-                clearInterval(intervalId);
-                sendMessage();
-            }
-        }, 100); // Retry every 100ms until connected
+        console.log("WebSocket connection is still in CONNECTING state. Retry in a moment.");
+        setTimeout(() => {
+            sendChatToPeople(to, mes);
+        }, 1000); // Retry after 1 second
     } else {
-        console.log("Socket is closed");
+        console.log("WebSocket connection is in CLOSING or CLOSED state.");
+        // Re-establish the WebSocket connection or handle the error as needed
     }
 };
+
 export const sendChatToRoom = (to, message) => {
     if (!socket) return;
 

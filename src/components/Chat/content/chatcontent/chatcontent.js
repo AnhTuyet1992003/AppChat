@@ -1,16 +1,12 @@
-import React, {useEffect, useRef} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
-import {getPeopleChatMes, initializeSocket, reLoginUser} from "../../../../socket/socket";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min';
-import {database, query, ref, orderByChild, equalTo, onValue} from "../../../../firebase";
-import {addNewMessage} from "../../../../redux/action/action";
+import {useEffect, useRef} from "react";
+import {reLoginUser, initializeSocket} from "../../../../socket/socket";
 import {decode} from "../../../../utill/convert-text";
 
-function ChatGroup() {
+function ChatContent() {
     // Lấy trạng thái đăng nhập từ Redux store
-    const login = useSelector((state) => state.login);
+    const loginUser = useSelector((state) => state.login);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const {name} = useParams(); // lấy ra tên người nhận
@@ -25,7 +21,7 @@ function ChatGroup() {
 
     // kiểm tra đăng nhập
     useEffect(() => {
-        if (!login.status) {
+        if (!loginUser.status) {
             if (localStorage.getItem("reLogin") !== null) {
                 // Reconnect socket
                 initializeSocket('ws://140.238.54.136:8080/chat/chat');
@@ -34,43 +30,8 @@ function ChatGroup() {
                 navigate("/login");
             }
         }
-    }, [dispatch, navigate, login, username]);
+    }, [dispatch, navigate, loginUser, username]);
 
-    // useEffect(() => {
-    //     const intervalId = setInterval(() => {
-    //         getPeopleChatMes(name);
-    //     }, 1000);
-    //
-    //     return () => clearInterval(intervalId); // Clean up the interval on component unmount
-    // }, [name]);
-
-    useEffect(() => {
-        if (login.status) {
-            const socket = new WebSocket('ws://140.238.54.136:8080/chat/chat');
-
-            socket.onopen = () => {
-                console.log('WebSocket connection established');
-            };
-
-            socket.onmessage = async (event) => {
-                const messageData = JSON.parse(event.data);
-                if (messageData.to === username) {
-                    await dispatch(addNewMessage(messageData));
-                    getPeopleChatMes(name);
-                }
-            };
-
-            socket.onerror = (error) => {
-                console.error('WebSocket error:', error);
-            };
-
-            socket.onclose = () => {
-                console.log('WebSocket connection closed');
-            };
-
-            return () => socket.close();
-        }
-    }, [dispatch, login.status, username, name]);
     // cuộn xuong cuối khi co tin nhắn mới
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
@@ -78,7 +39,7 @@ function ChatGroup() {
 
     // không hiển thị nếu đoạn tin nhắn rỗng
     const filteredMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '') : [];
-    // Sap xep tin nhan theo ngay gio gui
+    // Sắp xếp tin nhắn theo ngày giờ gửi
     const sortedMessages = filteredMessages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
 
     const formatTimestamp = (timestamp) => {
@@ -96,24 +57,6 @@ function ChatGroup() {
             ...(isToday ? {} : {day: '2-digit', month: '2-digit', year: 'numeric'})
         };
         return new Intl.DateTimeFormat('vi-VN', options).format(date);
-    };
-
-    const formatDateSeparator = (timestamp) => {
-        const date = new Date(timestamp);
-        if (isNaN(date.getTime())) {
-            return ""; // Trả về chuỗi rỗng nếu timestamp không hợp lệ
-        }
-        const now = new Date();
-        const isToday = date.toDateString() === now.toDateString();
-        if (isToday) {
-            return "hôm nay";
-        }
-        return new Intl.DateTimeFormat('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            timeZone: 'Asia/Ho_Chi_Minh'
-        }).format(date);
     };
 
     if (!name) {
@@ -202,4 +145,4 @@ function ChatGroup() {
     );
 }
 
-export default ChatGroup;
+export default ChatContent;
