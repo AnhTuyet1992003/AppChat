@@ -1,3 +1,4 @@
+
 import {
     GET_USER_LIST_FAILURE,
     GET_USER_LIST_SUCCESS,
@@ -16,7 +17,6 @@ import {
     JOIN_ROOM_FAILURE,
     CREATE_ROOM_SUCCESS,
     CREATE_ROOM_ERROR,
-    ADD_NEW_MESSAGE,
     CHECK_USER_SUCCESS,
     CHECK_USER_ERROR,
     REGISTER_SUCCESS,
@@ -27,7 +27,7 @@ import {
 
 } from "../action/action";
 import { format } from 'date-fns'; // Import format từ date-fns
-
+import {sendChatToPeople} from "../../socket/socket"
 const initialState = {
     register: {},
     login: {},
@@ -100,9 +100,19 @@ const socketReducer = (state = initialState, action) => {
                 userList: {data: null, error: action.error},
             };
         case SEND_CHAT_TO_PEOPLE_SUCCESS:
+            let newmess = action.payload;
+            if (state.userList.data && state.userList.data.findIndex(user => user && user.name === newmess.name && user.type === newmess.type) === -1) {
+                // Nếu không có, gửi tin nhắn trống đến người dùng mới để khởi tạo cuộc trò chuyện
+                sendChatToPeople(newmess.name, "");
+            }
+            // Kiểm tra xem nội dung tin nhắn mới có rỗng không
+            if (newmess.mes !== "") {
+                sendChatToPeople(newmess.name, "");
+            }
+
             return {
                 ...state,
-                messages: {data: action.data, error: null},
+                messages: { data: [...state.messages.data, newmess], error: null }
             };
         case SEND_CHAT_TO_PEOPLE_FAILURE:
             return {
@@ -175,7 +185,7 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 userStatuses: [], // Reset userStatuses or handle error case
-           
+
             };
 
         case GET_PEOPLE_CHAT_MES_SUCCESS:
@@ -205,12 +215,6 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 messages: {data: [], error: action.error}
-            };
-        case ADD_NEW_MESSAGE:
-            console.log('Reducer - ADD_NEW_MESSAGE:', action.payload); // Thêm dòng này để kiểm tra dữ liệu được nhận vào reducer
-            return {
-                ...state,
-                messages: {data: [...state.messages.data, action.payload], error: null}
             };
         default:
             return state;

@@ -5,7 +5,8 @@ import {initializeSocket, reLoginUser} from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import {database, query, ref, orderByChild, equalTo, onValue} from "../../../../firebase";
-import {addNewMessage} from "../../../../redux/action/action";
+
+
 
 function ChatGroup() {
     // Lấy trạng thái đăng nhập từ Redux store
@@ -35,36 +36,6 @@ function ChatGroup() {
         }
     }, [dispatch, navigate, login, username]);
 
-    useEffect(() => {
-        if (name && username) {
-            const messagesRef = ref(database, 'messages');
-
-            // Truy vấn các tin nhắn gửi từ người dùng hiện tại
-            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
-
-            // Truy vấn các tin nhắn gửi đến người dùng hiện tại
-            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
-
-            const handleValue = (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const messagesArray = Object.values(data).filter(message =>
-                        (message.name === name && message.to === username) ||
-                        (message.to === name && message.name === username)
-                    );
-                    dispatch(addNewMessage(messagesArray));
-                }
-            };
-
-            const userUnsubscribe = onValue(userQuery, handleValue);
-            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
-
-            return () => {
-                userUnsubscribe();
-                toUserUnsubscribe();
-            };
-        }
-    }, [name, username, dispatch]);
 
     // cuộn xuong cuối khi co tin nhắn mới
     useEffect(() => {

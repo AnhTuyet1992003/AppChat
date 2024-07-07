@@ -5,7 +5,6 @@ import { initializeSocket, reLoginUser } from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import { database, query, ref, orderByChild, equalTo, onValue } from "../../../../firebase";
-import { addNewMessage } from "../../../../redux/action/action";
 import { decode } from "../../../../utill/convert-text";
 import '../../../Chat/content/chatfooter/style.css'; // Đường dẫn tới file CSS đã thiết lập
 
@@ -29,38 +28,18 @@ function ChatContent() {
         }
     }, [dispatch, navigate, login, username]);
 
-    useEffect(() => {
-        if (name && username) {
-            const messagesRef = ref(database, 'messages');
-            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
-            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
 
-            const handleValue = (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const messagesArray = Object.values(data).filter(message =>
-                        (message.name === name && message.to === username) ||
-                        (message.to === name && message.name === username)
-                    );
-                    dispatch(addNewMessage(messagesArray));
-                }
-            };
-
-            const userUnsubscribe = onValue(userQuery, handleValue);
-            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
-
-            return () => {
-                userUnsubscribe();
-                toUserUnsubscribe();
-            };
-        }
-    }, [name, username, dispatch]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const sortedMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '').sort((a, b) => new Date(a.createAt) - new Date(b.createAt)) : [];
+    // không hiển thị nếu đoạn tin nhắn rỗng
+    const filteredMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '') : [];
+    // Sắp xếp tin nhắn theo ngày giờ gửi
+    const sortedMessages = filteredMessages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
+
+    // const sortedMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '').sort((a, b) => new Date(a.createAt) - new Date(b.createAt)) : [];
 
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);

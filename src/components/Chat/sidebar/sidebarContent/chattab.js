@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState} from 'react';
 import {
     checkUser,
     create_room,
@@ -76,8 +76,6 @@ function ChatTab({ toggleSidebar }) {
 
         fetchData().then(() => {});
     }, []);
-    //     getUsersList();
-    // }, [dispatch]);
 
     // Danh sách các người dùng
     const friendsList = userList.filter(user => user.type === 0);
@@ -199,9 +197,10 @@ function ChatTab({ toggleSidebar }) {
                     navigate(`/Home/friend/${nameUser}`);
                 } else {
                     sendChatToPeople(nameUser, "");
-                    setModalClosed(true);
+                    setModalClosed(false);
                     navigate(`/Home/friend/${nameUser}`);
-                    // dispatch(getUsersList());
+                    dispatch(getUsersList);
+                    getPeopleChatMes(nameUser);
                 }
             } else {
                 setErrorMessage("Vui lòng nhập tên người cần nhắn.");
@@ -240,42 +239,42 @@ function ChatTab({ toggleSidebar }) {
     const [userStatuses, setUserStatuses] = useState({});
     const [userStatusCache, setUserStatusCache] = useState({});
 
-    const debouncedFetchUserStatuses = useCallback(
-        debounce(async (friendsList) => {
-            const statuses = {};
-            const newCache = { ...userStatusCache };
-
-            for (const user of friendsList) {
-                try {
-                    const status = await checkUser(user.name);
-                    if (status === 'online') {
-                        newCache[user.name] = true;
-                        statuses[user.name] = true;
-                    } else {
-                        delete newCache[user.name];
-                        statuses[user.name] = false; // Đặt trạng thái người dùng thành false nếu họ đăng xuất
-                    }
-                } catch (error) {
-                    console.error("Error checking user:", error);
-                    delete newCache[user.name];
-                    statuses[user.name] = false; // Đặt trạng thái người dùng thành false nếu có lỗi
-                }
-            }
-
-            setUserStatusCache(newCache);
-            setUserStatuses((prevStatuses) => {
-                const newStatuses = { ...prevStatuses };
-                for (const key in statuses) {
-                    newStatuses[key] = statuses[key];
-                }
-                return newStatuses;
-            });
-        }, 300),
-        [userStatusCache]
-    );
-    useEffect(() => {
-        debouncedFetchUserStatuses(userList);
-    }, [userList, debouncedFetchUserStatuses]);
+    // const debouncedFetchUserStatuses = useCallback(
+    //     debounce(async (friendsList) => {
+    //         const statuses = {};
+    //         const newCache = { ...userStatusCache };
+    //
+    //         for (const user of friendsList) {
+    //             try {
+    //                 const status = await checkUser(user.name);
+    //                 if (status === 'online') {
+    //                     newCache[user.name] = true;
+    //                     statuses[user.name] = true;
+    //                 } else {
+    //                     delete newCache[user.name];
+    //                     statuses[user.name] = false; // Đặt trạng thái người dùng thành false nếu họ đăng xuất
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Error checking user:", error);
+    //                 delete newCache[user.name];
+    //                 statuses[user.name] = false; // Đặt trạng thái người dùng thành false nếu có lỗi
+    //             }
+    //         }
+    //
+    //         setUserStatusCache(newCache);
+    //         setUserStatuses((prevStatuses) => {
+    //             const newStatuses = { ...prevStatuses };
+    //             for (const key in statuses) {
+    //                 newStatuses[key] = statuses[key];
+    //             }
+    //             return newStatuses;
+    //         });
+    //     }, 300),
+    //     [userStatusCache]
+    // );
+    // useEffect(() => {
+    //     debouncedFetchUserStatuses(userList);
+    // }, [userList, debouncedFetchUserStatuses]);
 
 
 
