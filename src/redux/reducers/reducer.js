@@ -23,9 +23,10 @@ import {
     REGISTER_ERROR,
     SEND_CHAT_TO_ROOM_SUCCESS,
     SEND_CHAT_TO_ROOM_FAILURE,
-    GET_ROOM_CHAT_MES_SUCCESS, GET_ROOM_CHAT_MES_FAILURE,
+    GET_ROOM_CHAT_MES_SUCCESS, GET_ROOM_CHAT_MES_FAILURE, SEND_CHAT_SUCCESS,
 
 } from "../action/action";
+import { format } from 'date-fns'; // Import format từ date-fns
 
 const initialState = {
     register: {},
@@ -33,6 +34,7 @@ const initialState = {
     logout: {},
     listUser:{},
     messages: { data: [], error: null },
+    message1:{data:[]},
     active: { name: '', type: null },
     userList: { data: null, error: null },
     checkUser: { status: null, data: null, error: null }, // Thêm trạng thái kiểm tra người dùng
@@ -117,6 +119,10 @@ const socketReducer = (state = initialState, action) => {
                 ...state,
                 messages: {data: null, error: action.error},
             };
+        case SEND_CHAT_SUCCESS:
+            let newmess3 = action.data;
+            newmess3.createAt = format(new Date(new Date().getTime() - 25200000), 'yyyy-MM-dd HH:mm:ss');
+            return {...state, message: {data: [...state.message.data, newmess3], error: action.error}};
         case LOGOUT_SUCCESS:
             console.log('Processing LOGOUT_SUCCESS action');
             return {
@@ -191,6 +197,7 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 messages: {data: action.data.chatData, error: null},
+                message1: {data: action.data.chatData},
                 listUser: finalList
             };
         case GET_ROOM_CHAT_MES_FAILURE:
