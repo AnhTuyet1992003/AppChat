@@ -7,6 +7,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 import { database, query, ref, orderByChild, equalTo, onValue } from "../../../../firebase";
 import { addNewMessage } from "../../../../redux/action/action";
 import { decode } from "../../../../utill/convert-text";
+import '../../../Chat/content/chatfooter/style.css'; // Đường dẫn tới file CSS đã thiết lập
 
 function ChatContent() {
     const login = useSelector((state) => state.login);
@@ -79,9 +80,8 @@ function ChatContent() {
     };
 
     const renderMessageContent = (message) => {
-        // const decodedMessage = decode(message.mes);
         if (message.mes.startsWith('GIF:')) {
-            const gif = message.mes.replace('GIF:','')
+            const gif = message.mes.replace('GIF:', '');
             const gifUrl = decode(gif);
             return (
                 <div className="message-gif">
@@ -107,7 +107,7 @@ function ChatContent() {
 
     return (
         <div className="chat-content hide-scrollbar h-100">
-            <div className="container-fluid g-0 p-4">
+            <div className="container-fluid g-0 p-4 chat-content">
                 {sortedMessages.map((message, index) => (
                     <div key={index} className={`message ${message.name === localStorage.getItem("username") ? "self" : ""}`}>
                         <div className="message-wrap">
