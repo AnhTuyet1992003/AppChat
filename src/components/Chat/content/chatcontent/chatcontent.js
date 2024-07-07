@@ -106,7 +106,7 @@ function ChatContent() {
     }
 
     return (
-        <div className="chat-content hide-scrollbar h-100">
+        <div className="chat-content h-100">
             <div className="container-fluid g-0 p-4 chat-content">
                 {sortedMessages.map((message, index) => (
                     <div key={index} className={`message ${message.name === localStorage.getItem("username") ? "self" : ""}`}>

@@ -21,6 +21,7 @@
     padding-bottom: 15px;
 }
 .chat-content {
+    overflow-x:hidden;
     overflow-y: auto; /* Thiết lập thanh cuộn dọc khi nội dung vượt quá kích thước */
-    max-height: calc(100vh - 200px); /* Giới hạn chiều cao của chat content, để lại không gian cho footer và header */
+    /*max-height: calc(100vh - 200px); !* Giới hạn chiều cao của chat content, để lại không gian cho footer và header *!*/
 }
