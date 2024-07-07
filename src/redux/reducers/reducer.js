@@ -100,11 +100,14 @@ const socketReducer = (state = initialState, action) => {
                 userList: {data: null, error: action.error},
             };
         case SEND_CHAT_TO_PEOPLE_SUCCESS:
+            // Lấy dữ liệu tin nhắn mới từ action payload
             let newmess = action.payload;
+            // Kiểm tra xem danh sách người dùng có tồn tại và người dùng mới có trong danh sách không
             if (state.userList.data && state.userList.data.findIndex(user => user && user.name === newmess.name && user.type === newmess.type) === -1) {
+                // Nếu không có, gửi tin nhắn trống đến người dùng mới để khởi tạo cuộc trò chuyện
                 sendChatToPeople(newmess.name, "");
             }
-
+            // Kiểm tra xem nội dung tin nhắn mới có rỗng không
             if (newmess.mes !== "") {
                 sendChatToPeople(newmess.name, "");
             }
