@@ -68,7 +68,8 @@ export const initializeSocket = (url) => {
         }
         switch (response.event) {
             case "ADD_NEW_MESSAGE":
-                store.dispatch(addNewMessage(response.data));
+                console.log('Dispatching ADD_NEW_MESSAGE with data:', response.data);
+                await dispatch(addNewMessage(response.data));
                 break;
             // xử lý các sự kiện khác
             case "REGISTER":

@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
-import {initializeSocket, reLoginUser} from "../../../../socket/socket";
+import {getPeopleChatMes, initializeSocket, reLoginUser} from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import {database, query, ref, orderByChild, equalTo, onValue} from "../../../../firebase";
@@ -36,53 +36,40 @@ function ChatGroup() {
     }, [dispatch, navigate, login, username]);
 
     // useEffect(() => {
-    //     if (name) {
-    //         // Lắng nghe thay đổi từ Firebase cho người dùng hoặc nhóm được chọn
-    //         const messagesRef = ref(database, 'messages');
-    //         onValue(messagesRef, (snapshot) => {
-    //             const data = snapshot.val();
-    //             if (data) {
-    //                 // Lọc tin nhắn theo điều kiện name và to
-    //                 const messagesArray = Object.values(data).filter(message => (message.name === name && message.to === username) || (message.to === name && message.name === username));
-    //                 messagesArray.forEach(message => {
-    //                     dispatch(addNewMessage(message)); // Cập nhật Redux store với các tin nhắn mới
-    //                 });
-    //             }
-    //         });
-    //     }
-    // }, [name, username, dispatch]);
+    //     const intervalId = setInterval(() => {
+    //         getPeopleChatMes(name);
+    //     }, 1000);
+    //
+    //     return () => clearInterval(intervalId); // Clean up the interval on component unmount
+    // }, [name]);
 
     useEffect(() => {
-        if (name && username) {
-            const messagesRef = ref(database, 'messages');
+        if (login.status) {
+            const socket = new WebSocket('ws://140.238.54.136:8080/chat/chat');
 
-            // Truy vấn các tin nhắn gửi từ người dùng hiện tại
-            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
+            socket.onopen = () => {
+                console.log('WebSocket connection established');
+            };
 
-            // Truy vấn các tin nhắn gửi đến người dùng hiện tại
-            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
-
-            const handleValue = (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const messagesArray = Object.values(data).filter(message =>
-                        (message.name === name && message.to === username) ||
-                        (message.to === name && message.name === username)
-                    );
-                    dispatch(addNewMessage(messagesArray));
+            socket.onmessage = async (event) => {
+                const messageData = JSON.parse(event.data);
+                if (messageData.to === username) {
+                    await dispatch(addNewMessage(messageData));
+                    getPeopleChatMes(name);
                 }
             };
 
-            const userUnsubscribe = onValue(userQuery, handleValue);
-            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
-
-            return () => {
-                userUnsubscribe();
-                toUserUnsubscribe();
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
             };
-        }
-    }, [name, username, dispatch]);
 
+            socket.onclose = () => {
+                console.log('WebSocket connection closed');
+            };
+
+            return () => socket.close();
+        }
+    }, [dispatch, login.status, username, name]);
     // cuộn xuong cuối khi co tin nhắn mới
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});

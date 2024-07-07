@@ -75,8 +75,6 @@ function ChatTab({ toggleSidebar }) {
 
         fetchData().then(() => {});
     }, []);
-    //     getUsersList();
-    // }, [dispatch]);
 
     // Danh sách các người dùng
     const friendsList = userList.filter(user => user.type === 0);

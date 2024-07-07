@@ -1,14 +1,15 @@
 
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {useParams} from "react-router-dom";
-import {sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
+import {useNavigate, useParams} from "react-router-dom";
+import {getPeopleChatMes, getUsersList, sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
 import {addNewMessage} from "../../../../redux/action/action";
 import {database, ref, set, child, get} from "../../../../firebase";
 
 
 
 function ChatFooter() {
+    const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const dispatch = useDispatch();
     const {type, name } = useParams();
@@ -31,11 +32,16 @@ function ChatFooter() {
         // let data = {"name": username, "type": type, "to": name};
         if(type==='friend'){
             sendChatToPeople(name, message); // Gửi tin nhắn tới server
+            dispatch(getUsersList);
+            getPeopleChatMes(name);
+            navigate(`/Home/friend/${name}`);
         }else if(type==='group'){
             sendChatToRoom(name,message);
+            dispatch(getUsersList);
+            // await dispatch(getPeopleChatMes(name));
         }
         // lưu tin nhắn vao firebase
-        await set(ref(database, 'messages/' + nextMessageId), newMessage);
+        // await set(ref(database, 'messages/' + nextMessageId), newMessage);
 
         setMessage('');
 
