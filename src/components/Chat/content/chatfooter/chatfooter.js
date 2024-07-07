@@ -1,17 +1,20 @@
+
 import React, {useState} from 'react';
 import {useDispatch} from "react-redux";
-import {useParams} from "react-router-dom";
-import {sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
-import {addNewMessage} from "../../../../redux/action/action";
+import {useNavigate, useParams} from "react-router-dom";
+import {getPeopleChatMes, getUsersList, sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
 import {database, ref, set, child, get} from "../../../../firebase";
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import {encode} from "../../../../utill/convert-text";
+
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGift} from "@fortawesome/free-solid-svg-icons/faGift";
 
+
 function ChatFooter() {
+    const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const dispatch = useDispatch();
     const {type, name} = useParams();
@@ -49,13 +52,22 @@ function ChatFooter() {
             createAt: new Date().toISOString(),
         };
 
-        dispatch(addNewMessage(newMessage));
 
-        if (type === 'friend') {
-            sendChatToPeople(name, encodedContent);
-        } else if (type === 'group') {
-            sendChatToRoom(name, encodedContent);
+
+        const fecthSendChat = async () => {
+            if (type === 'friend') {
+                sendChatToPeople(name, encodedContent);
+                dispatch(getUsersList);
+                // getPeopleChatMes(name);
+                navigate(`/Home/friend/${name}`);
+            } else if (type === 'group') {
+                sendChatToRoom(name, encodedContent);
+                dispatch(getUsersList);
+            }
         }
+        fecthSendChat().then(r => {
+            dispatch(getUsersList);
+        });
 
         await set(ref(database, 'messages/' + nextMessageId), newMessage);
     };

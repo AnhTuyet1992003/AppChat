@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -27,39 +28,47 @@ function ChatContent() {
                 navigate("/login");
             }
         }
+
     }, [dispatch, navigate, login, username]);
 
-    useEffect(() => {
-        if (name && username) {
-            const messagesRef = ref(database, 'messages');
-            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
-            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
-
-            const handleValue = (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const messagesArray = Object.values(data).filter(message =>
-                        (message.name === name && message.to === username) ||
-                        (message.to === name && message.name === username)
-                    );
-                    dispatch(addNewMessage(messagesArray));
-                }
-            };
-
-            const userUnsubscribe = onValue(userQuery, handleValue);
-            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
-
-            return () => {
-                userUnsubscribe();
-                toUserUnsubscribe();
-            };
-        }
-    }, [name, username, dispatch]);
+//     useEffect(() => {
+//         if (name && username) {
+//             const messagesRef = ref(database, 'messages');
+//             const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
+//             const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
+//
+//             const handleValue = (snapshot) => {
+//                 const data = snapshot.val();
+//                 if (data) {
+//                     const messagesArray = Object.values(data).filter(message =>
+//                         (message.name === name && message.to === username) ||
+//                         (message.to === name && message.name === username)
+//                     );
+//                     dispatch(addNewMessage(messagesArray));
+//                 }
+//             };
+//
+//             const userUnsubscribe = onValue(userQuery, handleValue);
+//             const toUserUnsubscribe = onValue(toUserQuery, handleValue);
+//
+//             return () => {
+//                 userUnsubscribe();
+//                 toUserUnsubscribe();
+//             };
+//         }
+//     }, [name, username, dispatch]);
+// >>>>>>> master
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+// <<<<<<< HEAD
+//     // không hiển thị nếu đoạn tin nhắn rỗng
+//     const filteredMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '') : [];
+//     // Sắp xếp tin nhắn theo ngày giờ gửi
+//     const sortedMessages = filteredMessages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
+// =======
     const sortedMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '').sort((a, b) => new Date(a.createAt) - new Date(b.createAt)) : [];
 
     const formatTimestamp = (timestamp) => {
