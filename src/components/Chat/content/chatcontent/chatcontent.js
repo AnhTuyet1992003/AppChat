@@ -4,10 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { initializeSocket, reLoginUser } from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import { database, query, ref, orderByChild, equalTo, onValue } from "../../../../firebase";
 import { decode } from "../../../../utill/convert-text";
-import '../../../Chat/content/chatfooter/style.css'; // Đường dẫn tới file CSS đã thiết lập
-
+import '../../../Chat/content/chatfooter/style.css';
+import {getDownloadURL, getStorage, ref as storageRef} from "firebase/storage";
+import {storage} from "../../../../firebase";
+import './style.css'
 function ChatContent() {
     const login = useSelector((state) => state.login);
     const navigate = useNavigate();
@@ -28,18 +29,12 @@ function ChatContent() {
         }
     }, [dispatch, navigate, login, username]);
 
-
-
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // không hiển thị nếu đoạn tin nhắn rỗng
     const filteredMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '') : [];
-    // Sắp xếp tin nhắn theo ngày giờ gửi
     const sortedMessages = filteredMessages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
-
-    // const sortedMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '').sort((a, b) => new Date(a.createAt) - new Date(b.createAt)) : [];
 
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);
@@ -58,6 +53,26 @@ function ChatContent() {
         return new Intl.DateTimeFormat('vi-VN', options).format(date);
     };
 
+    // Xử lý nuút tải xuống tệp tin từ Firebase Storage
+    const handleDownloadFile = async (fileName) => {
+        try {
+            // Tạo tham chiếu đến tệp tin trong Firebase Storage
+            const fileRef = storageRef(storage, `files/${fileName}`);
+            // Lấy URL tải xuống của tệp tin
+            const fileUrl = await getDownloadURL(fileRef);
+            // Tạo một thẻ link ẩn để tải xuống tệp tin
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Failed to download file:', error);
+            alert('Failed to download file. The file data might be corrupted.');
+        }
+    };
+
     const renderMessageContent = (message) => {
         if (message.mes.startsWith('GIF:')) {
             const gif = message.mes.replace('GIF:', '');
@@ -65,6 +80,28 @@ function ChatContent() {
             return (
                 <div className="message-gif">
                     <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '450px' }} />
+                </div>
+            );
+        }
+        // Nếu tin nhắn là một tệp tin
+        else if (message.mes.startsWith('FILE:')) {
+            // lấy tên tệp từ tin nhắn
+            const fileName = message.mes.replace('FILE:', '');
+            const decodedFileName = decode(fileName);
+
+            // Hiển thị nội dung tin nhắn với URL tệp
+            return (
+                <div className="message-content">
+                    <span>{decodedFileName}</span>
+                    <br />
+                    <button
+                        onClick={async () => {
+                            await handleDownloadFile(decodedFileName);
+                        }}
+                        className={`btn btn-link ${message.name === username ? 'btn-download-self' : ''}`}
+                    >
+                        Tải xuống
+                    </button>
                 </div>
             );
         } else {
@@ -75,6 +112,7 @@ function ChatContent() {
             );
         }
     };
+
 
     if (!name) {
         return (

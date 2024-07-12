@@ -2,6 +2,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getDatabase, ref, set, push, child,get, onValue, query, orderByChild, equalTo, off } from "firebase/database";
+import { getStorage, ref as storageRef, listAll, uploadBytes, getDownloadURL } from "firebase/storage"; // Import Firebase Storage functions
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -18,9 +20,12 @@ const firebaseConfig = {
     measurementId: "G-9TKZ7BPTB6"
 };
 
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const database = getDatabase(app);
+const storage = getStorage(app);
 
-export { app, analytics, database, ref, set, push, child, get, onValue, query, orderByChild, equalTo, off };
+
+export { app, analytics, database, ref, set, push, child, get, onValue, query, orderByChild, equalTo, off, storage, storageRef, uploadBytes, getDownloadURL };
