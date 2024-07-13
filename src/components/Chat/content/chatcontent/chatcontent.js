@@ -4,11 +4,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { initializeSocket, reLoginUser } from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
+
 import {database, query, ref, orderByChild, equalTo, onValue, storage, storageRef} from "../../../../firebase";
 import { addNewMessage } from "../../../../redux/action/action";
 import { decode } from "../../../../utill/convert-text";
 import './style.css';
 import {getDownloadURL} from "firebase/storage";
+
 
 function ChatContent() {
     const login = useSelector((state) => state.login);
@@ -56,6 +58,7 @@ function ChatContent() {
             };
         }
     }, [name, username, dispatch]);
+
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,8 +114,10 @@ function ChatContent() {
         }
         // Nếu tin nhắn là một tệp tin
         else if (message.mes.startsWith('FILE:')) {
+
             const fileName = message.mes.replace('FILE:', '');
             const decodedFileName = decode(fileName);
+
             // Hiển thị nội dung tin nhắn với URL tệp
             return (
                 <div className="message-content">
@@ -128,6 +133,7 @@ function ChatContent() {
                     </button>
                 </div>
             );
+
         } else if (message.mes.startsWith('IMAGE:')) {
             const imageUrl = message.mes.replace('IMAGE:', '');
             return (
@@ -135,6 +141,7 @@ function ChatContent() {
                     <img src={imageUrl} alt="Image" style={{maxWidth: '200px', maxHeight: '450px'}}/>
                 </div>
             );
+
         } else {
             return (
                 <div className="message-content">
@@ -143,6 +150,7 @@ function ChatContent() {
             );
         }
     };
+
 
     if (!name) {
         return (

@@ -9,7 +9,9 @@ import {
     sendChatToRoom
 } from "../../../../socket/socket";
 
+
 import { database, ref, set, child, get, storageRef, storage, getDownloadURL, uploadBytes } from "../../../../firebase";
+
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -18,13 +20,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGift } from "@fortawesome/free-solid-svg-icons/faGift";
 
 function ChatFooter() {
+    // state quản lý tin nhắn và file
     const [message, setMessage] = useState('');
     const [files, setFiles] = useState([]);
+
     const [images, setImages] = useState([]);
+
 
     const dispatch = useDispatch();
     const { type, name } = useParams();
     const username = localStorage.getItem('username');
+
+    // emoji
 
     const [isPickerVisible, setPickerVisible] = useState(false);
     const [isGifPickerVisible, setGifPickerVisible] = useState(false);
@@ -32,6 +39,7 @@ function ChatFooter() {
     const navigate = useNavigate();
     const login = useSelector((state) => state.login);
     const fileInputRef = useRef(null);
+
     const imageInputRef = useRef(null);
     const gifList = [
         "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanNqMHpxcHo2cDFmbDlqNHk5Y3BhNHpzYTZqdjk2dTU4NWg0NndlZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7vDoUoDZHoUQxMPkd7/giphy.webp",
@@ -48,6 +56,7 @@ function ChatFooter() {
         "https://media3.giphy.com/media/kyLYXonQYYfwYDIeZl/200.webp?cid=790b761145cnlovyqgdfsa9jeownbghxj2uxjz34teyk92r3&ep=v1_gifs_trending&rid=200.webp&ct=g"
 
     ];
+
     useEffect(() => {
         if (!login.status) {
             if (localStorage.getItem("reLogin") !== null) {
@@ -59,7 +68,10 @@ function ChatFooter() {
         }
     }, [dispatch, navigate, login]);
 
+    // gửi tin nhắn
     const sendMessage = async (content, isGif = false) => {
+        // Nếu không có nội dung hoặc nội dung chỉ chứa khoảng trắng
+        // và không có tệp tin nào được chọn, không thực hiện gửi tin nhắn
         if ((!content || content.trim() === '') && files.length === 0 && images.length === 0) return;
 
         let encodedContent = encode(content);
@@ -67,11 +79,13 @@ function ChatFooter() {
         if (isGif) {
             encodedContent = `GIF:${encodedContent}`;
             await sendMessageForFile(encodedContent);
-
         } else if (files.length > 0 || images.length > 0) {
+          // Tải lên file lên Firebase Storage và lấy URL của từng tệp
             const fileUploadPromises = files.map(async (file) => {
                 const fileRef = storageRef(storage, `files/${file.name}`);
                 await uploadBytes(fileRef, file);
+
+              // Mã hóa tên tệp
                 const encodedFileName = encode(file.name);
                 return `FILE:${encodedFileName}`;
             });
@@ -93,6 +107,7 @@ function ChatFooter() {
                 await sendMessageForFile(image);
             }
         } else {
+
             await sendMessageForFile(encodedContent);
         }
     };
@@ -110,6 +125,8 @@ function ChatFooter() {
             }
         };
         await fetchSendChat();
+
+        // Cập nhật danh sách người dùng
         dispatch(getUsersList);
     };
 
@@ -118,6 +135,7 @@ function ChatFooter() {
         setMessage('');
         setFiles([]);
         setImages([]);
+
         setPickerVisible(false);
     };
 
@@ -132,12 +150,18 @@ function ChatFooter() {
         setGifPickerVisible(false);
     };
 
+
+    // cho tệp để tải lên
     const handleFileChange = (e) => {
+        // Chuyển đổi danh sách các tệp đã chọn thành mảng
         const selectedFiles = Array.from(e.target.files);
+        // Nếu có tệp tin được chọn
         if (selectedFiles.length) {
+            // Thêm các tệp tin đã chọn vào mảng `files` hiện tại
             setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
         }
     };
+
 
     const handleImageChange = (e) => {
         const selectedImages = Array.from(e.target.files);
@@ -146,13 +170,16 @@ function ChatFooter() {
         }
     };
 
+    // nút xóa file đã chọn
     const handleDeleteFile = (index) => {
+        // Cập nhật danh sách tập tin: loại bỏ phần tử có chỉ số `index`
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-    };
 
     const handleDeleteImage = (index) => {
         setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+
     };
+
 
     if (!name) {
         return null;
