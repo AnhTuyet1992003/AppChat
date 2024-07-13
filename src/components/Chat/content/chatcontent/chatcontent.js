@@ -4,11 +4,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { initializeSocket, reLoginUser } from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
+
+import {database, query, ref, orderByChild, equalTo, onValue, storage, storageRef} from "../../../../firebase";
+import { addNewMessage } from "../../../../redux/action/action";
 import { decode } from "../../../../utill/convert-text";
-import '../../../Chat/content/chatfooter/style.css';
-import {getDownloadURL, getStorage, ref as storageRef} from "firebase/storage";
-import {storage} from "../../../../firebase";
-import './style.css'
+import './style.css';
+import {getDownloadURL} from "firebase/storage";
+
+
 function ChatContent() {
     const login = useSelector((state) => state.login);
     const navigate = useNavigate();
@@ -20,7 +23,7 @@ function ChatContent() {
 
     useEffect(() => {
         if (!login.status) {
-            if (localStorage.getItem("reLogin") !== null) {
+            if (localStorage.getItem("reLogin")) {
                 initializeSocket('ws://140.238.54.136:8080/chat/chat');
                 reLoginUser(username, localStorage.getItem("reLogin"));
             } else {
@@ -28,6 +31,34 @@ function ChatContent() {
             }
         }
     }, [dispatch, navigate, login, username]);
+
+    useEffect(() => {
+        if (name && username) {
+            const messagesRef = ref(database, 'messages');
+            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
+            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
+
+            const handleValue = (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const messagesArray = Object.values(data).filter(message =>
+                        (message.name === name && message.to === username) ||
+                        (message.to === name && message.name === username)
+                    );
+                    dispatch(addNewMessage(messagesArray));
+                }
+            };
+
+            const userUnsubscribe = onValue(userQuery, handleValue);
+            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
+
+            return () => {
+                userUnsubscribe();
+                toUserUnsubscribe();
+            };
+        }
+    }, [name, username, dispatch]);
+
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -38,9 +69,7 @@ function ChatContent() {
 
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);
-        if (isNaN(date.getTime())) {
-            return "";
-        }
+        if (isNaN(date.getTime())) return "";
         const now = new Date();
         const isToday = date.toDateString() === now.toDateString();
         const options = {
@@ -85,7 +114,7 @@ function ChatContent() {
         }
         // Nếu tin nhắn là một tệp tin
         else if (message.mes.startsWith('FILE:')) {
-            // lấy tên tệp từ tin nhắn
+
             const fileName = message.mes.replace('FILE:', '');
             const decodedFileName = decode(fileName);
 
@@ -104,6 +133,15 @@ function ChatContent() {
                     </button>
                 </div>
             );
+
+        } else if (message.mes.startsWith('IMAGE:')) {
+            const imageUrl = message.mes.replace('IMAGE:', '');
+            return (
+                <div className="message-image">
+                    <img src={imageUrl} alt="Image" style={{maxWidth: '200px', maxHeight: '450px'}}/>
+                </div>
+            );
+
         } else {
             return (
                 <div className="message-content">
@@ -126,7 +164,7 @@ function ChatContent() {
         <div className="chat-content hide-scrollbar h-100">
             <div className="container-fluid g-0 p-4 chat-content">
                 {sortedMessages.map((message, index) => (
-                    <div key={index} className={`message ${message.name === localStorage.getItem("username") ? "self" : ""}`}>
+                    <div key={index} className={`message ${message.name === username ? "self" : ""}`}>
                         <div className="message-wrap">
                             <div className="message-item">
                                 {renderMessageContent(message)}
@@ -137,25 +175,25 @@ function ChatContent() {
                                         data-bs-toggle="dropdown"
                                         type="button"
                                     >
-                                        <i className="ri-more-2-fill"/>
+                                        <i className="ri-more-2-fill" />
                                     </button>
                                     <ul className="dropdown-menu">
                                         <li>
                                             <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
                                                 Edit
-                                                <i className="ri-edit-line"/>
+                                                <i className="ri-edit-line" />
                                             </a>
                                         </li>
                                         <li>
                                             <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
                                                 Share
-                                                <i className="ri-share-line"/>
+                                                <i className="ri-share-line" />
                                             </a>
                                         </li>
                                         <li>
                                             <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
                                                 Delete
-                                                <i className="ri-delete-bin-line"/>
+                                                <i className="ri-delete-bin-line" />
                                             </a>
                                         </li>
                                     </ul>
@@ -173,14 +211,14 @@ function ChatContent() {
                                     </h6>
                                     <small className="text-muted">
                                         {formatTimestamp(message.createAt)}
-                                        <i className="ri-check-double-line align-bottom text-success fs-5"/>
+                                        <i className="ri-check-double-line align-bottom text-success fs-5" />
                                     </small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 ))}
-                <div ref={messagesEndRef}/>
+                <div ref={messagesEndRef} />
             </div>
         </div>
     );
