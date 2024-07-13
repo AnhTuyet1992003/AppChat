@@ -58,20 +58,22 @@ function ChatFooter() {
             }
         }
     }, [dispatch, navigate, login]);
-
+// gửi tin nhắn
     const sendMessage = async (content, isGif = false) => {
+        // Nếu không có nội dung hoặc nội dung chỉ chứa khoảng trắng
+        // và không có tệp tin nào được chọn, không thực hiện gửi tin nhắn
         if ((!content || content.trim() === '') && files.length === 0 && images.length === 0) return;
 
         let encodedContent = encode(content);
-
         if (isGif) {
             encodedContent = `GIF:${encodedContent}`;
             await sendMessageForFile(encodedContent);
-
         } else if (files.length > 0 || images.length > 0) {
+            // Tải lên file lên Firebase Storage và lấy URL của từng tệp
             const fileUploadPromises = files.map(async (file) => {
                 const fileRef = storageRef(storage, `files/${file.name}`);
                 await uploadBytes(fileRef, file);
+                // Mã hóa tên tệp
                 const encodedFileName = encode(file.name);
                 return `FILE:${encodedFileName}`;
             });
@@ -110,6 +112,7 @@ function ChatFooter() {
             }
         };
         await fetchSendChat();
+        // Cập nhật danh sách người dùng
         dispatch(getUsersList);
     };
 
@@ -131,10 +134,13 @@ function ChatFooter() {
         sendMessage(gifUrl, true);
         setGifPickerVisible(false);
     };
-
+    // cho tệp để tải lên
     const handleFileChange = (e) => {
+        // Chuyển đổi danh sách các tệp đã chọn thành mảng
         const selectedFiles = Array.from(e.target.files);
+        // Nếu có tệp tin được chọn
         if (selectedFiles.length) {
+            // Thêm các tệp tin đã chọn vào mảng `files` hiện tại
             setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
         }
     };
@@ -145,7 +151,7 @@ function ChatFooter() {
             setImages((prevImages) => [...prevImages, ...selectedImages]);
         }
     };
-
+// nút xóa file đã chọn
     const handleDeleteFile = (index) => {
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     };
