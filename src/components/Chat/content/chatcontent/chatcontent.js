@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { initializeSocket, reLoginUser } from "../../../../socket/socket";
@@ -9,7 +9,7 @@ import {database, query, ref, orderByChild, equalTo, onValue, storage, storageRe
 import { addNewMessage } from "../../../../redux/action/action";
 import { decode } from "../../../../utill/convert-text";
 import './style.css';
-import {getDownloadURL} from "firebase/storage";
+import { getDownloadURL } from "firebase/storage";
 
 
 function ChatContent() {
@@ -20,6 +20,7 @@ function ChatContent() {
     const messages = useSelector(state => state.messages?.data);
     const messagesEndRef = useRef(null);
     const username = localStorage.getItem("username");
+    const [expandedImage, setExpandedImage] = useState(null);
 
     useEffect(() => {
         if (!login.status) {
@@ -102,6 +103,20 @@ function ChatContent() {
         }
     };
 
+
+    const handleDownloadImage = async (imageUrl) => {
+        try {
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = 'image.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Failed to download image:', error);
+            alert('Failed to download image. Please try again.');
+        }
+    };
     const renderMessageContent = (message) => {
         if (message.mes.startsWith('GIF:')) {
             const gif = message.mes.replace('GIF:', '');
@@ -111,6 +126,7 @@ function ChatContent() {
                     <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '450px' }} />
                 </div>
             );
+
         }
         // Nếu tin nhắn là một tệp tin
         else if (message.mes.startsWith('FILE:')) {
@@ -138,7 +154,12 @@ function ChatContent() {
             const imageUrl = message.mes.replace('IMAGE:', '');
             return (
                 <div className="message-image">
-                    <img src={imageUrl} alt="Image" style={{maxWidth: '200px', maxHeight: '450px'}}/>
+                    <img
+                        src={imageUrl}
+                        alt="Image"
+                        style={{ maxWidth: '200px', maxHeight: '450px', cursor: 'pointer' }}
+                        onClick={() => openExpandedImage(imageUrl)}
+                    />
                 </div>
             );
 
@@ -149,6 +170,14 @@ function ChatContent() {
                 </div>
             );
         }
+    };
+
+    const openExpandedImage = (imageUrl) => {
+        setExpandedImage(imageUrl);
+    };
+
+    const closeExpandedImage = () => {
+        setExpandedImage(null);
     };
 
 
@@ -196,6 +225,24 @@ function ChatContent() {
                                                 <i className="ri-delete-bin-line" />
                                             </a>
                                         </li>
+                                        {(message.mes.startsWith('IMAGE:') || message.mes.startsWith('FILE:')) && (
+                                            <li>
+                                                <a
+                                                    className="dropdown-item d-flex align-items-center justify-content-between"
+                                                    href="#"
+                                                    onClick={async () => {
+                                                        if (message.mes.startsWith('IMAGE:')) {
+                                                            await handleDownloadImage(message.mes.replace('IMAGE:', ''));
+                                                        } else if (message.mes.startsWith('FILE:')) {
+                                                            await handleDownloadFile(decode(message.mes.replace('FILE:', '')));
+                                                        }
+                                                    }}
+                                                >
+                                                    Download
+                                                    <i className="ri-download-line" />
+                                                </a>
+                                            </li>
+                                        )}
                                     </ul>
                                 </div>
                             </div>
@@ -218,6 +265,12 @@ function ChatContent() {
                         </div>
                     </div>
                 ))}
+                {expandedImage && (
+                    <div className="expanded-image-overlay">
+                        <img src={expandedImage} alt="Expanded" className="expanded-image" />
+                        <button className="close-button" onClick={closeExpandedImage}>Đóng</button>
+                    </div>
+                )}
                 <div ref={messagesEndRef} />
             </div>
         </div>
