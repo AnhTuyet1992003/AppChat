@@ -1,24 +1,38 @@
-import React, {useState} from 'react';
-import {useDispatch} from "react-redux";
-import {useNavigate, useParams} from "react-router-dom";
-import {getPeopleChatMes, getUsersList, sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+    getPeopleChatMes,
+    getRoomChatMes,
+    getUsersList, initializeSocket, reLoginUser,
+    sendChatToPeople,
+    sendChatToRoom
+} from "../../../../socket/socket";
 
-import {database, ref, set, child, get} from "../../../../firebase";
+import { database, ref, set, child, get, storageRef, storage, getDownloadURL, uploadBytes } from "../../../../firebase";
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import {encode} from "../../../../utill/convert-text";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faGift} from "@fortawesome/free-solid-svg-icons/faGift";
+import { encode } from "../../../../utill/convert-text";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGift } from "@fortawesome/free-solid-svg-icons/faGift";
 
 function ChatFooter() {
     const [message, setMessage] = useState('');
+    const [files, setFiles] = useState([]);
+    const [images, setImages] = useState([]);
+
     const dispatch = useDispatch();
-    const {type, name} = useParams();
+    const { type, name } = useParams();
     const username = localStorage.getItem('username');
+
     const [isPickerVisible, setPickerVisible] = useState(false);
     const [isGifPickerVisible, setGifPickerVisible] = useState(false);
+
     const navigate = useNavigate();
+    const login = useSelector((state) => state.login);
+    const fileInputRef = useRef(null);
+    const imageInputRef = useRef(null);
     const gifList = [
         "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanNqMHpxcHo2cDFmbDlqNHk5Y3BhNHpzYTZqdjk2dTU4NWg0NndlZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7vDoUoDZHoUQxMPkd7/giphy.webp",
         "https://media0.giphy.com/media/oKQGM5S2mwx5C/giphy.webp?cid=82a1493bo0nvjpdk35jsd5n6qte8jj8sruymuqpbsglhm5y0&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
@@ -34,42 +48,76 @@ function ChatFooter() {
         "https://media3.giphy.com/media/kyLYXonQYYfwYDIeZl/200.webp?cid=790b761145cnlovyqgdfsa9jeownbghxj2uxjz34teyk92r3&ep=v1_gifs_trending&rid=200.webp&ct=g"
 
     ];
-
-    const sendMessage = async (content, isGif = false) => {
-        if (content.trim() === '') return;
-
-        const nextMessageId = await getNextMessageId();
-        const encodedContent = isGif ? `GIF:${encode(content)}` : encode(content);
-
-        const newMessage = {
-            id: nextMessageId,
-            name: username,
-            to: name,
-            mes: encodedContent,
-            createAt: new Date().toISOString(),
-        };
-
-        const fecthSendChat = async () => {
-            if (type === 'friend') {
-                sendChatToPeople(name, encodedContent);
-                dispatch(getUsersList);
-                getPeopleChatMes(name);
-                navigate(`/Home/friend/${name}`);
-            } else if (type === 'group') {
-                sendChatToRoom(name, encodedContent);
-                dispatch(getUsersList);
+    useEffect(() => {
+        if (!login.status) {
+            if (localStorage.getItem("reLogin") !== null) {
+                initializeSocket('ws://140.238.54.136:8080/chat/chat');
+                reLoginUser(localStorage.getItem("username"), localStorage.getItem("reLogin"));
+            } else {
+                navigate("/login");
             }
         }
-        fecthSendChat().then(r => {
-            dispatch(getUsersList);
-        });
+    }, [dispatch, navigate, login]);
 
-        // await set(ref(database, 'messages/' + nextMessageId), newMessage);
+    const sendMessage = async (content, isGif = false) => {
+        if ((!content || content.trim() === '') && files.length === 0 && images.length === 0) return;
+
+        let encodedContent = encode(content);
+
+        if (isGif) {
+            encodedContent = `GIF:${encodedContent}`;
+            await sendMessageForFile(encodedContent);
+
+        } else if (files.length > 0 || images.length > 0) {
+            const fileUploadPromises = files.map(async (file) => {
+                const fileRef = storageRef(storage, `files/${file.name}`);
+                await uploadBytes(fileRef, file);
+                const encodedFileName = encode(file.name);
+                return `FILE:${encodedFileName}`;
+            });
+
+            const imageUploadPromises = images.map(async (image) => {
+                const imageRef = storageRef(storage, `images/${image.name}`);
+                await uploadBytes(imageRef, image);
+                const imageURL = await getDownloadURL(imageRef);
+                return `IMAGE:${imageURL}`;
+            });
+
+            const uploadedFiles = await Promise.all(fileUploadPromises);
+            const uploadedImages = await Promise.all(imageUploadPromises);
+
+            for (const file of uploadedFiles) {
+                await sendMessageForFile(file);
+            }
+            for (const image of uploadedImages) {
+                await sendMessageForFile(image);
+            }
+        } else {
+            await sendMessageForFile(encodedContent);
+        }
     };
 
-    const handleSendMessage = () => {
-        sendMessage(message);
+    const sendMessageForFile = async (encodedContent) => {
+        const fetchSendChat = async () => {
+            if (type === 'friend') {
+                await sendChatToPeople(name, encodedContent);
+                dispatch(getUsersList);
+                getPeopleChatMes(name);
+            } else if (type === 'group') {
+                await sendChatToRoom(name, encodedContent);
+                dispatch(getUsersList);
+                getRoomChatMes(name);
+            }
+        };
+        await fetchSendChat();
+        dispatch(getUsersList);
+    };
+
+    const handleSendMessage = async () => {
+        await sendMessage(message);
         setMessage('');
+        setFiles([]);
+        setImages([]);
         setPickerVisible(false);
     };
 
@@ -84,12 +132,26 @@ function ChatFooter() {
         setGifPickerVisible(false);
     };
 
-    const getNextMessageId = async () => {
-        const dbRef = ref(database);
-        const snapshot = await get(child(dbRef, 'messages'));
-        const messages = snapshot.val();
-        const ids = messages ? Object.keys(messages).map(Number) : [];
-        return ids.length ? Math.max(...ids) + 1 : 1;
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        if (selectedFiles.length) {
+            setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+        }
+    };
+
+    const handleImageChange = (e) => {
+        const selectedImages = Array.from(e.target.files);
+        if (selectedImages.length) {
+            setImages((prevImages) => [...prevImages, ...selectedImages]);
+        }
+    };
+
+    const handleDeleteFile = (index) => {
+        setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    };
+
+    const handleDeleteImage = (index) => {
+        setImages((prevImages) => prevImages.filter((_, i) => i !== index));
     };
 
     if (!name) {
@@ -97,78 +159,131 @@ function ChatFooter() {
     }
 
     return (
-        <div className="chat-footer d-flex align-items-center border-top px-2">
-            <div className="container-fluid" style={{border: '1px solid #black'}}>
-                <div className="d-flex align-items-center g-4">
-                    <div className="input-group">
-                        <button className="btn btn-white btn-lg border-0" type="button"
-                                onClick={() => setPickerVisible(!isPickerVisible)}>
-                            <i className="far fa-grin" style={{fontSize: '24px'}}></i>
-                        </button>
-                        <button className="btn btn-white btn-lg border-0" type="button"
-                                onClick={() => setGifPickerVisible(!isGifPickerVisible)}>
-                            <FontAwesomeIcon icon={faGift} style={{fontSize: '24px'}}/>
-                        </button>
-                        <div className={isPickerVisible ? 'd-block' : 'd-none'}
-                             style={{position: 'absolute', bottom: '80px', zIndex: 1000}}>
-                            <Picker data={data} previewPosition="none" onEmojiSelect={(e) => {
-                                setMessage(message + e.native);
-                            }}/>
+        <>
+            {files.length > 0 && (
+                <div className="mt-2 containerfile">
+                    {files.map((file, index) => (
+                        <div key={index} className="d-flex align-items-center fileshow">
+                            <button className="btn btn-secondary filename">
+                                {file.name}
+                            </button>
+                            <div className="xoaFile" onClick={() => handleDeleteFile(index)}>
+                                x
+                            </div>
                         </div>
-                        <input
-                            aria-label="type message"
-                            className="form-control form-control-lg border-0"
-                            placeholder="Nhập tin nhắn..."
-                            type="text"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            style={{borderRadius: '0'}}
-                        />
-                        <button className="btn btn-white btn-lg border-0" type="button">
-                            <i className="ri-attachment-2"/>
-                        </button>
-                        <button className="btn btn-white btn-lg border-0" type="button">
-                            <i className="ri-chat-smile-2-line"/>
-                        </button>
-                    </div>
-                    <button
-                        className="btn btn-icon btn-primary btn-lg rounded-circle ms-2"
-                        type="submit"
-                        onClick={handleSendMessage}
-                    >
-                        <i className="ri-send-plane-fill"/>
-                    </button>
-                </div>
-            </div>
-
-            {isGifPickerVisible && (
-                <div className="gif-picker" style={{
-                    position: 'absolute',
-                    width:'450px',
-                    bottom: '80px',
-                    zIndex: 1000,
-                    backgroundColor: 'white',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    marginBottom:'20px',
-                    marginLeft:'30px',
-                    boxShadow: '0 0 10px 0 #dbdbdb'
-                }}>
-                    <div className="d-flex flex-wrap">
-                        {gifList.map((gifUrl, index) => (
-                            <img
-                                key={index}
-                                src={gifUrl}
-                                alt={`gif-${index}`}
-                                style={{width: '140px', height: '100px', margin: '1px', cursor: 'pointer'}}
-                                onClick={() => handleGifClick(gifUrl)}
-                            />
-                        ))}
-                    </div>
+                    ))}
                 </div>
             )}
-        </div>
+
+            {images.length > 0 && (
+                <div className="mt-2 containerfile">
+                    {images.map((image, index) => (
+                        <div key={index} className="d-flex align-items-center fileshow">
+                            <img
+                                src={URL.createObjectURL(image)}
+                                alt={image.name}
+                                className="image-preview"
+                                style={{maxWidth: '80px', maxHeight: '60px'}}
+                            />
+
+                            <div className="xoaFile" onClick={() => handleDeleteImage(index)}>
+                                x
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div className="chat-footer d-flex align-items-center border-top px-2 ">
+                <div className="container-fluid" style={{ border: '1px solid #black' }}>
+                    <div className="d-flex align-items-center g-4 itemchat">
+                        <div className="input-group">
+                            <button className="btn btn-white btn-lg border-0" type="button"
+                                    onClick={() => setPickerVisible(!isPickerVisible)}>
+                                <i className="far fa-grin" style={{ fontSize: '24px' }}></i>
+                            </button>
+                            <button className="btn btn-white btn-lg border-0" type="button"
+                                    onClick={() => setGifPickerVisible(!isGifPickerVisible)}>
+                                <FontAwesomeIcon icon={faGift} style={{ fontSize: '24px' }} />
+                            </button>
+                            <div className={isPickerVisible ? 'd-block' : 'd-none'}
+                                 style={{ position: 'absolute', bottom: '80px', zIndex: 1000 }}>
+                                <Picker data={data} previewPosition="none" onEmojiSelect={(e) => {
+                                    setMessage(message + e.native);
+                                }} />
+                            </div>
+                            <input
+                                aria-label="type message"
+                                className="form-control form-control-lg border-0"
+                                placeholder="Nhập tin nhắn..."
+                                type="text"
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                style={{ borderRadius: '0' }}
+                            />
+                            <input
+                                type="file"
+                                style={{ display: 'none' }}
+                                onChange={handleFileChange}
+                                ref={fileInputRef}
+                                multiple
+                            />
+                            <button className="btn btn-white btn-lg border-0" type="button"
+                                    onClick={() => fileInputRef.current.click()}>
+                                <i className="ri-attachment-2"/>
+                            </button>
+                            <input
+                                type="file"
+                                style={{ display: 'none' }}
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                ref={imageInputRef}
+                                multiple
+                            />
+                            <button className="btn btn-white btn-lg border-0" type="button"
+                                    onClick={() => imageInputRef.current.click()}>
+                                <i className="far fa-image"/>
+                            </button>
+                        </div>
+                        <button
+                            className="btn btn-icon btn-primary btn-lg rounded-circle ms-2"
+                            type="submit"
+                            onClick={handleSendMessage}
+                        >
+                            <i className="ri-send-plane-fill" />
+                        </button>
+                    </div>
+                </div>
+
+                {isGifPickerVisible && (
+                    <div className="gif-picker" style={{
+                        position: 'absolute',
+                        width: '450px',
+                        bottom: '80px',
+                        zIndex: 1000,
+                        backgroundColor: 'white',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        marginBottom: '20px',
+                        marginLeft: '30px',
+                        boxShadow: '0 0 10px 0 #dbdbdb'
+                    }}>
+                        <div className="d-flex flex-wrap">
+                            {gifList.map((gifUrl, index) => (
+                                <img
+                                    key={index}
+                                    src={gifUrl}
+                                    alt={`gif-${index}`}
+                                    style={{ width: '140px', height: '100px', margin: '1px', cursor: 'pointer' }}
+                                    onClick={() => handleGifClick(gifUrl)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
     );
 }
 

@@ -23,7 +23,10 @@ import {
     REGISTER_ERROR,
     SEND_CHAT_TO_ROOM_SUCCESS,
     SEND_CHAT_TO_ROOM_FAILURE,
-    GET_ROOM_CHAT_MES_SUCCESS, GET_ROOM_CHAT_MES_FAILURE, SEND_CHAT_SUCCESS,
+    GET_ROOM_CHAT_MES_SUCCESS,
+    GET_ROOM_CHAT_MES_FAILURE,
+    SEND_CHAT_SUCCESS,
+
 
 } from "../action/action";
 import { format } from 'date-fns'; // Import format từ date-fns
@@ -41,7 +44,7 @@ const initialState = {
     userStatuses: [],
     joinRoom: { status: null, data: null, error: null }, // Thêm trạng thái joinRoom
     createRoom: { status: null, data: null, error: null }, // Thêm trạng thái createRoom
-
+    file: [],
 };
 
 const socketReducer = (state = initialState, action) => {
@@ -109,9 +112,10 @@ const socketReducer = (state = initialState, action) => {
             if (newmess.mes !== "") {
                 sendChatToPeople(newmess.name, "");
             }
-
+            let updatedFile = state.file;
             return {
                 ...state,
+                file: updatedFile,
                 messages: { data: [...state.messages.data, newmess], error: null }
             };
         case SEND_CHAT_TO_PEOPLE_FAILURE:
@@ -120,9 +124,14 @@ const socketReducer = (state = initialState, action) => {
                 messages: {data: null, error: action.error},
             };
         case SEND_CHAT_TO_ROOM_SUCCESS:
+            const newMessage2 = action.payload ? action.payload.data : null;
+            if (!newMessage2) {
+                console.error('No message data in payload:', action.payload);
+                return state;
+            }
             return {
                 ...state,
-                messages: {data: action.data, error: null},
+                messages: { data: [...state.messages.data, newMessage2], error: null },
             };
         case SEND_CHAT_TO_ROOM_FAILURE:
             return {
@@ -130,7 +139,7 @@ const socketReducer = (state = initialState, action) => {
                 messages: {data: null, error: action.error},
             };
         case SEND_CHAT_SUCCESS:
-            let newmess3 = action.data;
+            let newmess3 = action.payload;
             newmess3.createAt = format(new Date(new Date().getTime() - 25200000), 'yyyy-MM-dd HH:mm:ss');
             return {...state, message: {data: [...state.message.data, newmess3], error: action.error}};
         case LOGOUT_SUCCESS:

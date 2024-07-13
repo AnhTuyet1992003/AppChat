@@ -25,6 +25,7 @@ import {
     sendChatToRoomSuccess,
     sendChatToRoomFailure,
 } from "../redux/action/action";
+import Firebase from "../firebase";
 
 export let socket;
 export let isSocketOpen = false;
@@ -102,7 +103,7 @@ export const initializeSocket = (url) => {
                     } else {
                         store.dispatch(sendChatToPeopleFailure(response.error));
                     }
-                } else if (response.data.type === "room") {
+                } else if (response.data.type === 1) {
                     if (response.status === "success") {
                         store.dispatch(sendChatToRoomSuccess(response.data));
                     } else {
@@ -385,17 +386,24 @@ export const sendChatToPeople = (to, mes) => {
         console.log("WebSocket connection is still in CONNECTING state. Retry in a moment.");
         setTimeout(() => {
             sendChatToPeople(to, mes);
-        }, 1000); // Retry after 1 second
+        }, 100); // Retry after 1 second
     } else {
         console.log("WebSocket connection is in CLOSING or CLOSED state.");
         // Re-establish the WebSocket connection or handle the error as needed
+        // Attempt to reconnect the WebSocket
+        initializeSocket('ws://140.238.54.136:8080/chat/chat');
+        setTimeout(() => {
+            sendChatToPeople(to, mes);
+        }, 1000); // Retry after 1 second
     }
 };
 
-export const sendChatToRoom = (to, message) => {
-    if (!socket) return;
-
-    const sendMessage = () => {
+export const sendChatToRoom = (to, mes) => {
+    if (!socket) {
+        console.log("Socket is closed");
+        return;
+    }
+    if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
             action: "onchat",
             data: {
@@ -403,25 +411,21 @@ export const sendChatToRoom = (to, message) => {
                 data: {
                     type: "room",
                     to: to,
-                    mes: message
+                    mes: mes
                 }
             }
         }));
-    };
-
-    if (socket.readyState === WebSocket.OPEN) {
-        sendMessage();
     } else if (socket.readyState === WebSocket.CONNECTING) {
-        const intervalId = setInterval(() => {
-            if (socket.readyState === WebSocket.OPEN) {
-                clearInterval(intervalId);
-                sendMessage();
-            }
-        }, 100); // Retry every 100ms until connected
+        console.log("WebSocket connection is still in CONNECTING state. Retry in a moment.");
+        setTimeout(() => {
+            sendChatToRoom(to, mes);
+        }, 1000); // Retry after 1 second
     } else {
-        console.log("Socket is closed");
+        console.log("WebSocket connection is in CLOSING or CLOSED state.");
+        // Re-establish the WebSocket connection or handle the error as needed
     }
 };
+
 
 export const checkUser = (user) => {
     return new Promise((resolve, reject) => {
@@ -482,7 +486,6 @@ export const checkUser = (user) => {
         }
     });
 };
-
 export const socketActions = {
     logoutUser: () => logoutUsers(),
 };
