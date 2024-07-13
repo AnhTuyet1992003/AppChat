@@ -99,6 +99,7 @@ export const updateUserStatus = (username, status) => ({
     type: 'UPDATE_USER_STATUS',
     payload: { username, status }
 });
+
 export const ADD_NEW_MESSAGE = 'ADD_NEW_MESSAGE';
 
 // Thay đổi hàm hành động để nhận một mảng các tin nhắn
@@ -106,3 +107,4 @@ export const addNewMessage = (messages) => ({
     type: ADD_NEW_MESSAGE,
     payload: messages
 });
+
