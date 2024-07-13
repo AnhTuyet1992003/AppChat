@@ -21,9 +21,10 @@
     padding-bottom: 15px;
 }
 .chat-content {
-    overflow-x:hidden;
+    background-color: #f1f1f1;
     overflow-y: auto; /* Thiết lập thanh cuộn dọc khi nội dung vượt quá kích thước */
-    /*max-height: calc(100vh - 200px); !* Giới hạn chiều cao của chat content, để lại không gian cho footer và header *!*/
+    max-height: calc(110vh - 200px); /* Giới hạn chiều cao của chat content, để lại không gian cho footer và header */
+}
 
 .btn-link.btn-download-self {
     background-color: #f1f1f1;
@@ -86,5 +87,33 @@
     background-color: red;
     color: white;
     font-size: 15px;
+    cursor: pointer;
+}
+.expanded-image-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.expanded-image {
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.close-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
     cursor: pointer;
 }

@@ -1,12 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { initializeSocket, reLoginUser } from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import { database, query, ref, orderByChild, equalTo, onValue } from "../../../../firebase";
+
+import {database, query, ref, orderByChild, equalTo, onValue, storage, storageRef} from "../../../../firebase";
+import { addNewMessage } from "../../../../redux/action/action";
 import { decode } from "../../../../utill/convert-text";
-import '../../../Chat/content/chatfooter/style.css'; // Đường dẫn tới file CSS đã thiết lập
+import './style.css';
+import { getDownloadURL } from "firebase/storage";
+
 
 function ChatContent() {
     const login = useSelector((state) => state.login);
@@ -16,10 +20,11 @@ function ChatContent() {
     const messages = useSelector(state => state.messages?.data);
     const messagesEndRef = useRef(null);
     const username = localStorage.getItem("username");
+    const [expandedImage, setExpandedImage] = useState(null);
 
     useEffect(() => {
         if (!login.status) {
-            if (localStorage.getItem("reLogin") !== null) {
+            if (localStorage.getItem("reLogin")) {
                 initializeSocket('ws://140.238.54.136:8080/chat/chat');
                 reLoginUser(username, localStorage.getItem("reLogin"));
             } else {
@@ -28,24 +33,44 @@ function ChatContent() {
         }
     }, [dispatch, navigate, login, username]);
 
+    useEffect(() => {
+        if (name && username) {
+            const messagesRef = ref(database, 'messages');
+            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
+            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
+
+            const handleValue = (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const messagesArray = Object.values(data).filter(message =>
+                        (message.name === name && message.to === username) ||
+                        (message.to === name && message.name === username)
+                    );
+                    dispatch(addNewMessage(messagesArray));
+                }
+            };
+
+            const userUnsubscribe = onValue(userQuery, handleValue);
+            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
+
+            return () => {
+                userUnsubscribe();
+                toUserUnsubscribe();
+            };
+        }
+    }, [name, username, dispatch]);
 
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // không hiển thị nếu đoạn tin nhắn rỗng
     const filteredMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '') : [];
-    // Sắp xếp tin nhắn theo ngày giờ gửi
     const sortedMessages = filteredMessages.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
-
-    // const sortedMessages = messages ? messages.filter(message => message.mes && message.mes.trim() !== '').sort((a, b) => new Date(a.createAt) - new Date(b.createAt)) : [];
 
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);
-        if (isNaN(date.getTime())) {
-            return "";
-        }
+        if (isNaN(date.getTime())) return "";
         const now = new Date();
         const isToday = date.toDateString() === now.toDateString();
         const options = {
@@ -58,33 +83,86 @@ function ChatContent() {
         return new Intl.DateTimeFormat('vi-VN', options).format(date);
     };
 
-    const formatDateSeparator = (timestamp) => {
-        const date = new Date(timestamp);
-        if (isNaN(date.getTime())) {
-            return ""; // Trả về chuỗi rỗng nếu timestamp không hợp lệ
+    // Xử lý nuút tải xuống tệp tin từ Firebase Storage
+    const handleDownloadFile = async (fileName) => {
+        try {
+            // Tạo tham chiếu đến tệp tin trong Firebase Storage
+            const fileRef = storageRef(storage, `files/${fileName}`);
+            // Lấy URL tải xuống của tệp tin
+            const fileUrl = await getDownloadURL(fileRef);
+            // Tạo một thẻ link ẩn để tải xuống tệp tin
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Failed to download file:', error);
+            alert('Failed to download file. The file data might be corrupted.');
         }
-        const now = new Date();
-        const isToday = date.toDateString() === now.toDateString();
-        if (isToday) {
-            return "Hôm nay";
-        }
-        return new Intl.DateTimeFormat('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            timeZone: 'Asia/Ho_Chi_Minh'
-        }).format(date);
     };
 
+
+    const handleDownloadImage = async (imageUrl) => {
+        try {
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = 'image.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Failed to download image:', error);
+            alert('Failed to download image. Please try again.');
+        }
+    };
     const renderMessageContent = (message) => {
         if (message.mes.startsWith('GIF:')) {
             const gif = message.mes.replace('GIF:', '');
             const gifUrl = decode(gif);
             return (
                 <div className="message-gif">
-                    <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '450px', borderRadius:'12px' }} />
+                    <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '450px' }} />
                 </div>
             );
+
+        }
+        // Nếu tin nhắn là một tệp tin
+        else if (message.mes.startsWith('FILE:')) {
+
+            const fileName = message.mes.replace('FILE:', '');
+            const decodedFileName = decode(fileName);
+
+            // Hiển thị nội dung tin nhắn với URL tệp
+            return (
+                <div className="message-content">
+                    <span>{decodedFileName}</span>
+                    <br />
+                    <button
+                        onClick={async () => {
+                            await handleDownloadFile(decodedFileName);
+                        }}
+                        className={`btn btn-link ${message.name === username ? 'btn-download-self' : ''}`}
+                    >
+                        Tải xuống
+                    </button>
+                </div>
+            );
+
+        } else if (message.mes.startsWith('IMAGE:')) {
+            const imageUrl = message.mes.replace('IMAGE:', '');
+            return (
+                <div className="message-image">
+                    <img
+                        src={imageUrl}
+                        alt="Image"
+                        style={{ maxWidth: '200px', maxHeight: '450px', cursor: 'pointer' }}
+                        onClick={() => openExpandedImage(imageUrl)}
+                    />
+                </div>
+            );
+
         } else {
             return (
                 <div className="message-content">
@@ -93,6 +171,15 @@ function ChatContent() {
             );
         }
     };
+
+    const openExpandedImage = (imageUrl) => {
+        setExpandedImage(imageUrl);
+    };
+
+    const closeExpandedImage = () => {
+        setExpandedImage(null);
+    };
+
 
     if (!name) {
         return (
@@ -103,14 +190,13 @@ function ChatContent() {
     }
 
     return (
-        <div className="chat-content h-100">
+        <div className="chat-content hide-scrollbar h-100">
             <div className="container-fluid g-0 p-4 chat-content">
                 {sortedMessages.map((message, index) => (
-                    <div key={index} className={`message ${message.name === localStorage.getItem("username") ? "self" : ""}`}>
+                    <div key={index} className={`message ${message.name === username ? "self" : ""}`}>
                         <div className="message-wrap">
                             <div className="message-item">
                                 {renderMessageContent(message)}
-                                <span>{formatDateSeparator(messages.createAt)}</span>
                                 <div className="dropdown align-self-center">
                                     <button
                                         aria-expanded="false"
@@ -118,30 +204,45 @@ function ChatContent() {
                                         data-bs-toggle="dropdown"
                                         type="button"
                                     >
-                                        <i className="ri-more-2-fill"/>
+                                        <i className="ri-more-2-fill" />
                                     </button>
                                     <ul className="dropdown-menu">
                                         <li>
-                                            <a className="dropdown-item d-flex align-items-center justify-content-between"
-                                               href="#">
+                                            <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
                                                 Edit
-                                                <i className="ri-edit-line"/>
+                                                <i className="ri-edit-line" />
                                             </a>
                                         </li>
                                         <li>
-                                            <a className="dropdown-item d-flex align-items-center justify-content-between"
-                                               href="#">
+                                            <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
                                                 Share
-                                                <i className="ri-share-line"/>
+                                                <i className="ri-share-line" />
                                             </a>
                                         </li>
                                         <li>
-                                            <a className="dropdown-item d-flex align-items-center justify-content-between"
-                                               href="#">
+                                            <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
                                                 Delete
-                                                <i className="ri-delete-bin-line"/>
+                                                <i className="ri-delete-bin-line" />
                                             </a>
                                         </li>
+                                        {(message.mes.startsWith('IMAGE:') || message.mes.startsWith('FILE:')) && (
+                                            <li>
+                                                <a
+                                                    className="dropdown-item d-flex align-items-center justify-content-between"
+                                                    href="#"
+                                                    onClick={async () => {
+                                                        if (message.mes.startsWith('IMAGE:')) {
+                                                            await handleDownloadImage(message.mes.replace('IMAGE:', ''));
+                                                        } else if (message.mes.startsWith('FILE:')) {
+                                                            await handleDownloadFile(decode(message.mes.replace('FILE:', '')));
+                                                        }
+                                                    }}
+                                                >
+                                                    Download
+                                                    <i className="ri-download-line" />
+                                                </a>
+                                            </li>
+                                        )}
                                     </ul>
                                 </div>
                             </div>
@@ -157,14 +258,20 @@ function ChatContent() {
                                     </h6>
                                     <small className="text-muted">
                                         {formatTimestamp(message.createAt)}
-                                        <i className="ri-check-double-line align-bottom text-success fs-5"/>
+                                        <i className="ri-check-double-line align-bottom text-success fs-5" />
                                     </small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 ))}
-                <div ref={messagesEndRef}/>
+                {expandedImage && (
+                    <div className="expanded-image-overlay">
+                        <img src={expandedImage} alt="Expanded" className="expanded-image" />
+                        <button className="close-button" onClick={closeExpandedImage}>Đóng</button>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
             </div>
         </div>
     );

@@ -21,3 +21,25 @@ export function decode(encodedText) {
     }
 
 }
+// utill/convert-text.js
+
+export const encodeImage = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            const base64String = reader.result.split(',')[1]; // Extract base64 part from data URL
+            resolve(base64String);
+        };
+
+        reader.onerror = (error) => {
+            reject(error);
+        };
+
+        reader.readAsDataURL(file); // Start reading the file as a data URL
+    });
+};
+export const decodeImage = (base64String) => {
+    return `data:image/jpeg;base64,${base64String}`;
+};
+

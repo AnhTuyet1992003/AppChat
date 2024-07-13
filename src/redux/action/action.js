@@ -57,11 +57,11 @@ export const createRoomError = (error) => ({type: CREATE_ROOM_ERROR, error});
 
 // Gửi tin nhắn
 export const SEND_CHAT_SUCCESS = "SEND_CHAT_SUCCESS";
-export const sendChatSuccess = (data) => ({type: SEND_CHAT_SUCCESS, data});
+export const sendChatSuccess = (messages) => ({type: SEND_CHAT_SUCCESS, payload: messages});
 export const SEND_CHAT_TO_PEOPLE_SUCCESS = 'SEND_CHAT_TO_PEOPLE_SUCCESS';
 export const sendChatToPeopleSuccess = (messages) => ({ type: SEND_CHAT_TO_PEOPLE_SUCCESS, payload: messages });
 export const SEND_CHAT_TO_ROOM_SUCCESS = 'SEND_CHAT_TO_ROOM_SUCCESS';
-export const sendChatToRoomSuccess = (data) => ({ type: SEND_CHAT_TO_ROOM_SUCCESS, data });
+export const sendChatToRoomSuccess = (messages) => ({ type: SEND_CHAT_TO_ROOM_SUCCESS, payload: messages });
 
 export const SEND_CHAT_TO_PEOPLE_FAILURE = 'SEND_CHAT_TO_PEOPLE_FAILURE';
 export const sendChatToPeopleFailure = (error) => ({ type: SEND_CHAT_TO_PEOPLE_FAILURE, error });
@@ -99,3 +99,12 @@ export const updateUserStatus = (username, status) => ({
     type: 'UPDATE_USER_STATUS',
     payload: { username, status }
 });
+
+export const ADD_NEW_MESSAGE = 'ADD_NEW_MESSAGE';
+
+// Thay đổi hàm hành động để nhận một mảng các tin nhắn
+export const addNewMessage = (messages) => ({
+    type: ADD_NEW_MESSAGE,
+    payload: messages
+});
+
