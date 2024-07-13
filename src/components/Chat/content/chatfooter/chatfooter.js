@@ -1,7 +1,13 @@
 import React, {useState} from 'react';
 import {useDispatch} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
-import {getPeopleChatMes, getUsersList, sendChatToPeople, sendChatToRoom} from "../../../../socket/socket";
+import {
+    getPeopleChatMes,
+    getRoomChatMes,
+    getUsersList,
+    sendChatToPeople,
+    sendChatToRoom
+} from "../../../../socket/socket";
 
 import {database, ref, set, child, get} from "../../../../firebase";
 import Picker from '@emoji-mart/react';
@@ -54,10 +60,10 @@ function ChatFooter() {
                 sendChatToPeople(name, encodedContent);
                 dispatch(getUsersList);
                 getPeopleChatMes(name);
-                navigate(`/Home/friend/${name}`);
             } else if (type === 'group') {
                 sendChatToRoom(name, encodedContent);
                 dispatch(getUsersList);
+                getRoomChatMes(name);
             }
         }
         fecthSendChat().then(r => {

@@ -58,6 +58,24 @@ function ChatContent() {
         return new Intl.DateTimeFormat('vi-VN', options).format(date);
     };
 
+    const formatDateSeparator = (timestamp) => {
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) {
+            return ""; // Trả về chuỗi rỗng nếu timestamp không hợp lệ
+        }
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+        if (isToday) {
+            return "Hôm nay";
+        }
+        return new Intl.DateTimeFormat('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            timeZone: 'Asia/Ho_Chi_Minh'
+        }).format(date);
+    };
+
     const renderMessageContent = (message) => {
         if (message.mes.startsWith('GIF:')) {
             const gif = message.mes.replace('GIF:', '');
@@ -92,6 +110,7 @@ function ChatContent() {
                         <div className="message-wrap">
                             <div className="message-item">
                                 {renderMessageContent(message)}
+                                <span>{formatDateSeparator(messages.createAt)}</span>
                                 <div className="dropdown align-self-center">
                                     <button
                                         aria-expanded="false"
@@ -103,19 +122,22 @@ function ChatContent() {
                                     </button>
                                     <ul className="dropdown-menu">
                                         <li>
-                                            <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
+                                            <a className="dropdown-item d-flex align-items-center justify-content-between"
+                                               href="#">
                                                 Edit
                                                 <i className="ri-edit-line"/>
                                             </a>
                                         </li>
                                         <li>
-                                            <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
+                                            <a className="dropdown-item d-flex align-items-center justify-content-between"
+                                               href="#">
                                                 Share
                                                 <i className="ri-share-line"/>
                                             </a>
                                         </li>
                                         <li>
-                                            <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
+                                            <a className="dropdown-item d-flex align-items-center justify-content-between"
+                                               href="#">
                                                 Delete
                                                 <i className="ri-delete-bin-line"/>
                                             </a>
