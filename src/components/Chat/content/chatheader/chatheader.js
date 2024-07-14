@@ -31,7 +31,7 @@ function ChatHeader() {
                                     <i className="ri-arrow-left-s-line"/>
                                 </button>
                             </div>
-                            <div className="avatar avatar-online avatar-sm me-3">
+                            <div className="avatar  avatar-sm me-3">
                                 <span className="avatar-label bg-soft-primary text-primary fs-6">
                                     {name ? name.charAt(0) : ""}
                                 </span>

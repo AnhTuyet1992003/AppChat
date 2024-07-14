@@ -28,4 +28,4 @@ const database = getDatabase(app);
 const storage = getStorage(app);
 
 
-export { app, analytics, database, ref, set, push, child, get, onValue, query, orderByChild, equalTo, off, storage, storageRef, uploadBytes, getDownloadURL };
+export { app, analytics, database, ref, set, push, child, get, onValue, query, orderByChild, equalTo, off, storage, storageRef, uploadBytes, getDownloadURL,listAll };
