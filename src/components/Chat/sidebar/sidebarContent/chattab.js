@@ -161,7 +161,6 @@ function ChatTab({ toggleSidebar }) {
             if (createRoomStatus === "success") {
                 setErrorMessageCreate("");
                 setSuccessMessageCreate("Bạn đã tạo phòng thành công!");
-                handleCloseModal();
             } else if (createRoomStatus === "error") {
                 setErrorMessageCreate("Phòng đã tồn tại. Vui lòng nhập tên khác!");
                 setShowToast(true);
