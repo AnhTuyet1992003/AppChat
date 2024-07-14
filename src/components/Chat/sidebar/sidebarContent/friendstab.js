@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { getUsersList } from "../../../../socket/socket";
+import {getPeopleChatMes, getRoomChatMes, getUsersList} from "../../../../socket/socket";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
+import {useNavigate} from "react-router-dom";
 
 
 function FriendsTab(props) {
@@ -10,7 +11,8 @@ function FriendsTab(props) {
     const userList = useSelector(state => state.userList.data);
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredUsers, setFilteredUsers] = useState([]);
-
+    const navigate = useNavigate();
+    
     useEffect(() => {
         getUsersList();
     }, [dispatch]);
@@ -25,6 +27,22 @@ function FriendsTab(props) {
             );
         }
     }, [searchQuery, userList]);
+
+    // Sự kiện khi bấm vào 1 người hoặc 1 nhóm để mở đoạn chat
+    const handleUserClick = (user) => {
+        if (user.type === 0) {
+            // Lấy tin nhắn người đó
+            getPeopleChatMes(user.name);
+            // Chuyển trang tới cuộc trò chuyện của người đó
+            navigate(`/Home/friend/${user.name}`);
+        } else if (user.type === 1) {
+            // Tham gia phòng
+            getRoomChatMes(user.name)
+            // Chuyển trang tới cuộc trò chuyện của nhóm
+            navigate(`/Home/group/${user.name}`);
+        }
+    };
+
 
     const handleSearchChange = (event) => {
         setSearchQuery(event.target.value);
@@ -84,7 +102,7 @@ function FriendsTab(props) {
 
                             filteredUsers.map((user, index) => (
                                 <ul className="list-unstyled" key={index}>
-                                    <li className="card contact-item">
+                                    <li className="card contact-item" key={index} onClick={() => handleUserClick(user)}>
                                         <div className="card-body">
                                             <div className="d-flex align-items-center">
                                                 <div className="avatar avatar-busy me-4">
