@@ -1,13 +1,30 @@
-import React, { useEffect } from 'react';
-import { getPeopleChatMes, getRoomChatMes } from "../../../../socket/socket";
-import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { checkUser, getPeopleChatMes, getRoomChatMes } from '../../../../socket/socket';
 
 function ChatHeader() {
-    const messages = useSelector((state) => state.messages?.data);
     const { type, name } = useParams();
+    const [userStatus, setUserStatus] = useState('offline');
 
     useEffect(() => {
+        const fetchUserStatus = async () => {
+            try {
+                const status = await checkUser(name);
+                setUserStatus(status);
+            } catch (error) {
+                console.error("Error checking user:", error);
+                setUserStatus('offline');
+            }
+        };
+
+        // Gọi hàm kiểm tra trạng thái người dùng mỗi khi name hoặc type thay đổi
+        if (type && name) {
+            fetchUserStatus();
+        }
+    }, [type, name]);
+
+    useEffect(() => {
+        // Gọi hàm để lấy tin nhắn cho người dùng hoặc nhóm
         if (type && name) {
             if (type === 'friend') {
                 getPeopleChatMes(name);
@@ -28,10 +45,10 @@ function ChatHeader() {
                                     className="chat-hide btn btn-icon btn-base btn-sm"
                                     type="button"
                                 >
-                                    <i className="ri-arrow-left-s-line"/>
+                                    <i className="ri-arrow-left-s-line" />
                                 </button>
                             </div>
-                            <div className="avatar avatar-online avatar-sm me-3">
+                            <div className={`avatar ${userStatus === 'online' ? 'avatar-online' : 'avatar-busy'}`}>
                                 <span className="avatar-label bg-soft-primary text-primary fs-6">
                                     {name ? name.charAt(0) : ""}
                                 </span>
@@ -41,6 +58,7 @@ function ChatHeader() {
                                     {name || ""}
                                 </h6>
                                 <p className="d-block text-truncate text-success fs-6 mb-0">
+                                    {userStatus === 'online' ? 'Đang hoạt động' : 'Không hoạt động'}
                                 </p>
                             </div>
                         </div>
@@ -56,7 +74,7 @@ function ChatHeader() {
                                     title="Tìm kiếm"
                                     type="button"
                                 >
-                                    <i className="ri-search-line"/>
+                                    <i className="ri-search-line" />
                                 </button>
                             </li>
                             <li className="list-inline-item d-none d-sm-inline-block">
@@ -65,7 +83,7 @@ function ChatHeader() {
                                     title="Thông tin Chat"
                                     type="button"
                                 >
-                                    <i className="ri-user-3-line"/>
+                                    <i className="ri-user-3-line" />
                                 </button>
                             </li>
                             <li className="list-inline-item">
@@ -77,7 +95,7 @@ function ChatHeader() {
                                         title="Menu"
                                         type="button"
                                     >
-                                        <i className="ri-more-fill"/>
+                                        <i className="ri-more-fill" />
                                     </button>
                                     <ul className="dropdown-menu dropdown-menu-end">
                                         <li className="d-block d-sm-none">
@@ -89,7 +107,7 @@ function ChatHeader() {
                                                 href="#"
                                             >
                                                 Tìm kiếm
-                                                <i className="ri-search-line"/>
+                                                <i className="ri-search-line" />
                                             </a>
                                         </li>
                                         <li className="d-block d-sm-none">
@@ -98,7 +116,7 @@ function ChatHeader() {
                                                 href="#"
                                             >
                                                 Thông tin Chat
-                                                <i className="ri-information-line"/>
+                                                <i className="ri-information-line" />
                                             </a>
                                         </li>
                                         <li>
@@ -107,7 +125,7 @@ function ChatHeader() {
                                                 href="#"
                                             >
                                                 Lưu trữ
-                                                <i className="ri-archive-line"/>
+                                                <i className="ri-archive-line" />
                                             </a>
                                         </li>
                                         <li>
@@ -116,11 +134,11 @@ function ChatHeader() {
                                                 href="#"
                                             >
                                                 Tắt tiếng
-                                                <i className="ri-volume-mute-line"/>
+                                                <i className="ri-volume-mute-line" />
                                             </a>
                                         </li>
                                         <li>
-                                            <div className="dropdown-divider"/>
+                                            <div className="dropdown-divider" />
                                         </li>
                                         <li>
                                             <a
@@ -128,7 +146,7 @@ function ChatHeader() {
                                                 href="#"
                                             >
                                                 Chặn
-                                                <i className="ri-forbid-line"/>
+                                                <i className="ri-forbid-line" />
                                             </a>
                                         </li>
                                     </ul>
@@ -139,7 +157,7 @@ function ChatHeader() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default ChatHeader;
