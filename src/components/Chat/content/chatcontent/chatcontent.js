@@ -11,7 +11,6 @@ import { decode } from "../../../../utill/convert-text";
 import './style.css';
 import { getDownloadURL } from "firebase/storage";
 
-
 function ChatContent() {
     const login = useSelector((state) => state.login);
     const navigate = useNavigate();
@@ -60,7 +59,6 @@ function ChatContent() {
         }
     }, [name, username, dispatch]);
 
-
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
@@ -83,14 +81,10 @@ function ChatContent() {
         return new Intl.DateTimeFormat('vi-VN', options).format(date);
     };
 
-    // Xử lý nuút tải xuống tệp tin từ Firebase Storage
     const handleDownloadFile = async (fileName) => {
         try {
-            // Tạo tham chiếu đến tệp tin trong Firebase Storage
             const fileRef = storageRef(storage, `files/${fileName}`);
-            // Lấy URL tải xuống của tệp tin
             const fileUrl = await getDownloadURL(fileRef);
-            // Tạo một thẻ link ẩn để tải xuống tệp tin
             const a = document.createElement('a');
             a.href = fileUrl;
             a.download = fileName;
@@ -102,7 +96,6 @@ function ChatContent() {
             alert('Failed to download file. The file data might be corrupted.');
         }
     };
-
 
     const handleDownloadImage = async (imageUrl) => {
         try {
@@ -117,24 +110,21 @@ function ChatContent() {
             alert('Failed to download image. Please try again.');
         }
     };
+
     const renderMessageContent = (message) => {
         if (message.mes.startsWith('GIF:')) {
             const gif = message.mes.replace('GIF:', '');
             const gifUrl = decode(gif);
             return (
                 <div className="message-gif">
-                    <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '450px' }} />
+                    <img src={gifUrl} alt="GIF" style={{ maxWidth: '200px', maxHeight: '450px',borderRadius:'15px' }} />
                 </div>
             );
 
-        }
-        // Nếu tin nhắn là một tệp tin
-        else if (message.mes.startsWith('FILE:')) {
-
+        } else if (message.mes.startsWith('FILE:')) {
             const fileName = message.mes.replace('FILE:', '');
             const decodedFileName = decode(fileName);
 
-            // Hiển thị nội dung tin nhắn với URL tệp
             return (
                 <div className="message-content">
                     <span>{decodedFileName}</span>
@@ -180,6 +170,18 @@ function ChatContent() {
         setExpandedImage(null);
     };
 
+    const isDifferentDay = (currentMessage, previousMessage) => {
+        const currentDate = new Date(currentMessage.createAt);
+        const previousDate = new Date(previousMessage.createAt);
+
+        return currentDate.toDateString() !== previousDate.toDateString();
+    };
+
+    const isToday = (timestamp) => {
+        const today = new Date();
+        const date = new Date(timestamp);
+        return date.toDateString() === today.toDateString();
+    };
 
     if (!name) {
         return (
@@ -192,79 +194,98 @@ function ChatContent() {
     return (
         <div className="chat-content hide-scrollbar h-100">
             <div className="container-fluid g-0 p-4 chat-content">
-                {sortedMessages.map((message, index) => (
-                    <div key={index} className={`message ${message.name === username ? "self" : ""}`}>
-                        <div className="message-wrap">
-                            <div className="message-item">
-                                {renderMessageContent(message)}
-                                <div className="dropdown align-self-center">
-                                    <button
-                                        aria-expanded="false"
-                                        className="btn btn-icon btn-base btn-sm"
-                                        data-bs-toggle="dropdown"
-                                        type="button"
-                                    >
-                                        <i className="ri-more-2-fill" />
-                                    </button>
-                                    <ul className="dropdown-menu">
-                                        <li>
-                                            <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
-                                                Edit
-                                                <i className="ri-edit-line" />
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
-                                                Share
-                                                <i className="ri-share-line" />
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
-                                                Delete
-                                                <i className="ri-delete-bin-line" />
-                                            </a>
-                                        </li>
-                                        {(message.mes.startsWith('IMAGE:') || message.mes.startsWith('FILE:')) && (
-                                            <li>
-                                                <a
-                                                    className="dropdown-item d-flex align-items-center justify-content-between"
-                                                    href="#"
-                                                    onClick={async () => {
-                                                        if (message.mes.startsWith('IMAGE:')) {
-                                                            await handleDownloadImage(message.mes.replace('IMAGE:', ''));
-                                                        } else if (message.mes.startsWith('FILE:')) {
-                                                            await handleDownloadFile(decode(message.mes.replace('FILE:', '')));
-                                                        }
-                                                    }}
-                                                >
-                                                    Download
-                                                    <i className="ri-download-line" />
-                                                </a>
-                                            </li>
-                                        )}
-                                    </ul>
+                {sortedMessages.map((message, index) => {
+                    const showTodayLabel = index === 0 || isDifferentDay(message, sortedMessages[index - 1]);
+
+                    return (
+                        <React.Fragment key={index}>
+                            {showTodayLabel && isToday(message.createAt) && (
+                                <div className="today-label">
+                                    <hr className="today-line"/>
+                                    <div style={{
+                                        textAlign: 'center',
+                                        margin: '10px 0',
+                                        fontWeight: 'bold',
+                                        color: '#969696'
+                                    }}>
+                                        Hôm nay
+                                    </div>
+                                </div>
+                            )}
+                            <div className={`message ${message.name === username ? "self" : ""}`}>
+                                <div className="message-wrap">
+                                    <div className="message-item">
+                                        {renderMessageContent(message)}
+                                        <div className="dropdown align-self-center">
+                                            <button
+                                                aria-expanded="false"
+                                                className="btn btn-icon btn-base btn-sm"
+                                                data-bs-toggle="dropdown"
+                                                type="button"
+                                            >
+                                                <i className="ri-more-2-fill" />
+                                            </button>
+                                            <ul className="dropdown-menu">
+                                                <li>
+                                                    <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
+                                                        Edit
+                                                        <i className="ri-edit-line" />
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
+                                                        Share
+                                                        <i className="ri-share-line" />
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a className="dropdown-item d-flex align-items-center justify-content-between" href="#">
+                                                        Delete
+                                                        <i className="ri-delete-bin-line" />
+                                                    </a>
+                                                </li>
+                                                {(message.mes.startsWith('IMAGE:') || message.mes.startsWith('FILE:')) && (
+                                                    <li>
+                                                        <a
+                                                            className="dropdown-item d-flex align-items-center justify-content-between"
+                                                            href="#"
+                                                            onClick={async () => {
+                                                                if (message.mes.startsWith('IMAGE:')) {
+                                                                    await handleDownloadImage(message.mes.replace('IMAGE:', ''));
+                                                                } else if (message.mes.startsWith('FILE:')) {
+                                                                    await handleDownloadFile(decode(message.mes.replace('FILE:', '')));
+                                                                }
+                                                            }}
+                                                        >
+                                                            Download
+                                                            <i className="ri-download-line" />
+                                                        </a>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div className="message-info">
+                                        <div className="avatar avatar-sm">
+                                            <span className="avatar-label bg-soft-primary text-primary fs-6">
+                                                {message.name ? message.name.charAt(0) : ""}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h6 className="mb-0">
+                                                {message.name}
+                                            </h6>
+                                            <small className="text-muted">
+                                                {formatTimestamp(message.createAt)}
+                                                <i className="ri-check-double-line align-bottom text-success fs-5" />
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="message-info">
-                                <div className="avatar avatar-sm">
-                                    <span className="avatar-label bg-soft-primary text-primary fs-6">
-                                        {message.name ? message.name.charAt(0) : ""}
-                                    </span>
-                                </div>
-                                <div>
-                                    <h6 className="mb-0">
-                                        {message.name}
-                                    </h6>
-                                    <small className="text-muted">
-                                        {formatTimestamp(message.createAt)}
-                                        <i className="ri-check-double-line align-bottom text-success fs-5" />
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                        </React.Fragment>
+                    );
+                })}
                 {expandedImage && (
                     <div className="expanded-image-overlay">
                         <img src={expandedImage} alt="Expanded" className="expanded-image" />

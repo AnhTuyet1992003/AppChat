@@ -23,16 +23,11 @@ function ChatFooter() {
     // state quản lý tin nhắn và file
     const [message, setMessage] = useState('');
     const [files, setFiles] = useState([]);
-
     const [images, setImages] = useState([]);
-
-
     const dispatch = useDispatch();
     const {type, name} = useParams();
     const username = localStorage.getItem('username');
-
     // emoji
-
     const [isPickerVisible, setPickerVisible] = useState(false);
     const [isGifPickerVisible, setGifPickerVisible] = useState(false);
 
@@ -107,7 +102,6 @@ function ChatFooter() {
                 await sendMessageForFile(image);
             }
         } else {
-
             await sendMessageForFile(encodedContent);
         }
     };
@@ -227,11 +221,11 @@ function ChatFooter() {
                         <div className="input-group">
                             <button className="btn btn-white btn-lg border-0" type="button"
                                     onClick={() => setPickerVisible(!isPickerVisible)}>
-                                <i className="far fa-grin" style={{fontSize: '24px'}}></i>
+                                <i className="far fa-grin-beam" style={{fontSize: '20px'}}></i>
                             </button>
                             <button className="btn btn-white btn-lg border-0" type="button"
                                     onClick={() => setGifPickerVisible(!isGifPickerVisible)}>
-                                <FontAwesomeIcon icon={faGift} style={{fontSize: '24px'}}/>
+                                <FontAwesomeIcon icon={faGift} style={{fontSize: '20px'}}/>
                             </button>
                             <div className={isPickerVisible ? 'd-block' : 'd-none'}
                                  style={{position: 'absolute', bottom: '80px', zIndex: 1000}}>
