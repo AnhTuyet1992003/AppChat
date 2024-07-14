@@ -168,7 +168,7 @@ function ChatFooter() {
     const handleDeleteFile = (index) => {
         // Cập nhật danh sách tập tin: loại bỏ phần tử có chỉ số `index`
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-
+    }
         const handleDeleteImage = (index) => {
             setImages((prevImages) => prevImages.filter((_, i) => i !== index));
 
@@ -178,7 +178,7 @@ function ChatFooter() {
         if (!name) {
             return null;
         }
-    }
+
     return (
         <>
             {files.length > 0 && (
