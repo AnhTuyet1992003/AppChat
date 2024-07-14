@@ -13,6 +13,7 @@ import { useState } from "react";
 function Sidebar() {
     const [activeTab, setActiveTab] = useState('chats-tab');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const username = localStorage.getItem('username');
 
     const handleChatCreated = () => {
         setActiveTab('chats-tab');
@@ -104,7 +105,7 @@ function Sidebar() {
                         >
                             <div className="avatar avatar-online avatar-sm">
                                 <span className="avatar-label bg-soft-success text-success fs-6">
-                                    JD
+                                        {username?username.charAt(0):''}
                                 </span>
                             </div>
                         </a>

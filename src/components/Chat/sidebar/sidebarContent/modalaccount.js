@@ -8,7 +8,7 @@ const Logout = () => {
     const dispatch = useDispatch();
     const logoutStatus = useSelector((state) => state.logout.status);
     const navigate = useNavigate();
-    const username = localStorage.getItem('username')
+    const username = localStorage.getItem('username');
 
     useEffect(() => {
         const ws = initializeSocket('ws://140.238.54.136:8080/chat/chat');
@@ -78,7 +78,7 @@ const Logout = () => {
                         <div className="profile-content">
                             <div className="avatar avatar-lg">
                                 <span className="avatar-label bg-soft-success text-success fs-3">
-                                    JD
+                                    {username?username.charAt(0):''}
                                 </span>
                             </div>
                             <h5 className="m-1">{username}</h5>
