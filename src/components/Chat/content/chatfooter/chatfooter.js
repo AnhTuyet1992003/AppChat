@@ -55,8 +55,14 @@ function ChatFooter() {
         "https://media1.giphy.com/media/YTbZzCkRQCEJa/200.webp?cid=790b7611cb8xqe66nq90srrbhyquz14gy2uqj5d1vua9r0ry&ep=v1_gifs_trending&rid=200.webp&ct=g",
         "https://media1.giphy.com/media/tHIRLHtNwxpjIFqPdV/giphy.webp?cid=790b7611cb8xqe66nq90srrbhyquz14gy2uqj5d1vua9r0ry&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
         "https://media0.giphy.com/media/Fc0glzAjfjsaV0IfUQ/giphy.webp?cid=82a1493b41wmq8a7y8lh0myg4c1i1c3440mxrshlhwmvr2j7&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
-        "https://media4.giphy.com/media/fvjBHSTYMcE1fKcrP9/200.webp?cid=82a1493bw11uj0sjjt0pj7hz2k84olu4l5lp3xpjwz0pnceg&ep=v1_gifs_trending&rid=200.webp&ct=g",
-        "https://media3.giphy.com/media/kyLYXonQYYfwYDIeZl/200.webp?cid=790b761145cnlovyqgdfsa9jeownbghxj2uxjz34teyk92r3&ep=v1_gifs_trending&rid=200.webp&ct=g"
+        "https://media4.giphy.com/media/jZC7j19LG8s6zsLnoL/200.gif?cid=81a08d72s3a94jcgp81arvcmrbbuhr2ca6qzv7ei2pvrjf8a&ep=v1_gifs_search&rid=200.gif&ct=g",
+        "https://media3.giphy.com/media/kyLYXonQYYfwYDIeZl/200.webp?cid=790b761145cnlovyqgdfsa9jeownbghxj2uxjz34teyk92r3&ep=v1_gifs_trending&rid=200.webp&ct=g",
+        "https://media1.giphy.com/media/u6iGNlB8JCb1DymF53/giphy.webp?cid=82a1493bpyxsi8rhdzjfdzpwb69m3wwsd88sa51ga50jza5a&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
+        "https://media4.giphy.com/media/2WGDUTmsB4DzFuvZ2t/200.webp?cid=82a1493b6f6nsy4uo2qwz3iv42zn20k2xflp0xi6ysewb253&ep=v1_gifs_trending&rid=200.webp&ct=g",
+        "https://media0.giphy.com/media/GiWEowj3nQv9C/200.webp?cid=82a1493bjos1iupiuhz95l19ffujjjjjk7y6q8iohate2rk4&ep=v1_gifs_trending&rid=200.webp&ct=g",
+        "https://media4.giphy.com/media/tbRcseHU5ieXAEhlQw/giphy.webp?cid=82a1493bjos1iupiuhz95l19ffujjjjjk7y6q8iohate2rk4&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
+        "https://media4.giphy.com/media/l1KVaj5UcbHwrBMqI/200.webp?cid=82a1493btojm2l6ctzkfi7vngazlinthqq2ssyy9pt260g67&ep=v1_gifs_trending&rid=200.webp&ct=g",
+        "https://media2.giphy.com/media/ZqlvCTNHpqrio/200.webp?cid=790b76118xdfxi9w241h93a4btvmttnwdu8ui9gcqtdqpkf6&ep=v1_gifs_trending&rid=200.webp&ct=g"
 
     ];
 
@@ -70,6 +76,40 @@ function ChatFooter() {
             }
         }
     }, [dispatch, navigate, login]);
+
+    useEffect(() => {
+        if (searchTerm === '') {
+            fetchDefaultGifs();
+        } else {
+            fetchSearchGifs(searchTerm);
+        }
+    }, [searchTerm]);
+    const fetchDefaultGifs = () => {
+        setGifResults(gifList);
+    };
+
+    // Function to fetch GIFs based on a search term
+    const fetchSearchGifs = async (term) => {
+        try {
+            const response = await axios.get('https://api.giphy.com/v1/gifs/search', {
+                params: {
+                    api_key: 'X4r1rEOUEs10qzX12AZBHbc5FcpcjNdG',
+                    q: term,
+                    limit: 18
+                }
+            });
+            setGifResults(response.data.data.map(gif => gif.images.fixed_height.url));
+        } catch (error) {
+            console.error('Error fetching search gifs:', error);
+        }
+    };
+
+
+    const handleGifClick = (gifUrl) => {
+        sendMessage(gifUrl, true);
+        setGifPickerVisible(false);
+    };
+
 
 
     // gửi tin nhắn
@@ -154,38 +194,6 @@ function ChatFooter() {
         }
     };
 
-    useEffect(() => {
-        if (searchTerm === '') {
-            fetchDefaultGifs();
-        } else {
-            fetchSearchGifs(searchTerm);
-        }
-    }, [searchTerm]);
-    const fetchDefaultGifs = () => {
-        setGifResults(gifList);
-    };
-
-    // Function to fetch GIFs based on a search term
-    const fetchSearchGifs = async (term) => {
-        try {
-            const response = await axios.get('https://api.giphy.com/v1/gifs/search', {
-                params: {
-                    api_key: 'DUm34AMYwnQXYkngaVbqox9lEBDxWdUU',
-                    q: term,
-                    limit: 18
-                }
-            });
-            setGifResults(response.data.data.map(gif => gif.images.fixed_height.url));
-        } catch (error) {
-            console.error('Error fetching search gifs:', error);
-        }
-    };
-
-
-    const handleGifClick = (gifUrl) => {
-        sendMessage(gifUrl, true);
-        setGifPickerVisible(false);
-    };
 
     // cho tệp để tải lên
     const handleFileChange = (e) => {

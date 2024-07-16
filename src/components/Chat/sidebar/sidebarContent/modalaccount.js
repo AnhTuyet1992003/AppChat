@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { initializeSocket,logoutUser,socketActions } from '../../../../socket/socket';
+import {initializeSocket, logoutUser, logoutUsers, socketActions} from '../../../../socket/socket';
 
 const Logout = () => {
     const [socket, setSocket] = useState(null);
@@ -29,7 +29,7 @@ const Logout = () => {
 
     const handleLogout = (e) => {
         e.preventDefault();
-        socketActions.logoutUser();
+        logoutUsers();
     };
 
     return (

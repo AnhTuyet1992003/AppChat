@@ -1,4 +1,3 @@
-
 import {
     GET_USER_LIST_FAILURE,
     GET_USER_LIST_SUCCESS,
@@ -29,21 +28,22 @@ import {
 
 
 } from "../action/action";
-import { format } from 'date-fns'; // Import format từ date-fns
+import {format} from 'date-fns'; // Import format từ date-fns
 import {sendChatToPeople} from "../../socket/socket"
+
 const initialState = {
     register: {},
     login: {},
     logout: {},
-    listUser:{},
-    messages: { data: [], error: null },
-    message1:{data:[]},
-    active: { name: '', type: null },
-    userList: { data: null, error: null },
-    checkUser: { status: null, data: null, error: null }, // Thêm trạng thái kiểm tra người dùng
+    listUser: {},
+    messages: {data: [], error: null},
+    message1: {data: []},
+    active: {name: '', type: null},
+    userList: {data: null, error: null},
+    checkUser: {status: null, data: null, error: null}, // Thêm trạng thái kiểm tra người dùng
     userStatuses: [],
-    joinRoom: { status: null, data: null, error: null }, // Thêm trạng thái joinRoom
-    createRoom: { status: null, data: null, error: null }, // Thêm trạng thái createRoom
+    joinRoom: {status: null, data: null, error: null}, // Thêm trạng thái joinRoom
+    createRoom: {status: null, data: null, error: null}, // Thêm trạng thái createRoom
     file: [],
 };
 
@@ -109,14 +109,14 @@ const socketReducer = (state = initialState, action) => {
                 sendChatToPeople(newmess.name, "");
             }
             // Kiểm tra xem nội dung tin nhắn mới có rỗng không
-            if (newmess.mes !== "") {X
+            if (newmess.mes !== "") {
                 sendChatToPeople(newmess.name, "");
             }
             let updatedFile = state.file;
             return {
                 ...state,
                 file: updatedFile,
-                messages: { data: [...state.messages.data, newmess], error: null }
+                messages: {data: [...state.messages.data, newmess], error: null}
             };
         case SEND_CHAT_TO_PEOPLE_FAILURE:
             return {
@@ -124,15 +124,12 @@ const socketReducer = (state = initialState, action) => {
                 messages: {data: null, error: action.error},
             };
         case SEND_CHAT_TO_ROOM_SUCCESS:
-            const newMessage2 = action.payload ? action.payload.data : null;
+            const newMessage2 = action.payload;
             if (!newMessage2) {
                 console.error('No message data in payload:', action.payload);
                 return state;
             }
-            return {
-                ...state,
-                messages: { data: [...state.messages.data, newMessage2], error: null },
-            };
+            return {...state, messages: {data: [...state.messages.data, newMessage2], error: null},};
         case SEND_CHAT_TO_ROOM_FAILURE:
             return {
                 ...state,

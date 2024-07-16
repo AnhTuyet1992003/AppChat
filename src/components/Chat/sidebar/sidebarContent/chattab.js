@@ -91,14 +91,11 @@ function ChatTab({ toggleSidebar }) {
         if (user.type === 0) {
             // Lấy tin nhắn người đó
             getPeopleChatMes(user.name);
-            // onSelectUser('ChatContent', user.name);
             // Chuyển trang tới cuộc trò chuyện của người đó
             navigate(`/Home/friend/${user.name}`);
         } else if (user.type === 1) {
-            // Tham gia phòng
+            // lấy tin nhắn nhóm
             getRoomChatMes(user.name)
-            // joinRoom(user.name);
-            // onSelectUser('ChatGroup', user.name);
             // Chuyển trang tới cuộc trò chuyện của nhóm
             navigate(`/Home/group/${user.name}`);
         }
