@@ -12,7 +12,7 @@ import ChatFooter from "./content/chatfooter/chatfooter";
 import ChatContent from "./content/chatcontent/chatcontent";
 import ChatHeader from "./content/chatheader/chatheader";
 import SearchChat from "./content/searchchat";
-import ChatTab from "./sidebar/sidebarContent/chattab";
+
 
 function ChatBox() {
     const [activeComponent, setActiveComponent] = useState('ChatContent');

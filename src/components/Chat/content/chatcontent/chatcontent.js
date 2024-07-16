@@ -95,7 +95,21 @@ function ChatContent() {
                 </div>
             );
 
-        } else if (message.mes.startsWith('FILE:')) {
+        } else if (message.mes.startsWith('VIDEO:')) {
+            const videoUrl = message.mes.replace('VIDEO:', '');
+            return (
+                <div className="message-video">
+                    <video controls style={{ maxWidth: '200px', maxHeight: '450px' }}>
+                        <source src={videoUrl} type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            );
+        }
+        // Nếu tin nhắn là một tệp tin
+        else if (message.mes.startsWith('FILE:')) {
+
+
             const fileName = message.mes.replace('FILE:', '');
             const decodedFileName = decode(fileName);
 
