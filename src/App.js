@@ -16,7 +16,7 @@ import ChatContent from "./components/Chat/content/chatcontent/chatcontent";
 import ChatHeader from "./components/Chat/content/chatheader/chatheader";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
-import ChatGroup from "./components/Chat/content/chatcontent/chatgroup";
+
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDwplCXmmoBcfvUhKX1a50Zzn1mQ4F45xw",

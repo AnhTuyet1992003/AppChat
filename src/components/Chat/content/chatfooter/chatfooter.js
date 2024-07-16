@@ -39,8 +39,11 @@ function ChatFooter() {
     const navigate = useNavigate();
     const login = useSelector((state) => state.login);
     const fileInputRef = useRef(null);
+    const [videos, setVideos] = useState([]);
 
     const imageInputRef = useRef(null);
+    const videoInputRef = useRef(null);
+
     const gifList = [
         "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanNqMHpxcHo2cDFmbDlqNHk5Y3BhNHpzYTZqdjk2dTU4NWg0NndlZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7vDoUoDZHoUQxMPkd7/giphy.webp",
         "https://media0.giphy.com/media/oKQGM5S2mwx5C/giphy.webp?cid=82a1493bo0nvjpdk35jsd5n6qte8jj8sruymuqpbsglhm5y0&ep=v1_gifs_trending&rid=giphy.webp&ct=g",
@@ -71,23 +74,17 @@ function ChatFooter() {
 
     // gửi tin nhắn
     const sendMessage = async (content, isGif = false) => {
-        // Nếu không có nội dung hoặc nội dung chỉ chứa khoảng trắng
-        // và không có tệp tin nào được chọn, không thực hiện gửi tin nhắn
-        if ((!content || content.trim() === '') && files.length === 0 && images.length === 0) return;
+        if ((!content || content.trim() === '') && files.length === 0 && images.length === 0 && videos.length === 0) return;
 
         let encodedContent = encode(content);
         if (isGif) {
             encodedContent = `GIF:${encodedContent}`;
             await sendMessageForFile(encodedContent);
-        } else if (files.length > 0 || images.length > 0) {
-            // Tải lên file lên Firebase Storage và lấy URL của từng tệp
+        } else if (files.length > 0 || images.length > 0 || videos.length > 0) {
             const fileUploadPromises = files.map(async (file) => {
                 const fileRef = storageRef(storage, `files/${file.name}`);
                 await uploadBytes(fileRef, file);
-                // Mã hóa tên tệp
-
-                const encodedFileName = encode(file.name);
-                return `FILE:${encodedFileName}`;
+                return `FILE:${encode(file.name)}`;
             });
 
             const imageUploadPromises = images.map(async (image) => {
@@ -97,8 +94,16 @@ function ChatFooter() {
                 return `IMAGE:${imageURL}`;
             });
 
+            const videoUploadPromises = videos.map(async (video) => {
+                const videoRef = storageRef(storage, `videos/${video.name}`);
+                await uploadBytes(videoRef, video);
+                const videoURL = await getDownloadURL(videoRef);
+                return `VIDEO:${videoURL}`;
+            });
+
             const uploadedFiles = await Promise.all(fileUploadPromises);
             const uploadedImages = await Promise.all(imageUploadPromises);
+            const uploadedVideos = await Promise.all(videoUploadPromises);
 
             for (const file of uploadedFiles) {
                 await sendMessageForFile(file);
@@ -106,11 +111,14 @@ function ChatFooter() {
             for (const image of uploadedImages) {
                 await sendMessageForFile(image);
             }
+            for (const video of uploadedVideos) {
+                await sendMessageForFile(video);
+            }
         } else {
-
             await sendMessageForFile(encodedContent);
         }
     };
+
 
     const sendMessageForFile = async (encodedContent) => {
         const fetchSendChat = async () => {
@@ -135,6 +143,7 @@ function ChatFooter() {
         setMessage('');
         setFiles([]);
         setImages([]);
+        setVideos([]);
 
         setPickerVisible(false);
     };
@@ -169,6 +178,12 @@ function ChatFooter() {
         }
     };
 
+    const handleVideoChange = (e) => {
+        const selectedVideos = Array.from(e.target.files);
+        if (selectedVideos.length) {
+            setVideos((prevVideos) => [...prevVideos, ...selectedVideos]);
+        }
+    };
 
     // nút xóa file đã chọn
     const handleDeleteFile = (index) => {
@@ -179,6 +194,9 @@ function ChatFooter() {
             setImages((prevImages) => prevImages.filter((_, i) => i !== index));
 
         };
+    const handleDeleteVideo = (index) => {
+            setVideos((prevVideos) => prevVideos.filter((_, i) => i !== index));
+    };
 
 
         if (!name) {
@@ -214,6 +232,24 @@ function ChatFooter() {
                             />
 
                             <div className="xoaFile" onClick={() => handleDeleteImage(index)}>
+                                x
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+            {videos.length > 0 && (
+                <div className="mt-2 containerfile">
+                    {videos.map((video, index) => (
+                        <div key={index} className="d-flex align-items-center fileshow">
+                            <video
+                                src={URL.createObjectURL(video)}
+                                alt={video.name}
+                                className="video-preview"
+                                style={{ maxWidth: '100px', maxHeight: '80px' }}
+                                controls
+                            />
+                            <div className="xoaFile" onClick={() => handleDeleteVideo(index)}>
                                 x
                             </div>
                         </div>
@@ -272,6 +308,19 @@ function ChatFooter() {
                                     onClick={() => imageInputRef.current.click()}>
                                 <i className="far fa-image"/>
                             </button>
+                            <input
+                                type="file"
+                                style={{display: 'none'}}
+                                accept="video/*"
+                                onChange={handleVideoChange}
+                                ref={videoInputRef} // Create a ref for this input if needed
+                                multiple
+                            />
+                            <button className="btn btn-white btn-lg border-0" type="button"
+                                    onClick={() => videoInputRef.current.click()}>
+                                <i className="far fa-video"/> {/* Use an appropriate icon */}
+                            </button>
+
                         </div>
                         <button
                             className="btn btn-icon btn-primary btn-lg rounded-circle ms-2"
