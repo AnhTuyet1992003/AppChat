@@ -12,9 +12,7 @@ import ChatFooter from "./content/chatfooter/chatfooter";
 import ChatContent from "./content/chatcontent/chatcontent";
 import ChatHeader from "./content/chatheader/chatheader";
 import SearchChat from "./content/searchchat";
-import ChatGroup from "./content/chatcontent/chatgroup";
 import ChatTab from "./sidebar/sidebarContent/chattab";
-import ChatFriend from "./content/chatcontent/chatfriend";
 
 function ChatBox() {
     const [activeComponent, setActiveComponent] = useState('ChatContent');
@@ -39,8 +37,7 @@ function ChatBox() {
                             <ChatHeader />
                             <SearchChat />
                             <ChatContent/>
-                            {/*{activeComponent === 'ChatFriend' && <ChatFriend name={name} />}*/}
-                            {/*{activeComponent === 'ChatGroup' && <ChatGroup name={name} />}*/}
+
                             <ChatFooter name={name} />
                         </div>
                         <UserProfile />

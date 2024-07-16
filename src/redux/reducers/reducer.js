@@ -109,7 +109,7 @@ const socketReducer = (state = initialState, action) => {
                 sendChatToPeople(newmess.name, "");
             }
             // Kiểm tra xem nội dung tin nhắn mới có rỗng không
-            if (newmess.mes !== "") {
+            if (newmess.mes !== "") {X
                 sendChatToPeople(newmess.name, "");
             }
             let updatedFile = state.file;
@@ -216,7 +216,6 @@ const socketReducer = (state = initialState, action) => {
             return {
                 ...state,
                 messages: {data: action.data.chatData, error: null},
-                message1: {data: action.data.chatData},
                 listUser: finalList
             };
         case GET_ROOM_CHAT_MES_FAILURE:
