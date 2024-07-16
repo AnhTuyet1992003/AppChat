@@ -224,21 +224,6 @@ export const reLoginUser = (user, code) => {
         console.log("Socket is close")
     }
 };
-// export const getUsersList = () => {
-//     if (!socket) return;
-//     const request = () => socket.send(JSON.stringify({
-//         action: "onchat",
-//         data: {event: "GET_USER_LIST"},
-//     }));
-//
-//     if (socket.readyState === WebSocket.OPEN) {
-//         request();
-//     } else if (socket.readyState === WebSocket.CONNECTING) {
-//         setTimeout(request, 2000);
-//     } else {
-//         console.log("Socket is closed");
-//     }
-// };
 export const getUsersList = () => {
     if (!socket) return;
     if (socket.readyState === WebSocket.OPEN) {
