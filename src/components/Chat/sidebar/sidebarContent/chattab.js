@@ -236,36 +236,36 @@ function ChatTab({ toggleSidebar }) {
     const [userStatusCache, setUserStatusCache] = useState({});
     // useCallback: Dùng để ghi nhớ hàm debouncedFetchUserStatuses để nó không bị tạo lại trong mỗi
     // lần render trừ khi userStatusCache thay đổi. Điều này giúp tối ưu hóa hiệu suất.
-    const debouncedFetchUserStatuses = useCallback(
-        debounce(async (friendsList) => {
-            const newCache = { ...userStatusCache }; // Sao chép userStatusCache ban đầu
-            const statuses = {}; // Lưu trạng thái người dùng
-
-            for (const user of friendsList) {
-                try {
-                    const status = await checkUser(user.name);
-                    if (status === 'online') {
-                        newCache[user.name] = true; // Người dùng online
-                        statuses[user.name] = true;
-                    } else {
-                        newCache[user.name] = false; // Người dùng offline
-                        statuses[user.name] = false;
-                    }
-                } catch (error) {
-                    console.error("Error checking user:", error);
-                    newCache[user.name] = false; // Xử lý lỗi, người dùng offline
-                    statuses[user.name] = false;
-                }
-            }
-
-             setUserStatusCache(newCache); // Cập nhật bộ đệm
-            setUserStatuses(statuses); // Cập nhật trạng thái người dùng
-        }, 300), [userStatusCache]
-    );
-
-    useEffect(() => {
-        debouncedFetchUserStatuses(userList);
-    }, [userList, debouncedFetchUserStatuses]);
+    // const debouncedFetchUserStatuses = useCallback(
+    //     debounce(async (friendsList) => {
+    //         const newCache = { ...userStatusCache }; // Sao chép userStatusCache ban đầu
+    //         const statuses = {}; // Lưu trạng thái người dùng
+    //
+    //         for (const user of friendsList) {
+    //             try {
+    //                 const status = await checkUser(user.name);
+    //                 if (status === 'online') {
+    //                     newCache[user.name] = true; // Người dùng online
+    //                     statuses[user.name] = true;
+    //                 } else {
+    //                     newCache[user.name] = false; // Người dùng offline
+    //                     statuses[user.name] = false;
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Error checking user:", error);
+    //                 newCache[user.name] = false; // Xử lý lỗi, người dùng offline
+    //                 statuses[user.name] = false;
+    //             }
+    //         }
+    //
+    //          setUserStatusCache(newCache); // Cập nhật bộ đệm
+    //         setUserStatuses(statuses); // Cập nhật trạng thái người dùng
+    //     }, 300), [userStatusCache]
+    // );
+    //
+    // useEffect(() => {
+    //     debouncedFetchUserStatuses(userList);
+    // }, [userList, debouncedFetchUserStatuses]);
 
 
 

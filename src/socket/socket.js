@@ -25,7 +25,6 @@ import {
     sendChatToRoomSuccess,
     sendChatToRoomFailure,
 } from "../redux/action/action";
-import Firebase from "../firebase";
 
 export let socket;
 export let isSocketOpen = false;
