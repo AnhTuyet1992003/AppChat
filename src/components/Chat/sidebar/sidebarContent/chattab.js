@@ -234,6 +234,7 @@ function ChatTab({ toggleSidebar }) {
         }
     };
 
+
     const [userStatuses, setUserStatuses] = useState({});
     const [userStatusCache, setUserStatusCache] = useState({});
     // useCallback: Dùng để ghi nhớ hàm debouncedFetchUserStatuses để nó không bị tạo lại trong mỗi
@@ -268,6 +269,7 @@ function ChatTab({ toggleSidebar }) {
     useEffect(() => {
         debouncedFetchUserStatuses(userList);
     }, [userList, debouncedFetchUserStatuses]);
+
 
 
     return (

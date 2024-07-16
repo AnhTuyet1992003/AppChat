@@ -423,6 +423,11 @@ export const sendChatToRoom = (to, mes) => {
     } else {
         console.log("WebSocket connection is in CLOSING or CLOSED state.");
         // Re-establish the WebSocket connection or handle the error as needed
+        initializeSocket('ws://140.238.54.136:8080/chat/chat');
+        setTimeout(() => {
+            sendChatToPeople(to, mes);
+        }, 1000); // Retry after 1 second
+
     }
 };
 

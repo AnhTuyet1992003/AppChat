@@ -9,15 +9,25 @@ import { getStorage, ref as storageRef, listAll, uploadBytes, getDownloadURL } f
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// const firebaseConfig = {
+//     apiKey: "AIzaSyDwplCXmmoBcfvUhKX1a50Zzn1mQ4F45xw",
+//     authDomain: "appchat-frontend.firebaseapp.com",
+//     databaseURL: "https://appchat-frontend-default-rtdb.firebaseio.com",
+//     projectId: "appchat-frontend",
+//     storageBucket: "appchat-frontend.appspot.com",
+//     messagingSenderId: "494767959162",
+//     appId: "1:494767959162:web:ce7639451c7afcfc64dfc3",
+//     measurementId: "G-9TKZ7BPTB6"
+// };
 const firebaseConfig = {
-    apiKey: "AIzaSyDwplCXmmoBcfvUhKX1a50Zzn1mQ4F45xw",
-    authDomain: "appchat-frontend.firebaseapp.com",
-    databaseURL: "https://appchat-frontend-default-rtdb.firebaseio.com",
-    projectId: "appchat-frontend",
-    storageBucket: "appchat-frontend.appspot.com",
-    messagingSenderId: "494767959162",
-    appId: "1:494767959162:web:ce7639451c7afcfc64dfc3",
-    measurementId: "G-9TKZ7BPTB6"
+    apiKey: "AIzaSyCxc3pKK3YEFWp1dmo18aW_v6QoHZjClzM",
+    authDomain: "appchat-d2ddd.firebaseapp.com",
+    databaseURL: "https://appchat-d2ddd-default-rtdb.firebaseio.com",
+    projectId: "appchat-d2ddd",
+    storageBucket: "appchat-d2ddd.appspot.com",
+    messagingSenderId: "87141689413",
+    appId: "1:87141689413:web:d0750605547247948a1b2c",
+    measurementId: "G-G8BHWR5C3R"
 };
 
 

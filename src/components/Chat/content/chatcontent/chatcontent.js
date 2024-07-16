@@ -6,7 +6,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 import {database, query, ref, orderByChild, equalTo, onValue, storage, storageRef} from "../../../../firebase";
-import { addNewMessage } from "../../../../redux/action/action";
 import { decode } from "../../../../utill/convert-text";
 import './style.css';
 import { getDownloadURL } from "firebase/storage";
@@ -32,32 +31,7 @@ function ChatContent() {
         }
     }, [dispatch, navigate, login, username]);
 
-    useEffect(() => {
-        if (name && username) {
-            const messagesRef = ref(database, 'messages');
-            const userQuery = query(messagesRef, orderByChild('name'), equalTo(name));
-            const toUserQuery = query(messagesRef, orderByChild('to'), equalTo(username));
 
-            const handleValue = (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const messagesArray = Object.values(data).filter(message =>
-                        (message.name === name && message.to === username) ||
-                        (message.to === name && message.name === username)
-                    );
-                    dispatch(addNewMessage(messagesArray));
-                }
-            };
-
-            const userUnsubscribe = onValue(userQuery, handleValue);
-            const toUserUnsubscribe = onValue(toUserQuery, handleValue);
-
-            return () => {
-                userUnsubscribe();
-                toUserUnsubscribe();
-            };
-        }
-    }, [name, username, dispatch]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
