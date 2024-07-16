@@ -109,7 +109,7 @@ const socketReducer = (state = initialState, action) => {
                 sendChatToPeople(newmess.name, "");
             }
             // Kiểm tra xem nội dung tin nhắn mới có rỗng không
-            if (newmess.mes !== "") {X
+            if (newmess.mes !== "") {
                 sendChatToPeople(newmess.name, "");
             }
             let updatedFile = state.file;
@@ -124,7 +124,7 @@ const socketReducer = (state = initialState, action) => {
                 messages: {data: null, error: action.error},
             };
         case SEND_CHAT_TO_ROOM_SUCCESS:
-            const newMessage2 = action.payload ? action.payload.data : null;
+            const newMessage2 = action.payload ;
             if (!newMessage2) {
                 console.error('No message data in payload:', action.payload);
                 return state;
