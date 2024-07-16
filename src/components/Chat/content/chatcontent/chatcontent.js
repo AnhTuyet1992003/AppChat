@@ -43,6 +43,10 @@ function ChatContent() {
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);
         if (isNaN(date.getTime())) return "";
+
+        // Thêm 7 tiếng vào timestamp
+        date.setHours(date.getHours() + 7);
+
         const now = new Date();
         const isToday = date.toDateString() === now.toDateString();
         const options = {
