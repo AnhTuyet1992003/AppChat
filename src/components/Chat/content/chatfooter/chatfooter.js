@@ -14,6 +14,7 @@ import { database, ref, set, child, get, storageRef, storage, getDownloadURL, up
 
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
+import axios from 'axios'; // Make sure to import axios
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { encode } from "../../../../utill/convert-text";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,9 +28,13 @@ function ChatFooter() {
     const dispatch = useDispatch();
     const {type, name} = useParams();
     const username = localStorage.getItem('username');
-    // emoji
+
+    // Emoji, GIF
     const [isPickerVisible, setPickerVisible] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(''); // State for search term
+    const [gifResults, setGifResults] = useState([]); // State for search results
     const [isGifPickerVisible, setGifPickerVisible] = useState(false);
+
 
     const navigate = useNavigate();
     const login = useSelector((state) => state.login);
@@ -149,6 +154,34 @@ function ChatFooter() {
         }
     };
 
+    useEffect(() => {
+        if (searchTerm === '') {
+            fetchDefaultGifs();
+        } else {
+            fetchSearchGifs(searchTerm);
+        }
+    }, [searchTerm]);
+    const fetchDefaultGifs = () => {
+        setGifResults(gifList);
+    };
+
+    // Function to fetch GIFs based on a search term
+    const fetchSearchGifs = async (term) => {
+        try {
+            const response = await axios.get('https://api.giphy.com/v1/gifs/search', {
+                params: {
+                    api_key: 'DUm34AMYwnQXYkngaVbqox9lEBDxWdUU',
+                    q: term,
+                    limit: 18
+                }
+            });
+            setGifResults(response.data.data.map(gif => gif.images.fixed_height.url));
+        } catch (error) {
+            console.error('Error fetching search gifs:', error);
+        }
+    };
+
+
     const handleGifClick = (gifUrl) => {
         sendMessage(gifUrl, true);
         setGifPickerVisible(false);
@@ -185,18 +218,18 @@ function ChatFooter() {
         // Cập nhật danh sách tập tin: loại bỏ phần tử có chỉ số `index`
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     }
-        const handleDeleteImage = (index) => {
-            setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    const handleDeleteImage = (index) => {
+        setImages((prevImages) => prevImages.filter((_, i) => i !== index));
 
-        };
+    };
     const handleDeleteVideo = (index) => {
-            setVideos((prevVideos) => prevVideos.filter((_, i) => i !== index));
+        setVideos((prevVideos) => prevVideos.filter((_, i) => i !== index));
     };
 
 
-        if (!name) {
-            return null;
-        }
+    if (!name) {
+        return null;
+    }
 
     return (
         <>
@@ -340,19 +373,27 @@ function ChatFooter() {
                         marginLeft: '30px',
                         boxShadow: '0 0 10px 0 #dbdbdb'
                     }}>
+                        <input
+                            type="text"
+                            placeholder="Search GIFs"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+                        />
                         <div className="d-flex flex-wrap">
-                            {gifList.map((gifUrl, index) => (
+                            {gifResults.map((gifUrl, index) => (
                                 <img
                                     key={index}
                                     src={gifUrl}
                                     alt={`gif-${index}`}
-                                    style={{width: '140px', height: '100px', margin: '1px', cursor: 'pointer'}}
+                                    style={{ width: '140px', height: '100px', margin: '1px', cursor: 'pointer' }}
                                     onClick={() => handleGifClick(gifUrl)}
                                 />
                             ))}
                         </div>
                     </div>
                 )}
+
             </div>
         </>
     );
